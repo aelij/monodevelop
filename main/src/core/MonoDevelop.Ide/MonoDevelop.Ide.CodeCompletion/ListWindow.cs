@@ -27,19 +27,20 @@
 
 using System;
 using System.Collections.Generic;
-using MonoDevelop.Core.Text;
-using MonoDevelop.Ide.Gui.Content;
 using System.Linq;
 using Gdk;
 using Gtk;
 using MonoDevelop.Components;
-using MonoDevelop.Ide.Editor;
-using MonoDevelop.Ide.Editor.Highlighting;
+using MonoDevelop.Core.Text;
 using MonoDevelop.Ide.Editor.Extension;
+using MonoDevelop.Ide.Gui;
+using Char = System.Char;
+using Image = Xwt.Drawing.Image;
+using WindowType = Gtk.WindowType;
 
 namespace MonoDevelop.Ide.CodeCompletion
 {
-	[Flags()]
+	[Flags]
 	public enum KeyActions
 	{
 		None = 0,
@@ -49,12 +50,12 @@ namespace MonoDevelop.Ide.CodeCompletion
 		Complete = 8
 	}
 
-	class ListWindow : PopoverWindow
+    internal class ListWindow : PopoverWindow
 	{
-		const int WindowWidth = 400;
+	    private const int WindowWidth = 400;
 
-		ListWidget list;
-		Widget footer;
+	    private readonly ListWidget list;
+	    private Widget footer;
 		protected VBox vbox;
 		internal MruCache cache = new MruCache();
 		protected ICompletionDataList completionDataList;
@@ -68,64 +69,60 @@ namespace MonoDevelop.Ide.CodeCompletion
 			get {
 				var ext = Extension;
 				if (ext == null) // May happen in unit tests.
-					return MonoDevelop.Ide.CodeCompletion.CompletionCharacters.FallbackCompletionCharacters;
-				return MonoDevelop.Ide.CodeCompletion.CompletionCharacters.Get (ext.CompletionLanguage);
+					return CompletionCharacters.FallbackCompletionCharacters;
+				return CompletionCharacters.Get (ext.CompletionLanguage);
 			}
 		}
 		
-		public List<int> FilteredItems {
-			get {
-				return list.filteredItems;
-			}
-		}
+		public List<int> FilteredItems => list.filteredItems;
 
-		internal ScrolledWindow scrollbar;
+	    internal ScrolledWindow scrollbar;
 		
-		public ListWindow (Gtk.WindowType type) : base(type)
+		public ListWindow (WindowType type) : base(type)
 		{
 			vbox = new VBox ();
 			list = new ListWidget (this);
-			list.SelectionChanged += new EventHandler (OnSelectionChanged);
-			list.ScrollEvent += new ScrollEventHandler (OnScrolled);
+			list.SelectionChanged += OnSelectionChanged;
+			list.ScrollEvent += OnScrolled;
 
-			scrollbar = new MonoDevelop.Components.CompactScrolledWindow ();
+			scrollbar = new CompactScrolledWindow ();
 			scrollbar.Name = "CompletionScrolledWindow"; // use a different gtkrc style for GtkScrollBar
 			scrollbar.Child = list;
 			list.ButtonPressEvent += delegate(object o, ButtonPressEventArgs args) {
-				if (args.Event.Button == 1 && args.Event.Type == Gdk.EventType.TwoButtonPress)
+				if (args.Event.Button == 1 && args.Event.Type == EventType.TwoButtonPress)
 					DoubleClick ();
 			};
 			vbox.PackEnd (scrollbar, true, true, 0);
 			var colorBox = new EventBox ();
 			colorBox.Add (vbox);
 			ContentBox.Add (colorBox);
-			this.AutoSelect = true;
-			this.TypeHint = WindowTypeHint.Menu;
+			AutoSelect = true;
+			TypeHint = WindowTypeHint.Menu;
 			Theme.CornerRadius = 0;
 			Theme.Padding = 0;
 
 			UpdateStyle ();
-			Gui.Styles.Changed += HandleThemeChanged;
+			Styles.Changed += HandleThemeChanged;
 			IdeApp.Preferences.ColorScheme.Changed += HandleThemeChanged;
 		}
 
-		void HandleThemeChanged (object sender, EventArgs e)
+	    private void HandleThemeChanged (object sender, EventArgs e)
 		{
 			UpdateStyle ();
 		}
 
-		void UpdateStyle ()
+	    private void UpdateStyle ()
 		{
-			Theme.SetBackgroundColor (Gui.Styles.CodeCompletion.BackgroundColor.ToCairoColor ());
-			Theme.ShadowColor = Gui.Styles.PopoverWindow.ShadowColor.ToCairoColor ();
-			ContentBox.Child.ModifyBg (StateType.Normal, Gui.Styles.CodeCompletion.BackgroundColor.ToGdkColor ());
-			list.ModifyBg (StateType.Normal, Gui.Styles.CodeCompletion.BackgroundColor.ToGdkColor ());
+			Theme.SetBackgroundColor (Styles.CodeCompletion.BackgroundColor.ToCairoColor ());
+			Theme.ShadowColor = Styles.PopoverWindow.ShadowColor.ToCairoColor ();
+			ContentBox.Child.ModifyBg (StateType.Normal, Styles.CodeCompletion.BackgroundColor.ToGdkColor ());
+			list.ModifyBg (StateType.Normal, Styles.CodeCompletion.BackgroundColor.ToGdkColor ());
 		}
 
 		protected override void OnDestroyed ()
 		{
 			base.OnDestroyed ();
-			Gui.Styles.Changed -= HandleThemeChanged;
+			Styles.Changed -= HandleThemeChanged;
 			IdeApp.Preferences.ColorScheme.Changed -= HandleThemeChanged;
 		}
 
@@ -192,20 +189,16 @@ namespace MonoDevelop.Ide.CodeCompletion
 			}
 		}
 
-		public int SelectedItem {
-			get { return list.SelectedItem; }
-		}
-		
-		public bool AutoSelect {
+		public int SelectedItem => list.SelectedItem;
+
+	    public bool AutoSelect {
 			get { return list.AutoSelect; }
 			set { list.AutoSelect = value; }
 		}
 		
-		public bool SelectionEnabled {
-			get { return list.SelectionEnabled; }
-		}
-		
-		public bool AutoCompleteEmptyMatch {
+		public bool SelectionEnabled => list.SelectionEnabled;
+
+	    public bool AutoCompleteEmptyMatch {
 			get { return list.AutoCompleteEmptyMatch; }
 			set { list.AutoCompleteEmptyMatch = value; }
 		}
@@ -232,8 +225,8 @@ namespace MonoDevelop.Ide.CodeCompletion
 				list.CloseOnSquareBrackets = value;
 			}
 		}
-		
-		int startOffset;
+
+	    private int startOffset;
 		internal int StartOffset {
 			get {
 				return startOffset;
@@ -257,8 +250,8 @@ namespace MonoDevelop.Ide.CodeCompletion
 				list.CompletionWidget = value;
 			}
 		}
-		
-		int lastCommitCharEndoffset = -1;
+
+	    private int lastCommitCharEndoffset = -1;
 		public virtual string PartialWord {
 			get {
 				if (CompletionWidget == null)
@@ -268,23 +261,13 @@ namespace MonoDevelop.Ide.CodeCompletion
 			
 		}
 	
-		public string CurrentPartialWord {
-			get {
-				return !string.IsNullOrEmpty (PartialWord) ? PartialWord : DefaultCompletionString;
-			}
-		}
+		public string CurrentPartialWord => !string.IsNullOrEmpty (PartialWord) ? PartialWord : DefaultCompletionString;
 
-		public bool IsUniqueMatch {
-			get {
-				return list.filteredItems.Count == 1;
-			}
-		}
+	    public bool IsUniqueMatch => list.filteredItems.Count == 1;
 
-		public ListWidget List {
-			get { return list; }
-		}
+	    public ListWidget List => list;
 
-		/// <summary>
+	    /// <summary>
 		/// Gets or sets a value indicating that shift was pressed during enter.
 		/// </summary>
 		/// <value>
@@ -324,7 +307,7 @@ namespace MonoDevelop.Ide.CodeCompletion
 				bool hasMismatches;
 				var curword = PartialWord;
 				int match = FindMatchedEntry (curword, out hasMismatches);
-				if (match >= 0 && System.Char.IsPunctuation (keyChar)) {
+				if (match >= 0 && Char.IsPunctuation (keyChar)) {
 					string text = DataProvider.GetCompletionText (FilteredItems [match]);
 					if (!text.ToUpper ().StartsWith (curword.ToUpper (), StringComparison.Ordinal))
 						match = -1;	 
@@ -527,60 +510,7 @@ namespace MonoDevelop.Ide.CodeCompletion
 			SelectEntry (CurrentPartialWord);
 		}
 
-		//note: finds the full match, or the best partial match
-		//returns -1 if there is no match at all
-		
-		class WordComparer : IComparer <KeyValuePair<int, string>>
-		{
-			string filterWord;
-			StringMatcher matcher;
-
-			public WordComparer (string filterWord)
-			{
-				this.filterWord = filterWord ?? "";
-				matcher = CompletionMatcher.CreateCompletionMatcher (filterWord);
-			}
-			
-			public int Compare (KeyValuePair<int, string> xpair, KeyValuePair<int, string> ypair)
-			{
-				string x = xpair.Value;
-				string y = ypair.Value;
-				int[] xMatches = matcher.GetMatch (x) ?? new int[0];
-				int[] yMatches = matcher.GetMatch (y) ?? new int[0];
-				if (xMatches.Length < yMatches.Length) 
-					return 1;
-				if (xMatches.Length > yMatches.Length) 
-					return -1;
-				
-				int xExact = 0;
-				int yExact = 0;
-				for (int i = 0; i < filterWord.Length; i++) {
-					if (i < xMatches.Length && filterWord[i] == x[xMatches[i]])
-						xExact++;
-					if (i < yMatches.Length && filterWord[i] == y[yMatches[i]])
-						yExact++;
-				}
-				
-				if (xExact < yExact)
-					return 1;
-				if (xExact > yExact)
-					return -1;
-				
-				// favor words where the match starts sooner
-				if (xMatches.Length > 0 && yMatches.Length > 0 && xMatches[0] != yMatches[0])
-					return xMatches[0].CompareTo (yMatches[0]);
-				
-				int xIndex = xpair.Key;
-				int yIndex = ypair.Key;
-				
-				if (x.Length == y.Length)
-					return xIndex.CompareTo (yIndex);
-				
-				return x.Length.CompareTo (y.Length);
-			}
-		}
-		
-		protected int FindMatchedEntry (string partialWord, out bool hasMismatches)
+	    protected int FindMatchedEntry (string partialWord, out bool hasMismatches)
 		{
 			// default - word with highest match rating in the list.
 			hasMismatches = true;
@@ -614,7 +544,7 @@ namespace MonoDevelop.Ide.CodeCompletion
 					idx = bestIndex;
 					hasMismatches = false;
 					// exact match found.
-					if (string.Compare (bestWord, partialWord ?? "", true) == 0)
+					if (String.Compare (bestWord, partialWord, StringComparison.InvariantCultureIgnoreCase) == 0)
 						return idx;
 				}
 			}
@@ -647,7 +577,7 @@ namespace MonoDevelop.Ide.CodeCompletion
 			return idx;
 		}
 
-		void SelectEntry (int n)
+	    private void SelectEntry (int n)
 		{
 			if (n >= 0)
 				list.SelectionFilterIndex = n;
@@ -671,7 +601,7 @@ namespace MonoDevelop.Ide.CodeCompletion
 			SelectEntry (matchedIndex);
 		}
 
-		void OnScrolled (object o, ScrollEventArgs args)
+	    private void OnScrolled (object o, ScrollEventArgs args)
 		{
 			if (!scrollbar.Visible)
 				return;
@@ -690,7 +620,7 @@ namespace MonoDevelop.Ide.CodeCompletion
 				return;
 			
 			var itemDelta = dy / (alloc.Height / adj.PageSize);
-			double discreteItemDelta = System.Math.Round (itemDelta);
+			double discreteItemDelta = Math.Round (itemDelta);
 			if (discreteItemDelta == 0.0 && dy != 0.0)
 				discreteItemDelta = dy > 0? 1.0 : -1.0;
 			
@@ -698,7 +628,7 @@ namespace MonoDevelop.Ide.CodeCompletion
 			args.RetVal = true;
 		}
 
-		void OnSelectionChanged (object o, EventArgs args)
+	    private void OnSelectionChanged (object o, EventArgs args)
 		{
 			OnSelectionChanged ();
 		}
@@ -717,12 +647,10 @@ namespace MonoDevelop.Ide.CodeCompletion
 			return true;
 		}*/
 		
-		public int TextOffset {
-			get { return list.TextOffset + (int)Theme.CornerRadius; }
-		}
+		public int TextOffset => list.TextOffset + Theme.CornerRadius;
 	}
 
-	interface IListDataProvider
+    internal interface IListDataProvider
 	{
 		int ItemCount { get; }
 		string GetText (int n);
@@ -733,7 +661,7 @@ namespace MonoDevelop.Ide.CodeCompletion
 		CompletionData GetCompletionData (int n);
 		string GetDescription (int n, bool isSelected);
 		string GetRightSideDescription (int n, bool isSelected);
-		Xwt.Drawing.Image GetIcon (int n);
+		Image GetIcon (int n);
 		int CompareTo (int n, int m);
 	}
 }

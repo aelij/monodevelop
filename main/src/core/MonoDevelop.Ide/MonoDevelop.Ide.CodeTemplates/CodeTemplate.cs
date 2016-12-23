@@ -33,7 +33,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
 using MonoDevelop.Core;
-using MonoDevelop.Ide.CodeFormatting;
 using MonoDevelop.Ide.Editor;
 using MonoDevelop.Core.Text;
 using System.Linq;
@@ -450,29 +449,30 @@ namespace MonoDevelop.Ide.CodeTemplates
 
 			editor.CaretLocation = editor.OffsetToLocation (newoffset) ;
 
-			var prettyPrinter = CodeFormatterService.GetFormatter (data.MimeType);
-			if (prettyPrinter != null && prettyPrinter.SupportsOnTheFlyFormatting) {
-				int endOffset = template.InsertPosition + template.Code.Length;
-				var oldVersion = data.Version;
-				prettyPrinter.OnTheFlyFormat (editor, context, TextSegment.FromBounds (template.InsertPosition, editor.CaretOffset));
-				if (editor.CaretOffset < endOffset)
-					prettyPrinter.OnTheFlyFormat (editor, context, TextSegment.FromBounds (editor.CaretOffset, endOffset));
+            // TODO-AELIJ: formatter
+			//var prettyPrinter = CodeFormatterService.GetFormatter (data.MimeType);
+			//if (prettyPrinter != null && prettyPrinter.SupportsOnTheFlyFormatting) {
+			//	int endOffset = template.InsertPosition + template.Code.Length;
+			//	var oldVersion = data.Version;
+			//	prettyPrinter.OnTheFlyFormat (editor, context, TextSegment.FromBounds (template.InsertPosition, editor.CaretOffset));
+			//	if (editor.CaretOffset < endOffset)
+			//		prettyPrinter.OnTheFlyFormat (editor, context, TextSegment.FromBounds (editor.CaretOffset, endOffset));
 				
-				foreach (var textLink in template.TextLinks) {
-					for (int i = 0; i < textLink.Links.Count; i++) {
-						var segment = textLink.Links [i];
-						var translatedOffset = oldVersion.MoveOffsetTo (data.Version, template.InsertPosition + segment.Offset) - template.InsertPosition;
-						textLink.Links [i] = new TextSegment (translatedOffset, segment.Length);
-					}
-				}
-			}
+			//	foreach (var textLink in template.TextLinks) {
+			//		for (int i = 0; i < textLink.Links.Count; i++) {
+			//			var segment = textLink.Links [i];
+			//			var translatedOffset = oldVersion.MoveOffsetTo (data.Version, template.InsertPosition + segment.Offset) - template.InsertPosition;
+			//			textLink.Links [i] = new TextSegment (translatedOffset, segment.Length);
+			//		}
+			//	}
+			//}
 			return template;
 		}
 
 		public TemplateResult InsertTemplateContents (Document document)
 		{
 			if (document == null)
-				throw new ArgumentNullException ("document");
+				throw new ArgumentNullException (nameof (document));
 			return InsertTemplateContents (document.Editor, document);
 		}
 #region I/O

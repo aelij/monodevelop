@@ -26,211 +26,200 @@
 
 using System;
 using MonoDevelop.Core;
-using MonoDevelop.Ide.Gui.Content;
 using MonoDevelop.Ide.Editor.Extension;
 
 namespace MonoDevelop.Ide.CodeCompletion
 {
-	public class CompletionWindowManager
-	{
-		static CompletionListWindow wnd;
-		static bool isShowing;
-		
-		public static bool IsVisible {
-			get {
-				return isShowing || wnd != null && wnd.Visible;
-			}
-		}
-		
-		public static CompletionListWindow Wnd {
-			get { return wnd; }
-		}
-		
-		public static int X {
-			get {
-				return wnd.X;
-			}
-		}
-		
-		public static int Y {
-			get {
-				return wnd.Y;
-			}
-		}
-		
-		public static CodeCompletionContext CodeCompletionContext {
-			get {
-				return wnd.CodeCompletionContext;
-			}
-		}
+    public class CompletionWindowManager
+    {
+        private static CompletionListWindow wnd;
+        private static bool isShowing;
 
-		static CompletionWindowManager ()
-		{
-			if (IdeApp.Workbench != null) {
-				IdeApp.Workbench.RootWindow.Destroyed += (sender, e) => DestroyWindow ();
-				IdeApp.Workbench.RootWindow.WindowStateEvent += (o, args) => HideWindow ();
-			}
-			
-			IdeApp.Preferences.ForceSuggestionMode.Changed += (s,a) => {
-				if (wnd != null)
-					wnd.AutoCompleteEmptyMatch = wnd.AutoSelect = !IdeApp.Preferences.ForceSuggestionMode;
-			};
-		}
+        public static bool IsVisible => isShowing || wnd != null && wnd.Visible;
 
-		// ext may be null, but then parameter completion don't work
-		internal static bool ShowWindow (CompletionTextEditorExtension ext, char firstChar, ICompletionDataList list, ICompletionWidget completionWidget, CodeCompletionContext completionContext)
-		{
-			PrepareShowWindow (ext, firstChar, completionWidget, completionContext);
-			return ShowWindow (list, completionContext);
-		}
+        public static CompletionListWindow Wnd => wnd;
 
-		// ext may be null, but then parameter completion don't work
-		internal static void PrepareShowWindow (CompletionTextEditorExtension ext, char firstChar, ICompletionWidget completionWidget, CodeCompletionContext completionContext)
-		{
-			isShowing = true;
+        public static int X => wnd.X;
 
-			if (wnd == null) {
-				wnd = new CompletionListWindow ();
-				wnd.WordCompleted += HandleWndWordCompleted;
-			}
-			if (ext != null) {
-				var widget = ext.Editor.GetNativeWidget<Gtk.Widget> ();
-				wnd.TransientFor = widget?.Parent?.Toplevel as Gtk.Window;
-			} else {
-				var widget = completionWidget as Gtk.Widget;
-				if (widget != null) {
-					var window = widget.Toplevel as Gtk.Window;
-					if (window != null)
-						wnd.TransientFor = window;
-				}
-			}
-			wnd.Extension = ext;
+        public static int Y => wnd.Y;
 
-			wnd.InitializeListWindow (completionWidget, completionContext);
-		}
+        public static CodeCompletionContext CodeCompletionContext => wnd.CodeCompletionContext;
 
-		internal static bool ShowWindow (ICompletionDataList list, CodeCompletionContext completionContext)
-		{
-			if (wnd == null || !isShowing)
-				return false;
-			
-			var completionWidget = wnd.CompletionWidget;
-			var ext = wnd.Extension;
+        static CompletionWindowManager()
+        {
+            if (IdeApp.Workbench != null)
+            {
+                IdeApp.Workbench.RootWindow.Destroyed += (sender, e) => DestroyWindow();
+                IdeApp.Workbench.RootWindow.WindowStateEvent += (o, args) => HideWindow();
+            }
 
-			try {
-				isShowing = false;
-				if (!wnd.ShowListWindow (list, completionContext)) {
-					if (list is IDisposable)
-						((IDisposable)list).Dispose ();
-					HideWindow ();
-					return false;
-				}
-				
-				if (IdeApp.Preferences.ForceSuggestionMode)
-					wnd.AutoSelect = false;
-				wnd.Show ();
-				OnWindowShown (EventArgs.Empty);
-				return true;
-			} catch (Exception ex) {
-				LoggingService.LogError ("Exception while showing completion window.", ex);
-				return false;
-			} finally {
-				ParameterInformationWindowManager.UpdateWindow (ext, completionWidget);
-			}
-		}
+            IdeApp.Preferences.ForceSuggestionMode.Changed += (s, a) =>
+            {
+                if (wnd != null)
+                    wnd.AutoCompleteEmptyMatch = wnd.AutoSelect = !IdeApp.Preferences.ForceSuggestionMode;
+            };
+        }
 
-		static void HandleWndWordCompleted (object sender, CodeCompletionContextEventArgs e)
-		{
-			EventHandler<CodeCompletionContextEventArgs> handler = WordCompleted;
-			if (handler != null)
-				handler (sender, e);
-		}
-		
-		public static event EventHandler<CodeCompletionContextEventArgs> WordCompleted;
+        // ext may be null, but then parameter completion don't work
+        internal static bool ShowWindow(CompletionTextEditorExtension ext, char firstChar, ICompletionDataList list, ICompletionWidget completionWidget, CodeCompletionContext completionContext)
+        {
+            PrepareShowWindow(ext, firstChar, completionWidget, completionContext);
+            return ShowWindow(list, completionContext);
+        }
 
-		static void DestroyWindow ()
-		{
-			if (wnd != null) {
-				wnd.Destroy ();
-				wnd = null;
-			}
-			OnWindowClosed (EventArgs.Empty);
-		}
-		
-		public static bool PreProcessKeyEvent (KeyDescriptor descriptor)
-		{
-			if (!IsVisible)
-				return false;
-			if (descriptor.KeyChar != '\0') {
-				wnd.EndOffset = wnd.StartOffset + wnd.CurrentPartialWord.Length + 1;
-			}
-			return wnd.PreProcessKeyEvent (descriptor);
-		}
+        // ext may be null, but then parameter completion don't work
+        internal static void PrepareShowWindow(CompletionTextEditorExtension ext, char firstChar, ICompletionWidget completionWidget, CodeCompletionContext completionContext)
+        {
+            isShowing = true;
 
-		public static void UpdateCursorPosition ()
-		{
-			if (!IsVisible)
-				return;
-			if (wnd.IsInCompletion || isShowing)
-				return;
-			var caretOffset = wnd.CompletionWidget.CaretOffset;
-			if (caretOffset < wnd.StartOffset || caretOffset > wnd.EndOffset) {
-				HideWindow ();
-			}
-		}
+            if (wnd == null)
+            {
+                wnd = new CompletionListWindow();
+                wnd.WordCompleted += HandleWndWordCompleted;
+            }
+            if (ext != null)
+            {
+                var widget = ext.Editor.GetNativeWidget<Gtk.Widget>();
+                wnd.TransientFor = widget?.Parent?.Toplevel as Gtk.Window;
+            }
+            else
+            {
+                // ReSharper disable once SuspiciousTypeConversion.Global
+                var widget = completionWidget as Gtk.Widget;
+                var window = widget?.Toplevel as Gtk.Window;
+                if (window != null)
+                    wnd.TransientFor = window;
+            }
+            wnd.Extension = ext;
 
-		public static void UpdateWordSelection (string text)
-		{
-			if (IsVisible) {
-				wnd.CompletionString = text;
-				wnd.UpdateWordSelection ();
-			}
-		}
+            wnd.InitializeListWindow(completionWidget, completionContext);
+        }
 
-		public static void PostProcessKeyEvent (KeyDescriptor descriptor)
-		{
-			if (!IsVisible)
-				return;
-			wnd.PostProcessKeyEvent (descriptor);
-		}
+        internal static bool ShowWindow(ICompletionDataList list, CodeCompletionContext completionContext)
+        {
+            if (wnd == null || !isShowing)
+                return false;
 
-		public static void RepositionWindow ()
-		{
-			if (!IsVisible)
-				return;
-			wnd.RepositionWindow ();
-		}
-		
-		public static void HideWindow ()
-		{
-			isShowing = false;
-			if (!IsVisible)
-				return;
-			if (wnd == null)
-				return;
-			ParameterInformationWindowManager.UpdateWindow (wnd.Extension, wnd.CompletionWidget);
-			wnd.HideWindow ();
-			OnWindowClosed (EventArgs.Empty);
-			//DestroyWindow ();
-		}
-		
-		
-		static void OnWindowClosed (EventArgs e)
-		{
-			var handler = WindowClosed;
-			if (handler != null)
-				handler (null, e);
-		}
+            var completionWidget = wnd.CompletionWidget;
+            var ext = wnd.Extension;
 
-		public static event EventHandler WindowClosed;
-		
-		static void OnWindowShown (EventArgs e)
-		{
-			var handler = WindowShown;
-			if (handler != null)
-				handler (null, e);
-		}
-		
-		public static event EventHandler WindowShown;
-	}
+            try
+            {
+                isShowing = false;
+                if (!wnd.ShowListWindow(list, completionContext))
+                {
+                    (list as IDisposable)?.Dispose();
+                    HideWindow();
+                    return false;
+                }
+
+                if (IdeApp.Preferences.ForceSuggestionMode)
+                    wnd.AutoSelect = false;
+                wnd.Show();
+                OnWindowShown(EventArgs.Empty);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                LoggingService.LogError("Exception while showing completion window.", ex);
+                return false;
+            }
+            finally
+            {
+                ParameterInformationWindowManager.UpdateWindow(ext, completionWidget);
+            }
+        }
+
+        private static void HandleWndWordCompleted(object sender, CodeCompletionContextEventArgs e)
+        {
+            WordCompleted?.Invoke(sender, e);
+        }
+
+        public static event EventHandler<CodeCompletionContextEventArgs> WordCompleted;
+
+        private static void DestroyWindow()
+        {
+            if (wnd != null)
+            {
+                wnd.Destroy();
+                wnd = null;
+            }
+            OnWindowClosed(EventArgs.Empty);
+        }
+
+        public static bool PreProcessKeyEvent(KeyDescriptor descriptor)
+        {
+            if (!IsVisible)
+                return false;
+            if (descriptor.KeyChar != '\0')
+            {
+                wnd.EndOffset = wnd.StartOffset + wnd.CurrentPartialWord.Length + 1;
+            }
+            return wnd.PreProcessKeyEvent(descriptor);
+        }
+
+        public static void UpdateCursorPosition()
+        {
+            if (!IsVisible)
+                return;
+            if (wnd.IsInCompletion || isShowing)
+                return;
+            var caretOffset = wnd.CompletionWidget.CaretOffset;
+            if (caretOffset < wnd.StartOffset || caretOffset > wnd.EndOffset)
+            {
+                HideWindow();
+            }
+        }
+
+        public static void UpdateWordSelection(string text)
+        {
+            if (IsVisible)
+            {
+                wnd.CompletionString = text;
+                wnd.UpdateWordSelection();
+            }
+        }
+
+        public static void PostProcessKeyEvent(KeyDescriptor descriptor)
+        {
+            if (!IsVisible)
+                return;
+            wnd.PostProcessKeyEvent(descriptor);
+        }
+
+        public static void RepositionWindow()
+        {
+            if (!IsVisible)
+                return;
+            wnd.RepositionWindow();
+        }
+
+        public static void HideWindow()
+        {
+            isShowing = false;
+            if (!IsVisible)
+                return;
+            if (wnd == null)
+                return;
+            ParameterInformationWindowManager.UpdateWindow(wnd.Extension, wnd.CompletionWidget);
+            wnd.HideWindow();
+            OnWindowClosed(EventArgs.Empty);
+            //DestroyWindow ();
+        }
+
+
+        private static void OnWindowClosed(EventArgs e)
+        {
+            WindowClosed?.Invoke(null, e);
+        }
+
+        public static event EventHandler WindowClosed;
+
+        private static void OnWindowShown(EventArgs e)
+        {
+            WindowShown?.Invoke(null, e);
+        }
+
+        public static event EventHandler WindowShown;
+    }
 }

@@ -31,24 +31,16 @@ using System.Linq;
 using MonoDevelop.Refactoring;
 using System.Threading;
 using MonoDevelop.Core;
-using Microsoft.CodeAnalysis.CodeFixes;
 using MonoDevelop.CodeIssues;
 using System.Threading.Tasks;
-using Microsoft.CodeAnalysis.Text;
-using MonoDevelop.Ide.TypeSystem;
 using MonoDevelop.Ide;
-using Microsoft.CodeAnalysis.CodeActions;
-using RefactoringEssentials;
 using MonoDevelop.AnalysisCore;
 using MonoDevelop.Ide.Editor;
 using MonoDevelop.Components;
 using MonoDevelop.Ide.Editor.Extension;
 using System.Collections.Immutable;
-using Microsoft.CodeAnalysis.Formatting;
-using Microsoft.CodeAnalysis;
 using System.Reflection;
 using MonoDevelop.Ide.Gui;
-using Microsoft.CodeAnalysis.Diagnostics;
 using MonoDevelop.Core.Text;
 
 namespace MonoDevelop.CodeActions
@@ -539,7 +531,7 @@ namespace MonoDevelop.CodeActions
 					menu.Add (FixMenuEntry.Separator);
 					first = false;
 				}
-				var menuItem = new FixMenuEntry (GettextCatalog.GetString ("_Suppress with #pragma"),
+				var menuItem = new FixMenuEntry ("_Suppress with #pragma",
 				 	async delegate {
 						var fixes = await CSharpSuppressionFixProvider.Instance.GetSuppressionsAsync (DocumentContext.AnalysisDocument, new TextSpan (Editor.CaretOffset, 0), new [] { warning }, default (CancellationToken)).ConfigureAwait (false);
 					 	foreach (var f in fixes) {
@@ -584,7 +576,7 @@ namespace MonoDevelop.CodeActions
 				//				}
 
 				if (descriptor.CanDisableWithPragma) {
-					var menuItem = new FixMenuEntry (GettextCatalog.GetString ("_Suppress with #pragma"),
+					var menuItem = new FixMenuEntry ("_Suppress with #pragma",
 													 delegate {
 														 descriptor.DisableWithPragma (Editor, DocumentContext, fix);
 													 });
@@ -598,13 +590,13 @@ namespace MonoDevelop.CodeActions
 						currentPreviewWindow.RequestPopup (rect);
 					};
 					subMenu.Add (menuItem);
-					menuItem = new FixMenuEntry (GettextCatalog.GetString ("_Suppress with file"),
+					menuItem = new FixMenuEntry ("_Suppress with file",
 						delegate {
 							descriptor.DisableWithFile (Editor, DocumentContext, fix);
 						});
 					subMenu.Add (menuItem);
 				}
-				var optionsMenuItem = new FixMenuEntry (GettextCatalog.GetString ("_Configure Rule"),
+				var optionsMenuItem = new FixMenuEntry ("_Configure Rule",
 					delegate {
 						IdeApp.Workbench.ShowGlobalPreferencesDialog (null, "C#", dialog => {
 							var panel = dialog.GetPanel<CodeIssuePanel> ("C#");
@@ -623,13 +615,13 @@ namespace MonoDevelop.CodeActions
 						continue;
 					if (!provider.GetSupportedFixAllScopes ().Contains (FixAllScope.Document))
 						continue;
-					var subMenu2 = new FixMenuDescriptor (GettextCatalog.GetString ("Fix all"));
+					var subMenu2 = new FixMenuDescriptor ("Fix all");
 					var diagnosticAnalyzer = fix2.Diagnostic.GetCodeDiagnosticDescriptor (LanguageNames.CSharp).GetProvider ();
 					if (!diagnosticAnalyzer.SupportedDiagnostics.Contains (fix.Descriptor))
 						continue;
 
 					var menuItem = new FixMenuEntry (
-						GettextCatalog.GetString ("In _Document"),
+						"In _Document",
 						async delegate {
 							var fixAllDiagnosticProvider = new FixAllDiagnosticProvider (diagnosticAnalyzer.SupportedDiagnostics.Select (d => d.Id).ToImmutableHashSet (), async (Microsoft.CodeAnalysis.Document doc, ImmutableHashSet<string> diagnostics, CancellationToken token) => {
 

@@ -51,13 +51,13 @@ namespace MonoDevelop.CSharp.Refactoring.CodeActions
 
 			Xwt.VBox vbox = new Xwt.VBox ();
 
-			vbox.PackStart(new Xwt.Label(GettextCatalog.GetString("Name of enum")));
+			vbox.PackStart(new Xwt.Label("Name of enum"));
 
 			enumNameEntry = new Xwt.TextEntry ();
 			enumNameEntry.Text = proposedEnumName;
 			vbox.PackStart (enumNameEntry);
 
-			vbox.PackStart (new Xwt.Label (GettextCatalog.GetString ("Variables to include")));
+			vbox.PackStart (new Xwt.Label ("Variables to include"));
 
 			variableList = new Xwt.ListView ();
 			enabledField = new Xwt.DataField<bool> ();
@@ -67,11 +67,11 @@ namespace MonoDevelop.CSharp.Refactoring.CodeActions
 			variableStore = new Xwt.ListStore (enabledField, oldNameField, newNameField);
 			variableList.DataSource = variableStore;
 
-			enabledColumn = new Xwt.ListViewColumn (GettextCatalog.GetString ("Included"), new Xwt.CheckBoxCellView(enabledField) { Editable = true });
+			enabledColumn = new Xwt.ListViewColumn ("Included", new Xwt.CheckBoxCellView(enabledField) { Editable = true });
 			variableList.Columns.Add (enabledColumn);
-			oldNameColumn = new Xwt.ListViewColumn(GettextCatalog.GetString("Field name"), new Xwt.TextCellView(oldNameField) { Editable = false });
+			oldNameColumn = new Xwt.ListViewColumn("Field name", new Xwt.TextCellView(oldNameField) { Editable = false });
 			variableList.Columns.Add (oldNameColumn);
-			newNameColumn = new Xwt.ListViewColumn(GettextCatalog.GetString("Enum name"), new Xwt.TextCellView(newNameField) { Editable = true, });
+			newNameColumn = new Xwt.ListViewColumn("Enum name", new Xwt.TextCellView(newNameField) { Editable = true, });
 			variableList.Columns.Add (newNameColumn);
 
 			for (int i = 0; i < variables.Count; ++i) {
@@ -86,7 +86,7 @@ namespace MonoDevelop.CSharp.Refactoring.CodeActions
 
 			vbox.PackStart (variableList, true, true);
 
-			vbox.PackStart (new Xwt.Label (GettextCatalog.GetString ("Warning: This may take a while...")));
+			vbox.PackStart (new Xwt.Label ("Warning: This may take a while..."));
 
 			Content = vbox;
 

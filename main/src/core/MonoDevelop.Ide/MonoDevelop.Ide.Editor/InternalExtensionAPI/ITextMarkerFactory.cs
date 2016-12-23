@@ -24,9 +24,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 using System;
-using MonoDevelop.Core.Text;
 using MonoDevelop.Ide.Editor.Extension;
-using MonoDevelop.Ide.TypeSystem;
 
 namespace MonoDevelop.Ide.Editor
 {
@@ -41,14 +39,12 @@ namespace MonoDevelop.Ide.Editor
 		#region Line marker
 		IUrlTextLineMarker CreateUrlTextMarker (TextEditor editor, IDocumentLine line, string value, UrlType url, string syntax, int startCol, int endCol);
 		ICurrentDebugLineTextMarker CreateCurrentDebugLineTextMarker (TextEditor editor, int offset, int length);
-		ITextLineMarker CreateAsmLineMarker (TextEditor editor);
-		IUnitTestMarker CreateUnitTestMarker (TextEditor editor, UnitTestMarkerHost host, UnitTestLocation unitTestLocation);
-		IMessageBubbleLineMarker CreateMessageBubbleLineMarker (TextEditor editor);
-		#endregion
+
+	    #endregion
 
 		#region Segment marker
-		ITextSegmentMarker CreateUsageMarker (TextEditor editor, Usage usage);
-		ILinkTextMarker CreateLinkMarker (TextEditor editor, int offset, int length, Action<LinkRequest> activateLink);
+
+	    ILinkTextMarker CreateLinkMarker (TextEditor editor, int offset, int length, Action<LinkRequest> activateLink);
 
 		IGenericTextSegmentMarker CreateGenericTextSegmentMarker (TextEditor editor, TextSegmentMarkerEffect effect, int offset, int length);
 		ISmartTagMarker CreateSmartTagMarker (TextEditor editor, int offset, DocumentLocation realLocation);

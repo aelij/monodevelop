@@ -112,7 +112,7 @@ namespace MonoDevelop.Refactoring
 			doc.Text = TextFileUtility.ReadAllText (replaceChange.FileName);
 			var loc = doc.OffsetToLocation (replaceChange.Offset);
 			
-			string text = string.Format (GettextCatalog.GetString ("(Line:{0}, Column:{1})"), loc.Line, loc.Column);
+			string text = string.Format ("(Line:{0}, Column:{1})", loc.Line, loc.Column);
 			if (treeviewPreview.Selection.IterIsSelected (iter)) {
 				cellRendererText.Text = text;
 			} else {

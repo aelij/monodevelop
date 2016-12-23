@@ -151,7 +151,7 @@ namespace MonoDevelop.Ide.Gui.Dialogs
 			}
 			
 			if (message.AllowApplyToAll) {
-				CheckButton check = new CheckButton (GettextCatalog.GetString ("Apply to all"));
+				CheckButton check = new CheckButton (("Apply to all"));
 				labelsBox.PackStart (check, false, false, 0);
 				check.Toggled += delegate {
 					ApplyToAll = check.Active;

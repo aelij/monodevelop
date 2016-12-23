@@ -27,18 +27,10 @@
 // THE SOFTWARE.
 
 using System;
-using System.Threading;
 using System.IO;
-using System.Xml;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Reflection;
-using MonoDevelop.Core;
 using MonoDevelop.Core.Execution;
-using MonoDevelop.Core.AddIns;
-using MonoDevelop.Core.Serialization;
-using Mono.Addins;
 using Mono.PkgConfig;
 
 namespace MonoDevelop.Core.Assemblies
@@ -305,33 +297,35 @@ namespace MonoDevelop.Core.Assemblies
 		/// <param name="assemblyPath">Assembly path.</param>
 		public string GetMonoExecutableForAssembly (string assemblyPath)
 		{
-			IKVM.Reflection.PortableExecutableKinds peKind;
-			IKVM.Reflection.ImageFileMachine machine;
+            //TODO-AELIJ: fix this!
 
-			using (var universe = new IKVM.Reflection.Universe ()) {
-				IKVM.Reflection.Assembly assembly;
-				try {
-					assembly = universe.LoadFile (assemblyPath);
-					assembly.ManifestModule.GetPEKind (out peKind, out machine);
-				} catch {
-					peKind = IKVM.Reflection.PortableExecutableKinds.ILOnly;
-					machine = IKVM.Reflection.ImageFileMachine.I386;
-				}
-			}
+			//IKVM.Reflection.PortableExecutableKinds peKind;
+			//IKVM.Reflection.ImageFileMachine machine;
 
-			string monoPath;
+			//using (var universe = new IKVM.Reflection.Universe ()) {
+			//	IKVM.Reflection.Assembly assembly;
+			//	try {
+			//		assembly = universe.LoadFile (assemblyPath);
+			//		assembly.ManifestModule.GetPEKind (out peKind, out machine);
+			//	} catch {
+			//		peKind = IKVM.Reflection.PortableExecutableKinds.ILOnly;
+			//		machine = IKVM.Reflection.ImageFileMachine.I386;
+			//	}
+			//}
 
-			if ((peKind & (IKVM.Reflection.PortableExecutableKinds.Required32Bit | IKVM.Reflection.PortableExecutableKinds.Preferred32Bit)) != 0) {
-				monoPath = Path.Combine (MonoRuntimeInfo.Prefix, "bin", "mono32");
-				if (File.Exists (monoPath))
-					return monoPath;
-			} else if ((peKind & IKVM.Reflection.PortableExecutableKinds.PE32Plus) != 0) {
-				monoPath = Path.Combine (MonoRuntimeInfo.Prefix, "bin", "mono64");
-				if (File.Exists (monoPath))
-					return monoPath;
-			}
+			//string monoPath;
 
-			return monoPath = Path.Combine (MonoRuntimeInfo.Prefix, "bin", "mono");
+			//if ((peKind & (IKVM.Reflection.PortableExecutableKinds.Required32Bit | IKVM.Reflection.PortableExecutableKinds.Preferred32Bit)) != 0) {
+			//	monoPath = Path.Combine (MonoRuntimeInfo.Prefix, "bin", "mono32");
+			//	if (File.Exists (monoPath))
+			//		return monoPath;
+			//} else if ((peKind & IKVM.Reflection.PortableExecutableKinds.PE32Plus) != 0) {
+			//	monoPath = Path.Combine (MonoRuntimeInfo.Prefix, "bin", "mono64");
+			//	if (File.Exists (monoPath))
+			//		return monoPath;
+			//}
+
+			return Path.Combine (MonoRuntimeInfo.Prefix, "bin", "mono");
 		}
 	}
 	
@@ -356,14 +350,14 @@ namespace MonoDevelop.Core.Assemblies
 			bool inconsistentFrameworks = false;
 			
 			foreach (PackageAssemblyInfo pi in pinfo.Assemblies) {
-				TargetFrameworkMoniker targetFramework = Runtime.SystemAssemblyService.GetTargetFrameworkForAssembly (Runtime.SystemAssemblyService.CurrentRuntime, pi.File);
+				TargetFrameworkMoniker targetFramework = SystemAssemblyService.Instance.GetTargetFrameworkForAssembly (SystemAssemblyService.Instance.CurrentRuntime, pi.File);
 				if (commonFramework == null) {
-					commonFramework = Runtime.SystemAssemblyService.GetTargetFramework (targetFramework);
+					commonFramework = SystemAssemblyService.Instance.GetTargetFramework (targetFramework);
 					if (commonFramework == null)
 						inconsistentFrameworks = true;
 				}
 				else if (targetFramework != null) {
-					TargetFramework newfx = Runtime.SystemAssemblyService.GetTargetFramework (targetFramework);
+					TargetFramework newfx = SystemAssemblyService.Instance.GetTargetFramework (targetFramework);
 					if (newfx == null)
 						inconsistentFrameworks = true;
 					else {

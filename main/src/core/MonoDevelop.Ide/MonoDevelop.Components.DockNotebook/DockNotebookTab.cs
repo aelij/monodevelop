@@ -29,112 +29,126 @@ using Xwt.Motion;
 
 namespace MonoDevelop.Components.DockNotebook
 {
-	class DockNotebookTab: IAnimatable
-	{
-		DockNotebook notebook;
-		readonly TabStrip strip;
+    class DockNotebookTab : IAnimatable
+    {
+        DockNotebook notebook;
+        readonly TabStrip strip;
 
-		string text;
-		string markup;
-		Xwt.Drawing.Image icon;
-		Widget content;
+        string text;
+        string markup;
+        Xwt.Drawing.Image icon;
+        Widget content;
 
-		internal Gdk.Rectangle Allocation;
-		internal Cairo.Rectangle CloseButtonActiveArea;
+        internal Gdk.Rectangle Allocation;
+        internal Cairo.Rectangle CloseButtonActiveArea;
 
-		public DockNotebook Notebook { get { return notebook; } }
+        public DockNotebook Notebook { get { return notebook; } }
 
-		public int Index { get; internal set; }
+        public int Index { get; internal set; }
 
-		public bool Notify { get; set; }
+        public bool Notify { get; set; }
 
-		public double WidthModifier { get; set; }
+        public double WidthModifier { get; set; }
 
-		public double Opacity { get; set; }
+        public double Opacity { get; set; }
 
-		public double GlowStrength { get; set; }
+        public double GlowStrength { get; set; }
 
-		public bool Hidden { get; set; }
+        public bool Hidden { get; set; }
 
-		public double DirtyStrength { get; set; }
-		
-		void IAnimatable.BatchBegin () { }
-		void IAnimatable.BatchCommit () { QueueDraw (); }
+        public double DirtyStrength { get; set; }
 
-		bool dirty;
-		public bool Dirty {
-			get { return dirty; }
-			set { 
-				if (dirty == value)
-					return;
-				dirty = value;
-				this.Animate ("Dirty", f => DirtyStrength = f,
-				              easing: Easing.CubicInOut,
-				              start: DirtyStrength, end: value ? 1 : 0);
-			}
-		}
+        void IAnimatable.BatchBegin() { }
+        void IAnimatable.BatchCommit() { QueueDraw(); }
 
-		public string Text {
-			get {
-				return text;
-			}
-			set {
-				text = value;
-				markup = null;
-				strip.Update ();
-			}
-		}
+        bool dirty;
+        public bool Dirty
+        {
+            get { return dirty; }
+            set
+            {
+                if (dirty == value)
+                    return;
+                dirty = value;
+                this.Animate("Dirty", f => DirtyStrength = f,
+                              easing: Easing.CubicInOut,
+                              start: DirtyStrength, end: value ? 1 : 0);
+            }
+        }
 
-		public string Markup {
-			get {
-				return markup;
-			}
-			set {
-				markup = value;
-				text = null;
-				strip.Update ();
-			}
-		}
+        public string Text
+        {
+            get
+            {
+                return text;
+            }
+            set
+            {
+                text = value;
+                markup = null;
+                strip.Update();
+            }
+        }
 
-		public Xwt.Drawing.Image Icon {
-			get {
-				return icon;
-			}
-			set {
-				icon = value;
-				strip.Update ();
-			}
-		}
+        public string Markup
+        {
+            get
+            {
+                return markup;
+            }
+            set
+            {
+                markup = value;
+                text = null;
+                strip.Update();
+            }
+        }
 
-		public Widget Content {
-			get {
-				return content;
-			}
-			set {
-				content = value;
-				notebook.ShowContent (this);
-			}
-		}
+        public Xwt.Drawing.Image Icon
+        {
+            get
+            {
+                return icon;
+            }
+            set
+            {
+                icon = value;
+                strip.Update();
+            }
+        }
 
-		public string Tooltip { get; set; }
+        public Widget Content
+        {
+            get
+            {
+                return content;
+            }
+            set
+            {
+                content = value;
+                notebook.ShowContent(this);
+            }
+        }
 
-		internal DockNotebookTab (DockNotebook notebook, TabStrip strip)
-		{
-			this.notebook = notebook;
-			this.strip = strip;
-		}
+        public string Tooltip { get; set; }
 
-		internal Gdk.Rectangle SavedAllocation { get; private set; }
-		internal double SaveStrength { get; set; }
+        internal DockNotebookTab(DockNotebook notebook, TabStrip strip)
+        {
+            this.notebook = notebook;
+            this.strip = strip;
+        }
 
-		internal void SaveAllocation ()
-		{
-			SavedAllocation = Allocation;
-		}
+        internal Gdk.Rectangle SavedAllocation { get; private set; }
+        internal double SaveStrength { get; set; }
 
-		public void QueueDraw ()
-		{
-			strip.QueueDraw ();
-		}
-	}
+        internal void SaveAllocation()
+        {
+            SavedAllocation = Allocation;
+        }
+
+        public void QueueDraw()
+        {
+            strip.QueueDraw();
+        }
+    }
 }

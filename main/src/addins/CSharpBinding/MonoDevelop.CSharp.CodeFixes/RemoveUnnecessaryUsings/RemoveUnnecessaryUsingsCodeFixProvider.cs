@@ -49,7 +49,7 @@ namespace MonoDevelop.CSharp.CodeFixes.RemoveUnusedUsings
 
 			context.RegisterCodeFix(
 				new DocumentChangeAction(context.Diagnostics[0].Location.SourceSpan, DiagnosticSeverity.Warning,
-					GettextCatalog.GetString ("Remove Unnecessary Usings"),
+					"Remove Unnecessary Usings",
 					(c) => Task.FromResult(newDocument)),
 				context.Diagnostics);
 		}

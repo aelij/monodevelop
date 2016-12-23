@@ -53,13 +53,13 @@ namespace MonoDevelop.CSharp.Diagnostics.InconsistentNaming
 			Show ();
 
 			var ct1 = new CellRendererText ();
-			var col1 = treeviewConventions.AppendColumn (GettextCatalog.GetString ("Rule"), ct1);
+			var col1 = treeviewConventions.AppendColumn ("Rule", ct1);
 			col1.Expand = true;
 			col1.SetCellDataFunc (ct1, NameConventionRuleNameDataFunc);
 			
 			
 			var ct2 = new CellRendererText ();
-			var col2 = treeviewConventions.AppendColumn (GettextCatalog.GetString ("Example"), ct2);
+			var col2 = treeviewConventions.AppendColumn ("Example", ct2);
 			col2.Expand = true;
 			col2.SetCellDataFunc (ct2, NameConventionRulePreviewDataFunc);
 			

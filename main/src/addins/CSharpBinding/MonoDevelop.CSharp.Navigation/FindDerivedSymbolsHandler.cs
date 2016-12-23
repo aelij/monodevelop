@@ -51,7 +51,7 @@ namespace MonoDevelop.CSharp.Refactoring
 		{
 			if (symbol.Kind == SymbolKind.NamedType) {
 				var type = (ITypeSymbol)symbol;
-				description = type.TypeKind == TypeKind.Interface ? GettextCatalog.GetString ("Find Implementing Types") : GettextCatalog.GetString ("Find Derived Types");
+				description = type.TypeKind == TypeKind.Interface ? "Find Implementing Types" : "Find Derived Types";
 				return !type.IsStatic && !type.IsSealed;
 			}
 			if (symbol.ContainingType != null && symbol.ContainingType.TypeKind == TypeKind.Interface) {

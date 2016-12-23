@@ -40,39 +40,39 @@ namespace MonoDevelop.Ide.CodeTemplates
 			set;
 		}
 		
-		[LocalizedDescription ("Default value for this variable.")]
+		[Description ("Default value for this variable.")]
 		public string Default {
 			get;
 			set;
 		}
 		
-		[LocalizedDescription ("The tooltip to display to the user for this variable.")]
+		[Description ("The tooltip to display to the user for this variable.")]
 		public string ToolTip {
 			get;
 			set;
 		}
 		
-		[LocalizedDescription ("A function to be evaluated for the contents of this variable.")]
+		[Description ("A function to be evaluated for the contents of this variable.")]
 		public string Function {
 			get;
 			set;
 		}
 		
-		[LocalizedDisplayName ("Editable")]
-		[LocalizedDescription ("Whether the variable is an editable region.")]
+		[DisplayName ("Editable")]
+		[Description ("Whether the variable is an editable region.")]
 		public bool IsEditable {
 			get;
 			set;
 		}
 
-		[LocalizedDisplayName ("Identifier")]
-		[LocalizedDescription ("Whether the variable is an identifier, and should only accept valid identifiers as input.")]
+		[DisplayName ("Identifier")]
+		[Description ("Whether the variable is an identifier, and should only accept valid identifiers as input.")]
 		public bool IsIdentifier {
 			get;
 			set;
 		}
 		
-		[LocalizedDescription ("A list of values for the user to choose from.")]
+		[Description ("A list of values for the user to choose from.")]
 		List<CodeTemplateVariableValue> values = new List<CodeTemplateVariableValue> ();
 		public List<CodeTemplateVariableValue> Values {
 			get {
@@ -205,10 +205,10 @@ namespace MonoDevelop.Ide.CodeTemplates
 			this.IconName = iconName;
 		}
 		
-		[LocalizedDisplayName ("Text")]
+		[DisplayName ("Text")]
 		public string Text { get; set; }
 		
-		[LocalizedDisplayName ("Icon name")]
+		[DisplayName ("Icon name")]
 		public string IconName { get; set; }
 		
 		public override string ToString ()

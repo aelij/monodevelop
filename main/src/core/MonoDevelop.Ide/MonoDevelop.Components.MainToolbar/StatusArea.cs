@@ -24,15 +24,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 using System;
-using System.Diagnostics;
 using Gtk;
-using MonoDevelop.Components;
 using Cairo;
 using MonoDevelop.Ide;
 using MonoDevelop.Ide.Gui;
-using MonoDevelop.Ide.Tasks;
 using System.Collections.Generic;
-using MonoDevelop.Ide.CodeCompletion;
 using MonoDevelop.Core;
 using MonoDevelop.Ide.Gui.Components;
 using StockIcons = MonoDevelop.Ide.Gui.Stock;
@@ -315,55 +311,16 @@ namespace MonoDevelop.Components.MainToolbar
 			box.NoShowAll = true;
 			box.Show ();
 
-			TaskEventHandler updateHandler = delegate {
-				int ec=0, wc=0;
-
-				foreach (TaskListEntry t in TaskService.Errors) {
-					if (t.Severity == TaskSeverity.Error)
-						ec++;
-					else if (t.Severity == TaskSeverity.Warning)
-						wc++;
-				}
-
-
-				using (var font = FontService.SansFont.CopyModified (MonoDevelop.Ide.Gui.Styles.FontScale11)) {
-					errors.Visible = ec > 0;
-					errors.ModifyFont (font);
-					errors.Text = ec.ToString ();
-					errorImage.Visible = ec > 0;
-
-					warnings.Visible = wc > 0;
-					warnings.ModifyFont (font);
-					warnings.Text = wc.ToString ();
-					warningImage.Visible = wc > 0;
-				}
-
-				ebox.Visible = ec > 0 || wc > 0;
-
-				UpdateSeparators ();
-			};
-
-			updateHandler (null, null);
-
-			TaskService.Errors.TasksAdded += updateHandler;
-			TaskService.Errors.TasksRemoved += updateHandler;
-
 			currentApplicationName = BrandingService.ApplicationLongName;
 			BrandingService.ApplicationNameChanged += ApplicationNameChanged;
 			
 			box.Destroyed += delegate {
-				TaskService.Errors.TasksAdded -= updateHandler;
-				TaskService.Errors.TasksRemoved -= updateHandler;
 				BrandingService.ApplicationNameChanged -= ApplicationNameChanged;
 			};
 
 			ebox.VisibleWindow = false;
 			ebox.Add (box);
 			ebox.ShowAll ();
-			ebox.ButtonReleaseEvent += delegate {
-				var pad = IdeApp.Workbench.GetPad<MonoDevelop.Ide.Gui.Pads.ErrorListPad> ();
-				pad.BringToFront ();
-			};
 
 			errors.Visible = false;
 			errorImage.Visible = false;

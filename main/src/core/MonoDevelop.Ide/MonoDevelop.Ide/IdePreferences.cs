@@ -28,9 +28,7 @@
 using System;
 using MonoDevelop.Core;
 using MonoDevelop.Core.Assemblies;
-using MonoDevelop.Projects.MSBuild;
 using MonoDevelop.Ide.Fonts;
-using MonoDevelop.Ide.Editor;
 using MonoDevelop.Ide.Editor.Highlighting;
 using System.Linq;
 
@@ -79,7 +77,6 @@ namespace MonoDevelop.Ide
 		public readonly ConfigurationProperty<bool> BuildBeforeRunningTests = ConfigurationProperty.Create ("BuildBeforeRunningTests", true);
 		public readonly ConfigurationProperty<BeforeCompileAction> BeforeBuildSaveAction = ConfigurationProperty.Create ("MonoDevelop.Ide.BeforeCompileAction", BeforeCompileAction.SaveAllFiles);
 		public readonly ConfigurationProperty<bool> RunWithWarnings = ConfigurationProperty.Create ("MonoDevelop.Ide.RunWithWarnings", true);
-		public readonly ConfigurationProperty<MSBuildVerbosity> MSBuildVerbosity = Runtime.Preferences.MSBuildVerbosity;
 		public readonly ConfigurationProperty<BuildResultStates> ShowOutputPadAfterBuild = ConfigurationProperty.Create ("MonoDevelop.Ide.ShowOutputPadAfterBuild", BuildResultStates.Never);
 		public readonly ConfigurationProperty<BuildResultStates> ShowErrorPadAfterBuild = ConfigurationProperty.Create ("MonoDevelop.Ide.NewShowErrorPadAfterBuild", BuildResultStates.Never);
 		public readonly ConfigurationProperty<JumpToFirst> JumpToFirstErrorOrWarning = ConfigurationProperty.Create ("MonoDevelop.Ide.NewJumpToFirstErrorOrWarning", JumpToFirst.Error);
@@ -100,9 +97,9 @@ namespace MonoDevelop.Ide
 			{
 				string id = defaultTargetRuntimeText.Value;
 				if (id == "__current")
-					return Runtime.SystemAssemblyService.CurrentRuntime;
-				TargetRuntime tr = Runtime.SystemAssemblyService.GetTargetRuntime (id);
-				return tr ?? Runtime.SystemAssemblyService.CurrentRuntime;
+					return SystemAssemblyService.Instance.CurrentRuntime;
+				TargetRuntime tr = SystemAssemblyService.Instance.GetTargetRuntime (id);
+				return tr ?? SystemAssemblyService.Instance.CurrentRuntime;
 			}
 
 			protected override bool OnSetValue (TargetRuntime value)

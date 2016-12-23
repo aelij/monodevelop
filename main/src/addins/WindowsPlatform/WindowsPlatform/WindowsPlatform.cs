@@ -46,13 +46,10 @@ using MonoDevelop.Core;
 using Microsoft.WindowsAPICodePack.InternetExplorer;
 using Microsoft.WindowsAPICodePack.Taskbar;
 using MonoDevelop.Ide;
-using MonoDevelop.Components.Windows;
 using WindowsPlatform.MainToolbar;
 using MonoDevelop.Components.Commands;
 using System.Windows.Controls;
-using System.Collections.ObjectModel;
 using System.Windows;
-using System.Windows.Input;
 
 namespace MonoDevelop.Platform
 {

@@ -26,242 +26,234 @@
 //
 
 using System;
-using MonoDevelop.Core;
+using System.Threading;
+using System.Threading.Tasks;
+using Gdk;
 using Gtk;
 using MonoDevelop.Components;
-using MonoDevelop.Ide.Gui.Content;
-using MonoDevelop.Ide.Fonts;
-using MonoDevelop.Ide.Editor;
-using MonoDevelop.Ide.Editor.Highlighting;
+using MonoDevelop.Core;
 using MonoDevelop.Ide.Editor.Extension;
-using System.Threading.Tasks;
-using System.Threading;
+using MonoDevelop.Ide.Editor.Highlighting;
+using MonoDevelop.Ide.Fonts;
 using MonoDevelop.Ide.Gui;
+using Color = Cairo.Color;
+using WrapMode = Pango.WrapMode;
 
 namespace MonoDevelop.Ide.CodeCompletion
 {
-	class ParameterInformationWindow : PopoverWindow
-	{
-		CompletionTextEditorExtension ext;
-		public CompletionTextEditorExtension Ext {
-			get {
-				return ext;
-			}
-			set {
-				ext = value;
-			}
-		}
+    internal class ParameterInformationWindow : PopoverWindow
+    {
+        public CompletionTextEditorExtension Ext { get; set; }
 
-		ICompletionWidget widget;
-		public ICompletionWidget Widget {
-			get {
-				return widget;
-			}
-			set {
-				widget = value;
-			}
-		}
+        public ICompletionWidget Widget { get; set; }
 
-		VBox descriptionBox = new VBox (false, 0);
-		VBox vb2 = new VBox (false, 0);
-		Cairo.Color foreColor;
-		MonoDevelop.Components.FixedWidthWrapLabel headlabel;
+        private readonly VBox descriptionBox = new VBox(false, 0);
+        private readonly VBox vb2 = new VBox(false, 0);
+        private Color foreColor;
+        private readonly FixedWidthWrapLabel headlabel;
 
-		public ParameterInformationWindow ()
-		{
-			TypeHint = Gdk.WindowTypeHint.Tooltip;
-			this.SkipTaskbarHint = true;
-			this.SkipPagerHint = true;
-			this.AllowShrink = false;
-			this.AllowGrow = false;
-			this.CanFocus = false;
-			this.CanDefault = false;
-			WindowTransparencyDecorator.Attach (this);
+        public ParameterInformationWindow()
+        {
+            TypeHint = WindowTypeHint.Tooltip;
+            SkipTaskbarHint = true;
+            SkipPagerHint = true;
+            AllowShrink = false;
+            AllowGrow = false;
+            CanFocus = false;
+            CanDefault = false;
+            WindowTransparencyDecorator.Attach(this);
 
-			headlabel = new MonoDevelop.Components.FixedWidthWrapLabel ();
-			headlabel.Indent = -20;
-			
-			headlabel.Wrap = Pango.WrapMode.WordChar;
-			headlabel.BreakOnCamelCasing = false;
-			headlabel.BreakOnPunctuation = false;
-			descriptionBox.Spacing = 4;
-			VBox vb = new VBox (false, 0);
-			vb.PackStart (headlabel, true, true, 0);
-			vb.PackStart (descriptionBox, true, true, 0);
-			
-			HBox hb = new HBox (false, 0);
-			hb.PackStart (vb, true, true, 0);
-			
-			vb2.Spacing = 4;
-			vb2.PackStart (hb, true, true, 0);
-			ContentBox.Add (vb2);
+            headlabel = new FixedWidthWrapLabel
+            {
+                Indent = -20,
+                Wrap = WrapMode.WordChar,
+                BreakOnCamelCasing = false,
+                BreakOnPunctuation = false
+            };
 
-			UpdateStyle ();
-			Styles.Changed += HandleThemeChanged;
-			IdeApp.Preferences.ColorScheme.Changed += HandleThemeChanged;
+            descriptionBox.Spacing = 4;
+            VBox vb = new VBox(false, 0);
+            vb.PackStart(headlabel, true, true, 0);
+            vb.PackStart(descriptionBox, true, true, 0);
 
-			ShowAll ();
-			DesktopService.RemoveWindowShadow (this);
-		}
+            HBox hb = new HBox(false, 0);
+            hb.PackStart(vb, true, true, 0);
 
-		void UpdateStyle ()
-		{
-			var scheme = SyntaxModeService.GetColorStyle (IdeApp.Preferences.ColorScheme);
-			if (!scheme.FitsIdeTheme (IdeApp.Preferences.UserInterfaceTheme))
-				scheme = SyntaxModeService.GetDefaultColorStyle (IdeApp.Preferences.UserInterfaceTheme);
-			
-			Theme.SetSchemeColors (scheme);
-			Theme.Font = FontService.SansFont.CopyModified (Styles.FontScale11);
-			Theme.ShadowColor = Styles.PopoverWindow.ShadowColor.ToCairoColor ();
-			foreColor = Styles.PopoverWindow.DefaultTextColor.ToCairoColor ();
+            vb2.Spacing = 4;
+            vb2.PackStart(hb, true, true, 0);
+            ContentBox.Add(vb2);
 
-			headlabel.ModifyFg (StateType.Normal, foreColor.ToGdkColor ());
-			headlabel.FontDescription = FontService.GetFontDescription ("Editor").CopyModified (Styles.FontScale11);
+            UpdateStyle();
+            Styles.Changed += HandleThemeChanged;
+            IdeApp.Preferences.ColorScheme.Changed += HandleThemeChanged;
 
-			if (this.Visible)
-				QueueDraw ();
-		}
+            ShowAll();
+            DesktopService.RemoveWindowShadow(this);
+        }
 
-		void HandleThemeChanged (object sender, EventArgs e)
-		{
-			UpdateStyle ();
-		}
+        private void UpdateStyle()
+        {
+            var scheme = SyntaxModeService.GetColorStyle(IdeApp.Preferences.ColorScheme);
+            if (!scheme.FitsIdeTheme(IdeApp.Preferences.UserInterfaceTheme))
+                scheme = IdeApp.Preferences.UserInterfaceTheme.GetDefaultColorStyle();
 
-		protected override void OnDestroyed ()
-		{
-			base.OnDestroyed ();
-			Styles.Changed -= HandleThemeChanged;
-			IdeApp.Preferences.ColorScheme.Changed -= HandleThemeChanged;
-		}
+            Theme.SetSchemeColors(scheme);
+            Theme.Font = FontService.SansFont.CopyModified(Styles.FontScale11);
+            Theme.ShadowColor = Styles.PopoverWindow.ShadowColor.ToCairoColor();
+            foreColor = Styles.PopoverWindow.DefaultTextColor.ToCairoColor();
 
-		int lastParam = -2;
-		TooltipInformation currentTooltipInformation;
-		ParameterHintingResult lastProvider;
-		CancellationTokenSource cancellationTokenSource;
+            headlabel.ModifyFg(StateType.Normal, foreColor.ToGdkColor());
+            headlabel.FontDescription = FontService.GetFontDescription("Editor").CopyModified(Styles.FontScale11);
 
-		public async void ShowParameterInfo (ParameterHintingResult provider, int overload, int _currentParam, int maxSize)
-		{
-			if (provider == null)
-				throw new ArgumentNullException ("provider");
-			int numParams = System.Math.Max (0, provider [overload].ParameterCount);
-			var currentParam = System.Math.Min (_currentParam, numParams - 1);
-			if (numParams > 0 && currentParam < 0)
-				currentParam = 0;
-			if (lastParam == currentParam && (currentTooltipInformation != null) && lastProvider == provider) {
-				return;
-			}
-			lastProvider = provider;
+            if (Visible)
+                QueueDraw();
+        }
 
-			lastParam = currentParam;
-			var parameterHintingData = (ParameterHintingData)provider [overload];
+        private void HandleThemeChanged(object sender, EventArgs e)
+        {
+            UpdateStyle();
+        }
 
-			ResetTooltipInformation ();
-			ClearDescriptions ();
-			if (ext == null) {
-				// ext == null means HideParameterInfo was called aka. we are not in valid context to display tooltip anymore
-				lastParam = -2;
-				return;
-			}
-			var ct = new CancellationTokenSource ();
-			try {
-				cancellationTokenSource = ct;
-				currentTooltipInformation = await parameterHintingData.CreateTooltipInformation (ext.Editor, ext.DocumentContext, currentParam, false, ct.Token);
-			} catch (Exception ex) {
-				if (!(ex is TaskCanceledException))
-					LoggingService.LogError ("Error while getting tooltip information", ex);
-				return;
-			}
+        protected override void OnDestroyed()
+        {
+            base.OnDestroyed();
+            Styles.Changed -= HandleThemeChanged;
+            IdeApp.Preferences.ColorScheme.Changed -= HandleThemeChanged;
+        }
 
-			if (ct.IsCancellationRequested)
-				return;
+        private int lastParam = -2;
+        private TooltipInformation currentTooltipInformation;
+        private ParameterHintingResult lastProvider;
+        private CancellationTokenSource cancellationTokenSource;
 
-			cancellationTokenSource = null;
+        public async void ShowParameterInfo(ParameterHintingResult provider, int overload, int param, int maxSize)
+        {
+            if (provider == null)
+                throw new ArgumentNullException(nameof(provider));
+            int numParams = Math.Max(0, provider[overload].ParameterCount);
+            var currentParam = Math.Min(param, numParams - 1);
+            if (numParams > 0 && currentParam < 0)
+                currentParam = 0;
+            if (lastParam == currentParam && currentTooltipInformation != null && ReferenceEquals (lastProvider, provider))
+            {
+                return;
+            }
+            lastProvider = provider;
 
-			Theme.NumPages = provider.Count;
-			Theme.CurrentPage = overload;
+            lastParam = currentParam;
+            var parameterHintingData = provider[overload];
 
-			if (provider.Count > 1) {
-				Theme.DrawPager = true;
-				Theme.PagerVertical = true;
-			}
+            ResetTooltipInformation();
+            ClearDescriptions();
+            if (Ext == null)
+            {
+                // ext == null means HideParameterInfo was called aka. we are not in valid context to display tooltip anymore
+                lastParam = -2;
+                return;
+            }
+            var ct = new CancellationTokenSource();
+            try
+            {
+                cancellationTokenSource = ct;
+                currentTooltipInformation = await parameterHintingData.CreateTooltipInformation(Ext.Editor, Ext.DocumentContext, currentParam, false, ct.Token);
+            }
+            catch (Exception ex)
+            {
+                if (!(ex is TaskCanceledException))
+                    LoggingService.LogError("Error while getting tooltip information", ex);
+                return;
+            }
 
-			ShowTooltipInfo ();
-		}
+            if (ct.IsCancellationRequested)
+                return;
 
-		void ShowTooltipInfo ()
-		{
-			ClearDescriptions ();
-			headlabel.Markup = currentTooltipInformation.SignatureMarkup;
-			headlabel.Visible = true;
-			if (Theme.DrawPager)
-				headlabel.WidthRequest = headlabel.RealWidth + 70;
-			
-			foreach (var cat in currentTooltipInformation.Categories) {
-				descriptionBox.PackStart (CreateCategory (TooltipInformationWindow.GetHeaderMarkup (cat.Item1), cat.Item2), true, true, 4);
-			}
-			
-			if (!string.IsNullOrEmpty (currentTooltipInformation.SummaryMarkup)) {
-				descriptionBox.PackStart (CreateCategory (TooltipInformationWindow.GetHeaderMarkup (GettextCatalog.GetString ("Summary")), currentTooltipInformation.SummaryMarkup), true, true, 4);
-			}
-			descriptionBox.ShowAll ();
-			QueueResize ();
-			Show ();
-		}
+            cancellationTokenSource = null;
 
-		void CurrentTooltipInformation_Changed (object sender, EventArgs e)
-		{
-			ShowTooltipInfo ();
-		}
+            Theme.NumPages = provider.Count;
+            Theme.CurrentPage = overload;
 
-		void ClearDescriptions ()
-		{
-			while (descriptionBox.Children.Length > 0) {
-				var child = descriptionBox.Children [0];
-				descriptionBox.Remove (child);
-				child.Destroy ();
-			}
-		}
+            if (provider.Count > 1)
+            {
+                Theme.DrawPager = true;
+                Theme.PagerVertical = true;
+            }
 
-		void ResetTooltipInformation ()
-		{
-			if (cancellationTokenSource != null) {
-				cancellationTokenSource.Cancel ();
-				cancellationTokenSource = null;
-			}
-			currentTooltipInformation = null;
-		}
+            ShowTooltipInfo();
+        }
 
-		VBox CreateCategory (string categoryName, string categoryContentMarkup)
-		{
-			return TooltipInformationWindow.CreateCategory (categoryName, categoryContentMarkup, foreColor, Theme.Font);
-		}
+        private void ShowTooltipInfo()
+        {
+            ClearDescriptions();
+            headlabel.Markup = currentTooltipInformation.SignatureMarkup;
+            headlabel.Visible = true;
+            if (Theme.DrawPager)
+                headlabel.WidthRequest = headlabel.RealWidth + 70;
 
-		public void ChangeOverload ()
-		{
-			lastParam = -2;
-			ResetTooltipInformation ();
-		}
+            foreach (var cat in currentTooltipInformation.Categories)
+            {
+                descriptionBox.PackStart(CreateCategory(TooltipInformationWindow.GetHeaderMarkup(cat.Item1), cat.Item2), true, true, 4);
+            }
 
-		protected override void OnPagerLeftClicked ()
-		{
-			if (Ext != null && Widget != null)
-				ParameterInformationWindowManager.OverloadUp (Ext, Widget);
-			base.OnPagerRightClicked ();
-		}
+            if (!string.IsNullOrEmpty(currentTooltipInformation.SummaryMarkup))
+            {
+                descriptionBox.PackStart(CreateCategory(TooltipInformationWindow.GetHeaderMarkup("Summary"), currentTooltipInformation.SummaryMarkup), true, true, 4);
+            }
+            descriptionBox.ShowAll();
+            QueueResize();
+            Show();
+        }
 
-		protected override void OnPagerRightClicked ()
-		{
-			if (Ext != null && Widget != null)
-				ParameterInformationWindowManager.OverloadDown (Ext, Widget);
-			base.OnPagerRightClicked ();
-		}
-		
-		public void HideParameterInfo ()
-		{
-			ChangeOverload ();
-			Hide ();
-			Ext = null;
-			Widget = null;
-		}
-	}
+        private void ClearDescriptions()
+        {
+            while (descriptionBox.Children.Length > 0)
+            {
+                var child = descriptionBox.Children[0];
+                descriptionBox.Remove(child);
+                child.Destroy();
+            }
+        }
+
+        private void ResetTooltipInformation()
+        {
+            if (cancellationTokenSource != null)
+            {
+                cancellationTokenSource.Cancel();
+                cancellationTokenSource = null;
+            }
+            currentTooltipInformation = null;
+        }
+
+        private VBox CreateCategory(string categoryName, string categoryContentMarkup)
+        {
+            return TooltipInformationWindow.CreateCategory(categoryName, categoryContentMarkup, foreColor, Theme.Font);
+        }
+
+        public void ChangeOverload()
+        {
+            lastParam = -2;
+            ResetTooltipInformation();
+        }
+
+        protected override void OnPagerLeftClicked()
+        {
+            if (Ext != null && Widget != null)
+                ParameterInformationWindowManager.OverloadUp(Ext, Widget);
+            base.OnPagerRightClicked();
+        }
+
+        protected override void OnPagerRightClicked()
+        {
+            if (Ext != null && Widget != null)
+                ParameterInformationWindowManager.OverloadDown(Ext, Widget);
+            base.OnPagerRightClicked();
+        }
+
+        public void HideParameterInfo()
+        {
+            ChangeOverload();
+            Hide();
+            Ext = null;
+            Widget = null;
+        }
+    }
 }

@@ -73,24 +73,8 @@ namespace MonoDevelop.Core.Assemblies
 		}
 		
 		public event EventHandler Changed;
-		
-		public IEnumerable<SystemPackage> GetPackages ()
-		{
-			foreach (IAssemblyContext ctx in sources) {
-				foreach (SystemPackage p in ctx.GetPackages ())
-					yield return p;
-			}
-		}
-		
-		public IEnumerable<SystemPackage> GetPackages (TargetFramework fx)
-		{
-			foreach (IAssemblyContext ctx in sources) {
-				foreach (SystemPackage p in ctx.GetPackages (fx))
-					yield return p;
-			}
-		}
-		
-		public SystemAssembly[] GetAssembliesFromFullName (string fullname)
+
+	    public SystemAssembly[] GetAssembliesFromFullName (string fullname)
 		{
 			List<SystemAssembly> list = new List<SystemAssembly> ();
 			foreach (IAssemblyContext ctx in sources) {

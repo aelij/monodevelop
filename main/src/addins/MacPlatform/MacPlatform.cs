@@ -122,7 +122,7 @@ namespace MonoDevelop.MacIntegration
 				var downloadButton = new AlertButton ("Download Mono Framework", null);
 				if (downloadButton == MessageService.GenericAlert (
 					Stock.Error,
-					GettextCatalog.GetString ("Some dependencies need to be updated"),
+					"Some dependencies need to be updated",
 					GettextCatalog.GetString (
 						"{0} requires a newer version of GTK+, which is included with the Mono Framework. Please " +
 						"download and install the latest stable Mono Framework package and restart {0}.",

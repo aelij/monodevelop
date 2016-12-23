@@ -27,14 +27,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Reflection;
-using System.Threading;
-using System.Xml;
 using System.Xml.Schema;
-using System.Linq;
-using Mono.Addins;
 using MonoDevelop.Core;
 using MonoDevelop.Core.Text;
 
@@ -127,7 +122,7 @@ namespace MonoDevelop.Ide.Editor.Highlighting
 		static void LoadStyle (string name)
 		{
 			if (!styleLookup.ContainsKey (name))
-				throw new System.ArgumentException ("Style " + name + " not found", "name");
+				throw new System.ArgumentException ("Style " + name + " not found", nameof (name));
 			var provider = styleLookup [name];
 			styleLookup.Remove (name); 
 			var stream = provider.Open ();

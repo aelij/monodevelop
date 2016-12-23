@@ -43,7 +43,7 @@ namespace MonoDevelop.CSharp.Diagnostics.InconsistentNaming
 		
 		protected override string PolicyTitleWithMnemonic {
 			get {
-				return GettextCatalog.GetString ("_Naming Style");
+				return "_Naming Style";
 			}
 		}
 

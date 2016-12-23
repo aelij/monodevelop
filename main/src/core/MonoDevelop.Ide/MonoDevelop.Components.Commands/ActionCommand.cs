@@ -28,20 +28,15 @@
 
 
 using System;
-using Mono.Addins;
 using MonoDevelop.Core;
 
 namespace MonoDevelop.Components.Commands
 {
 	public class ActionCommand: Command
 	{
-		ActionType type;
-		bool commandArray;
+	    bool commandArray;
 		Type defaultHandlerType;
 		CommandHandler defaultHandler;
-		
-		RuntimeAddin defaultHandlerAddin;
-		string defaultHandlerTypeName;
 		
 		public ActionCommand ()
 		{
@@ -60,15 +55,12 @@ namespace MonoDevelop.Components.Commands
 		{
 			Icon = icon;
 			AccelKey = accelKey;
-			this.type = type;
+			ActionType = type;
 		}
 		
-		public ActionType ActionType {
-			get { return type; }
-			set { type = value; }
-		}
-		
-		public bool CommandArray {
+		public ActionType ActionType { get; set; }
+
+	    public bool CommandArray {
 			get { return commandArray; }
 			set { commandArray = value; }
 		}
@@ -77,8 +69,6 @@ namespace MonoDevelop.Components.Commands
 			get {
 				if (defaultHandlerType != null)
 					return defaultHandlerType;
-				if (defaultHandlerAddin != null)
-					return defaultHandlerType = defaultHandlerAddin.GetType (defaultHandlerTypeName, true);
 				return null;
 			}
 			set {
@@ -89,12 +79,6 @@ namespace MonoDevelop.Components.Commands
 			}
 		}
 		
-		public void SetDefaultHandlerTypeInfo (RuntimeAddin addin, string typeName)
-		{
-			defaultHandlerAddin = addin;
-			defaultHandlerTypeName = typeName;
-		}
-
 		public CommandHandler DefaultHandler {
 			get { return defaultHandler; }
 			set { defaultHandler = value; }

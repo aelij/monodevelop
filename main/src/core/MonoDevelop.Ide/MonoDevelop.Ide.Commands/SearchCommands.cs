@@ -25,10 +25,6 @@
 // THE SOFTWARE.
 
 
-using MonoDevelop.Ide.Gui.Dialogs;
-using MonoDevelop.Ide.Gui;
-using MonoDevelop.Components.Commands;
-
 namespace MonoDevelop.Ide.Commands
 {
 	public enum SearchCommands

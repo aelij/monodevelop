@@ -28,14 +28,6 @@ using MonoDevelop.Components.Commands;
 
 namespace MonoDevelop.Components.MainToolbar
 {
-	class NavigateToHandler : CommandHandler
-	{
-		protected override void Run ()
-		{
-			Ide.IdeApp.Workbench.Toolbar.FocusSearchBar ();
-		}
-	}
-
 	class GotoTypeHandler : CommandHandler
 	{
 		protected override void Run ()

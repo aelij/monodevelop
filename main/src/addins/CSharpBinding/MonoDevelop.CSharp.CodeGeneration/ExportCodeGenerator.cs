@@ -222,13 +222,13 @@ namespace MonoDevelop.CodeGeneration
 	{
 		public override string Text {
 			get {
-				return GettextCatalog.GetString ("Implement protocol members");
+				return "Implement protocol members";
 			}
 		}
 
 		public override string GenerateDescription {
 			get {
-				return GettextCatalog.GetString ("Select protocol members to implement");
+				return "Select protocol members to implement";
 			}
 		}
 
@@ -242,13 +242,13 @@ namespace MonoDevelop.CodeGeneration
 	{
 		public override string Text {
 			get {
-				return GettextCatalog.GetString ("Implement required protocol members");
+				return "Implement required protocol members";
 			}
 		}
 
 		public override string GenerateDescription {
 			get {
-				return GettextCatalog.GetString ("Select protocol members to implement");
+				return "Select protocol members to implement";
 			}
 		}
 

@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="12.0">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -9,7 +9,8 @@
     <OutputType>Library</OutputType>
     <AssemblyName>Mono.TextEditor</AssemblyName>
     <RootNamespace>Mono.TextEditor</RootNamespace>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>True</DebugSymbols>
@@ -229,6 +230,7 @@
     <None Include="Mono.TextEditor.dll.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="SyntaxModes\MakefileSyntaxMode.xml">
@@ -366,21 +368,8 @@
     </MonoDevelop>
   </ProjectExtensions>
   <ItemGroup>
-    <Folder Include="Mono.TextEditor.PopupWindow\" />
-    <Folder Include="Mono.TextEditor.Highlighting.Regex\" />
-    <Folder Include="Mono.TextEditor.Utils\" />
-    <Folder Include="Mono.TextEditor\Actions\" />
-    <Folder Include="Mono.TextEditor\Gui\" />
-    <Folder Include="Mono.TextEditor\Document\" />
-    <Folder Include="Mono.TextEditor\Standalone\" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\external\nrefactory\ICSharpCode.NRefactory\ICSharpCode.NRefactory.csproj">
-      <Project>{3B2A5653-EC97-4001-BB9B-D90F1AF2C371}</Project>
-      <Name>ICSharpCode.NRefactory</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\..\external\xwt\Xwt\Xwt.csproj">
-      <Project>{92494904-35FA-4DC9-BDE9-3A3E87AC49D3}</Project>
+      <Project>{92494904-35fa-4dc9-bde9-3a3e87ac49d3}</Project>
       <Name>Xwt</Name>
     </ProjectReference>
   </ItemGroup>

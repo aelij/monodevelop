@@ -91,7 +91,7 @@ namespace MonoDevelop.CSharp.CodeRefactorings.InlineTemporary
 
 			context.RegisterRefactoring(
 				new DocumentChangeAction(node.Span, DiagnosticSeverity.Info,
-					GettextCatalog.GetString ("Inline temporary variable"),
+					"Inline temporary variable",
 					(c) => this.InlineTemporaryAsync(document, variableDeclarator, c)));
 		}
 
@@ -165,7 +165,7 @@ namespace MonoDevelop.CSharp.CodeRefactorings.InlineTemporary
 
 		private static SyntaxAnnotation CreateConflictAnnotation()
 		{
-			return ConflictAnnotation.Create(GettextCatalog.GetString ("Conflict(s) detected."));
+			return ConflictAnnotation.Create("Conflict(s) detected.");
 		}
 
 		private async Task<Document> InlineTemporaryAsync(Document document, VariableDeclaratorSyntax declarator, CancellationToken cancellationToken)
@@ -567,7 +567,7 @@ namespace MonoDevelop.CSharp.CodeRefactorings.InlineTemporary
 			// Replace the conflicting inlined nodes with the original nodes annotated with conflict annotation.
 			Func<SyntaxNode, SyntaxNode, SyntaxNode> conflictAnnotationAdder =
 				(SyntaxNode oldNode, SyntaxNode newNode) =>
-				newNode.WithAdditionalAnnotations(ConflictAnnotation.Create(GettextCatalog.GetString ("Conflict(s) detected.")));
+				newNode.WithAdditionalAnnotations(ConflictAnnotation.Create("Conflict(s) detected."));
 
 			return await inlinedDocument.ReplaceNodesAsync(replacementNodesWithChangedSemantics.Keys, conflictAnnotationAdder, cancellationToken).ConfigureAwait(false);
 		}

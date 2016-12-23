@@ -25,9 +25,7 @@
 // THE SOFTWARE.
 using System;
 using MonoDevelop.Core.Text;
-using MonoDevelop.Ide.Editor;
 using MonoDevelop.Components;
-using MonoDevelop.Ide.TypeSystem;
 
 namespace MonoDevelop.Ide.Editor
 {

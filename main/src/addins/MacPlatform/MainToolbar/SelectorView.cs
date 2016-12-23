@@ -133,9 +133,9 @@ namespace MonoDevelop.MacIntegration.MainToolbar
 				AllShown = 0x7,
 			}
 
-			static readonly string RunConfigurationPlaceholder = GettextCatalog.GetString ("Default");
-			static readonly string ConfigurationPlaceholder = GettextCatalog.GetString ("Default");
-			static readonly string RuntimePlaceholder = GettextCatalog.GetString ("Default");
+			static readonly string RunConfigurationPlaceholder = "Default";
+			static readonly string ConfigurationPlaceholder = "Default";
+			static readonly string RuntimePlaceholder = "Default";
 
 			static nfloat iconSize = 28;
 			nfloat AddCellSize (int cellId, nfloat totalWidth, nfloat layoutWidth, nfloat allIconsWidth)

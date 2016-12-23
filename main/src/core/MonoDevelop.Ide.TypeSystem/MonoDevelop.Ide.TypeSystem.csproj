@@ -1,0 +1,83 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{EF0FA8D7-B6CD-45B7-B47A-733911B2D5DC}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>MonoDevelop.Ide.TypeSystem</RootNamespace>
+    <AssemblyName>MonoDevelop.Ide.TypeSystem</AssemblyName>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Ambience.cs" />
+    <Compile Include="AmbienceTooltipProvider.cs" />
+    <Compile Include="CodeGenerator.cs" />
+    <Compile Include="Comment.cs" />
+    <Compile Include="IFoldingParser.cs" />
+    <Compile Include="MarkupUtilities.cs" />
+    <Compile Include="MetadataReferenceCache.cs" />
+    <Compile Include="MonoDevelopSourceText.cs" />
+    <Compile Include="MonoDevelopSourceTextContainer.cs" />
+    <Compile Include="MonoDevelopTemporaryStorageServiceFactory.cs" />
+    <Compile Include="MonoDevelopTextLoader.cs" />
+    <Compile Include="MonoDevelopWorkspace.cs" />
+    <Compile Include="MonoDocDocumentationProvider.cs" />
+    <Compile Include="NR5CompatibiltyExtensions.cs" />
+    <Compile Include="ParsedDocument.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SolutionSizeTracker.cs" />
+    <Compile Include="StockIcons.cs" />
+    <Compile Include="Tag.cs" />
+    <Compile Include="TypeSystemOutputTrackingNode.cs" />
+    <Compile Include="TypeSystemParser.cs" />
+    <Compile Include="TypeSystemParserNode.cs" />
+    <Compile Include="TypeSystemService.cs" />
+    <Compile Include="TypeSystemService_WorkspaceHandling.cs" />
+    <Compile Include="WorkspaceId.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="project.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Mono.Texteditor\Mono.TextEditor.csproj">
+      <Project>{a2329308-3751-4dbd-9a75-5f7b8b024625}</Project>
+      <Name>Mono.TextEditor</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MonoDevelop.Core\MonoDevelop.Core.csproj">
+      <Project>{7525bb88-6142-4a26-93b9-a30c6983390a}</Project>
+      <Name>MonoDevelop.Core</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

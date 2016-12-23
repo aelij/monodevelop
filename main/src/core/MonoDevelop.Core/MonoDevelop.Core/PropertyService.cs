@@ -196,13 +196,9 @@ namespace MonoDevelop.Core
 				properties.Set ("MonoDevelop.Core.FirstRun", true);
 			}
 			
-			if (migratableProfile != null)
-				UserDataMigrationService.SetMigrationSource (migratableProfile, migrateVersion);
-			
 			properties.PropertyChanged += delegate(object sender, PropertyChangedEventArgs args) {
 				Runtime.RunInMainThread (() => {
-					if (PropertyChanged != null)
-						PropertyChanged (sender, args);
+				    PropertyChanged?.Invoke (sender, args);
 				});
 			};
 			

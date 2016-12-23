@@ -47,13 +47,13 @@ namespace MonoDevelop.CodeGeneration
 
 		public string Text {
 			get {
-				return GettextCatalog.GetString ("Override members");
+				return "Override members";
 			}
 		}
 
 		public string GenerateDescription {
 			get {
-				return GettextCatalog.GetString ("Select members to be overridden.");
+				return "Select members to be overridden.";
 			}
 		}
 

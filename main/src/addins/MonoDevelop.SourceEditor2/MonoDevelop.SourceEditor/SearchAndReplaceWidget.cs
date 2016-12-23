@@ -387,7 +387,7 @@ namespace MonoDevelop.SourceEditor
 			
 			searchEntry.Menu = new Menu ();
 			
-			CheckMenuItem caseSensitive = new CheckMenuItem (GettextCatalog.GetString ("_Case sensitive"));
+			CheckMenuItem caseSensitive = new CheckMenuItem ("_Case sensitive");
 			caseSensitive.Active = IsCaseSensitive;
 			caseSensitive.DrawAsRadio = false;
 			caseSensitive.Toggled += delegate {
@@ -396,7 +396,7 @@ namespace MonoDevelop.SourceEditor
 			};
 			searchEntry.Menu.Add (caseSensitive);
 			
-			CheckMenuItem wholeWordsOnly = new CheckMenuItem (GettextCatalog.GetString ("_Whole words only"));
+			CheckMenuItem wholeWordsOnly = new CheckMenuItem ("_Whole words only");
 			wholeWordsOnly.Active = IsWholeWordOnly;
 			wholeWordsOnly.DrawAsRadio = false;
 			wholeWordsOnly.Toggled += delegate {
@@ -406,7 +406,7 @@ namespace MonoDevelop.SourceEditor
 			searchEntry.Menu.Add (wholeWordsOnly);
 				
 			
-			CheckMenuItem regexSearch = new CheckMenuItem (GettextCatalog.GetString ("_Regex search"));
+			CheckMenuItem regexSearch = new CheckMenuItem ("_Regex search");
 			regexSearch.Active = SearchEngine == RegexSearchEngine;
 			regexSearch.DrawAsRadio = false;
 			regexSearch.Toggled += delegate {
@@ -415,7 +415,7 @@ namespace MonoDevelop.SourceEditor
 			};
 			searchEntry.Menu.Add (regexSearch);
 			
-			CheckMenuItem inselectionSearch = new CheckMenuItem (GettextCatalog.GetString ("_Search In Selection"));
+			CheckMenuItem inselectionSearch = new CheckMenuItem ("_Search In Selection");
 			inselectionSearch.Active = IsInSelectionSearchMode;
 			inselectionSearch.DrawAsRadio = false;
 			inselectionSearch.Toggled += delegate {
@@ -427,7 +427,7 @@ namespace MonoDevelop.SourceEditor
 			List<string> history = GetHistory (seachHistoryProperty);
 			if (history.Count > 0) {
 				searchEntry.Menu.Add (new SeparatorMenuItem ());
-				MenuItem recentSearches = new MenuItem (GettextCatalog.GetString ("Recent Searches"));
+				MenuItem recentSearches = new MenuItem ("Recent Searches");
 				recentSearches.Sensitive = false;
 				searchEntry.Menu.Add (recentSearches);
 				
@@ -445,7 +445,7 @@ namespace MonoDevelop.SourceEditor
 					searchEntry.Menu.Add (recentItem);
 				}
 				searchEntry.Menu.Add (new SeparatorMenuItem ());
-				MenuItem clearRecentSearches = new MenuItem (GettextCatalog.GetString ("Clear Recent Searches"));
+				MenuItem clearRecentSearches = new MenuItem ("Clear Recent Searches");
 				clearRecentSearches.Activated += delegate {
 					StoreHistory (seachHistoryProperty, null);
 				};
@@ -819,9 +819,9 @@ But I leave it in in the case I've missed something. Mike
 					resultIndex++;
 				}
 				if (foundIndex != -1) {
-					resultInformLabel.Text = String.Format (GettextCatalog.GetString ("{0} of {1}"), foundIndex, textEditor.TextViewMargin.SearchResultMatchCount);
+					resultInformLabel.Text = String.Format ("{0} of {1}", foundIndex, textEditor.TextViewMargin.SearchResultMatchCount);
 				} else {
-					resultInformLabel.Text = String.Format (GettextCatalog.GetPluralString ("{0} match", "{0} matches", textEditor.TextViewMargin.SearchResultMatchCount), textEditor.TextViewMargin.SearchResultMatchCount);
+					resultInformLabel.Text = String.Format (textEditor.TextViewMargin.SearchResultMatchCount == 1 ? "{0} match" : "{0} matches", textEditor.TextViewMargin.SearchResultMatchCount);
 				}
 				resultInformLabelEventBox.ModifyBg (StateType.Normal, searchEntry.Entry.Style.Base (searchEntry.Entry.State));
 				resultInformLabel.ModifyFg (StateType.Normal, searchEntry.Entry.Style.Foreground (StateType.Insensitive));
@@ -868,7 +868,7 @@ But I leave it in in the case I've missed something. Mike
 			if (result.SearchWrapped) {
 				IdeApp.Workbench.StatusBar.ShowMessage (
 					Stock.Find,
-					GettextCatalog.GetString ("Reached bottom, continued from top")
+					"Reached bottom, continued from top"
 				);
 			} else {
 				IdeApp.Workbench.StatusBar.ShowReady ();
@@ -886,7 +886,7 @@ But I leave it in in the case I've missed something. Mike
 			if (result.SearchWrapped) {
 				IdeApp.Workbench.StatusBar.ShowMessage (
 					Stock.Find,
-					GettextCatalog.GetString ("Reached top, continued from bottom")
+					"Reached top, continued from bottom"
 				);
 			} else {
 				IdeApp.Workbench.StatusBar.ShowReady ();
@@ -905,11 +905,10 @@ But I leave it in in the case I've missed something. Mike
 		{
 			int number = textEditor.ReplaceAll (ReplacePattern);
 			if (number == 0) {
-				IdeApp.Workbench.StatusBar.ShowError (GettextCatalog.GetString ("Search pattern not found"));
+				IdeApp.Workbench.StatusBar.ShowError ("Search pattern not found");
 			} else {
 				IdeApp.Workbench.StatusBar.ShowMessage (
-					GettextCatalog.GetPluralString ("Found and replaced one occurrence",
-					                                "Found and replaced {0} occurrences", number, number));
+					string.Format(number == 1 ? "Found and replaced one occurrence" : "Found and replaced {0} occurrences", number));
 			}
 			textEditor.GrabFocus ();
 			textEditor.CenterToCaret ();

@@ -27,130 +27,101 @@
 //
 
 
-
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using MonoDevelop.Ide.Codons;
 using MonoDevelop.Core;
 
 namespace MonoDevelop.Ide.Gui
 {
-	public class Pad
-	{
-		IPadWindow window;
-		PadCodon content;
-		DefaultWorkbench workbench;
-		string[] categories;
-		
-		internal Pad (DefaultWorkbench workbench, PadCodon content)
-		{
-			this.window    = workbench.GetPadWindow (content);
-			this.window.PadHidden += delegate {
-				IsOpenedAutomatically = false;
-			};
-			this.content   = content;
-			this.workbench = workbench;
-		}
+    public class Pad
+    {
+        private readonly IPadWindow window;
+        private readonly PadCodon content;
+        private readonly DefaultWorkbench workbench;
+        private string[] categories;
 
-		internal PadCodon InternalContent {
-			get { return content; }
-		}
-		
-		public object Content {
-			get { return window.Content; }
-		}
-		
-		public string Title {
-			get { return window.Title; }
-		}
-		
-		public IconId Icon {
-			get { return window.Icon; }
-		}
-		
-		public string Id {
-			get { return window.Id; }
-		}
-		
-		public bool IsOpenedAutomatically {
-			get;
-			set;
-		}
-		
-		public string[] Categories {
-			get {
-				if (categories == null) {
-					CategoryNode cat = content.Parent as CategoryNode;
-					if (cat == null)
-						categories = new string[] { GettextCatalog.GetString ("Pads") };
-					else {
-						List<string> list = new List<string> ();
-						while (cat != null) {
-							list.Insert (0, cat.Name);
-							cat = cat.Parent as CategoryNode;
-						}
-						categories = list.ToArray ();
-					}
-				}
-				return categories;
-			}
-		}
+        internal Pad(DefaultWorkbench workbench, PadCodon content)
+        {
+            window = workbench.GetPadWindow(content);
+            window.PadHidden += delegate
+            {
+                IsOpenedAutomatically = false;
+            };
+            this.content = content;
+            this.workbench = workbench;
+        }
 
-		public string Group {
-			get {
-				return content.Group;
-			}
-		}
-		
-		public void BringToFront ()
-		{
-			BringToFront (false);
-		}
-		
-		public void BringToFront (bool grabFocus)
-		{
-			workbench.BringToFront (content);
-			window.Activate (grabFocus);
-		}
-		
-		public bool AutoHide {
-			get { return window.AutoHide; }
-			set { window.AutoHide = value; }
-		}
-		
-		public bool Visible {
-			get {
-				return window.Visible;
-			}
-			set {
-				window.Visible = value;
-			}
-		}
+        internal PadCodon InternalContent => content;
 
-		public bool Sticky {
-			get {
-				return window.Sticky;
-			}
-			set {
-				window.Sticky = value;
-			}
-		}
-		
-		internal IPadWindow Window {
-			get { return window; }
-		}
-		
-		internal IMementoCapable GetMementoCapable ()
-		{
-			PadWindow pw = (PadWindow) window;
-			return pw.GetMementoCapable ();
-		}
-		
-		public void Destroy ()
-		{
-			Visible = false;
-			((DefaultWorkbench)workbench).RemovePad (content);
-		}
-	}
+        public object Content => window.Content;
+
+        public string Title => window.Title;
+
+        public IconId Icon => window.Icon;
+
+        public string Id => window.Id;
+
+        public bool IsOpenedAutomatically
+        {
+            get;
+            set;
+        }
+
+        public string[] Categories => categories ?? (categories = new[] { "Pads" });
+
+        public string Group => content.Group;
+
+        public void BringToFront()
+        {
+            BringToFront(false);
+        }
+
+        public void BringToFront(bool grabFocus)
+        {
+            workbench.BringToFront(content);
+            window.Activate(grabFocus);
+        }
+
+        public bool AutoHide
+        {
+            get { return window.AutoHide; }
+            set { window.AutoHide = value; }
+        }
+
+        public bool Visible
+        {
+            get
+            {
+                return window.Visible;
+            }
+            set
+            {
+                window.Visible = value;
+            }
+        }
+
+        public bool Sticky
+        {
+            get
+            {
+                return window.Sticky;
+            }
+            set
+            {
+                window.Sticky = value;
+            }
+        }
+
+        internal IPadWindow Window => window;
+
+        internal IMementoCapable GetMementoCapable()
+        {
+            PadWindow pw = (PadWindow)window;
+            return pw.GetMementoCapable();
+        }
+
+        public void Destroy()
+        {
+            Visible = false;
+            workbench.RemovePad(content);
+        }
+    }
 }

@@ -25,8 +25,6 @@
 // THE SOFTWARE.
 
 using System;
-using MonoDevelop.Core.Serialization;
-using MonoDevelop.Projects.Policies;
 
 namespace MonoDevelop.Ide.Gui.Content
 {
@@ -37,7 +35,6 @@ namespace MonoDevelop.Ide.Gui.Content
 		Windows = 3 // '\r\n'
 	}
 	
-	[PolicyType ("Text file formatting")]
 	public sealed class TextStylePolicy : IEquatable<TextStylePolicy>
 	{
 		public TextStylePolicy (int fileWidth, int tabWidth, int indentWidth, bool tabsToSpaces, bool noTabsAfterNonTabs, bool removeTrailingWhitespace, EolMarker eolMarker)
@@ -59,26 +56,19 @@ namespace MonoDevelop.Ide.Gui.Content
 			RemoveTrailingWhitespace = true;
 		}
 		
-		[ItemProperty]
-		public int FileWidth { get; private set; }
+		public int FileWidth { get; }
 		
-		[ItemProperty]
-		public int TabWidth { get; private set; }
+		public int TabWidth { get; }
 		
-		[ItemProperty]
-		public bool TabsToSpaces { get; private set; }
+		public bool TabsToSpaces { get; }
 		
-		[ItemProperty]
-		public int IndentWidth { get; private set; }
+		public int IndentWidth { get; }
 		
-		[ItemProperty]
-		public bool RemoveTrailingWhitespace { get; private set; }
+		public bool RemoveTrailingWhitespace { get; }
 		
-		[ItemProperty]
-		public bool NoTabsAfterNonTabs { get; private set; }
+		public bool NoTabsAfterNonTabs { get; }
 		
-		[ItemProperty]
-		public EolMarker EolMarker { get; private set; }
+		public EolMarker EolMarker { get; }
 		
 		public static string GetEolMarker (EolMarker eolMarker)
 		{
@@ -92,13 +82,11 @@ namespace MonoDevelop.Ide.Gui.Content
 			}
 			return Environment.NewLine;
 		}
-
 	
 		public string GetEolMarker ()
 		{
 			return GetEolMarker (EolMarker);
 		}
-
 	
 		public bool Equals (TextStylePolicy other)
 		{

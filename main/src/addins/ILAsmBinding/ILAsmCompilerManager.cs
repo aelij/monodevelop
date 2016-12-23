@@ -91,9 +91,9 @@ namespace ILAsmBinding
 			string ilasm = configuration.TargetRuntime.GetToolPath (configuration.TargetFramework, "ilasm");
 			if (ilasm == null) {
 				var res = new BuildResult ();
-				res.AddError (GettextCatalog.GetString ("IL compiler (ilasm) not found."));
+				res.AddError ("IL compiler (ilasm) not found.");
 				if (configuration.TargetRuntime is MsNetTargetRuntime)
-					res.AddError (GettextCatalog.GetString ("You may need to install the .NET SDK."));
+					res.AddError ("You may need to install the .NET SDK.");
 				return res;
 			}
 			string outstr = ilasm + " " + sb;

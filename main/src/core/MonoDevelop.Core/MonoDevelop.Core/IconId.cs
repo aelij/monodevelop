@@ -28,91 +28,89 @@ using System;
 
 namespace MonoDevelop.Core
 {
-	[System.Diagnostics.DebuggerDisplay ("{id}")]
-	public struct IconId: IEquatable<IconId>
-	{
-		readonly string id;
-		
-		public static readonly IconId Null = new IconId (null);
-		
-		public static IconNameRequestHandler IconNameRequestHandler;
+    [System.Diagnostics.DebuggerDisplay("{" + nameof (id) + "}")]
+    public struct IconId : IEquatable<IconId>
+    {
+        private readonly string id;
 
-		public IconId (string id)
-		{
-			this.id = id;
-		}
+        public static readonly IconId Null = new IconId(null);
 
-		public bool IsNull {
-			get { return id == null; }
-		}
-		
-		public string Name {
-			get {
-				// If the icon is converted to string, fire the icon request event, to ensure that
-				// the icon it represents is loaded.
-				if (IconNameRequestHandler != null)
-					IconNameRequestHandler (id);
-				return id; 
-			}
-		}
+        public static IconNameRequestHandler IconNameRequestHandler;
 
-		public static implicit operator IconId (string name)
-		{
-			return new IconId (name);
-		}
+        public IconId(string id)
+        {
+            this.id = id;
+        }
 
-		public static implicit operator string (IconId icon)
-		{
-			return icon.Name;
-		}
+        public bool IsNull => id == null;
 
-		public static bool operator == (IconId name1, IconId name2)
-		{
-			return name1.id == name2.id;
-		}
+        public string Name
+        {
+            get
+            {
+                // If the icon is converted to string, fire the icon request event, to ensure that
+                // the icon it represents is loaded.
+                IconNameRequestHandler?.Invoke(id);
+                return id;
+            }
+        }
 
-		public static bool operator != (IconId name1, IconId name2)
-		{
-			return name1.id != name2.id;
-		}
+        public static implicit operator IconId(string name)
+        {
+            return new IconId(name);
+        }
 
-		public static bool operator == (IconId name1, string name2)
-		{
-			return name1.id == name2;
-		}
+        public static implicit operator string(IconId icon)
+        {
+            return icon.Name;
+        }
 
-		public static bool operator != (IconId name1, string name2)
-		{
-			return name1.id != name2;
-		}
+        public static bool operator ==(IconId name1, IconId name2)
+        {
+            return name1.id == name2.id;
+        }
 
-		public override bool Equals (object obj)
-		{
-			if (!(obj is IconId))
-				return false;
+        public static bool operator !=(IconId name1, IconId name2)
+        {
+            return name1.id != name2.id;
+        }
 
-			IconId fn = (IconId) obj;
-			return id == fn.id;
-		}
+        public static bool operator ==(IconId name1, string name2)
+        {
+            return name1.id == name2;
+        }
 
-		public override int GetHashCode ( )
-		{
-			if (id == null)
-				return 0;
-			return id.GetHashCode ();
-		}
+        public static bool operator !=(IconId name1, string name2)
+        {
+            return name1.id != name2;
+        }
 
-		public override string ToString ()
-		{
-			return Name;
-		}
+        public override bool Equals(object obj)
+        {
+            if (!(obj is IconId))
+                return false;
 
-		bool IEquatable<IconId>.Equals (IconId other)
-		{
-			return this.id == other.id;
-		}
-	}
-	
-	public delegate void IconNameRequestHandler (string id);
+            IconId fn = (IconId)obj;
+            return id == fn.id;
+        }
+
+        public override int GetHashCode()
+        {
+            if (id == null)
+                return 0;
+            return id.GetHashCode();
+        }
+
+        public override string ToString()
+        {
+            return Name;
+        }
+
+        bool IEquatable<IconId>.Equals(IconId other)
+        {
+            return id == other.id;
+        }
+    }
+
+    public delegate void IconNameRequestHandler(string id);
 }
-

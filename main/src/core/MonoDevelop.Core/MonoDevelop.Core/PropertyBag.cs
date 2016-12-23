@@ -27,34 +27,18 @@
 
 using System;
 using System.Xml;
-using System.IO;
-using System.Collections;
 using System.Collections.Generic;
-using MonoDevelop.Core.Serialization;
 using System.Text;
 using System.Globalization;
 using System.Collections.Immutable;
 
 namespace MonoDevelop.Core
 {
-	[DataItem ("Properties")]
-	public sealed class PropertyBag: ICustomDataItem, IDisposable
+	public sealed class PropertyBag: IDisposable
 	{
 		ImmutableDictionary<string,object> properties = ImmutableDictionary<string,object>.Empty;
-		DataContext context;
-		string sourceFile;
 		bool isShared;
 
-		class DataNodeInfo
-		{
-			public DataNode DataNode;
-			public object Object;
-		}
-
-		public PropertyBag()
-		{
-		}
-		
 		void AssertMainThread ()
 		{
 			if (isShared)
@@ -77,10 +61,10 @@ namespace MonoDevelop.Core
 		
 		public T GetValue<T> (string name)
 		{
-			return GetValue<T> (name, (DataContext) null);
+			return GetValue<T> (name, (object) null);
 		}
 		
-		public T GetValue<T> (string name, DataContext ctx)
+		public T GetValue<T> (string name, object ctx)
 		{
 			return GetValue<T> (name, default(T), ctx);
 		}
@@ -90,19 +74,11 @@ namespace MonoDevelop.Core
 			return GetValue<T> (name, defaultValue, null);
 		}
 		
-		public T GetValue<T> (string name, T defaultValue, DataContext ctx)
+		public T GetValue<T> (string name, T defaultValue, object ctx)
 		{
 			if (properties != null) {
 				object val;
 				if (properties.TryGetValue (name, out val)) {
-					var di = val as DataNodeInfo;
-					if (di != null) {
-						if (di.Object == null) {
-							di.Object = Deserialize (name, di.DataNode, typeof(T), ctx ?? context);
-							di.DataNode = null;
-						}
-						val = di.Object;
-					}
 					return (T) val;
 				}
 			}
@@ -168,122 +144,6 @@ namespace MonoDevelop.Core
 					disp.Dispose ();
 			}
 			properties = properties.Clear ();
-		}
-		
-		object Deserialize (string name, DataNode node, Type type, DataContext ctx)
-		{
-			if (type.IsAssignableFrom (typeof(XmlElement))) {
-				// The xml content is the first child of the data node
-				DataItem it = node as DataItem;
-				if (it == null || it.ItemData.Count > 1)
-					throw new InvalidOperationException ("Can't convert property to an XmlElement object.");
-				if (it.ItemData.Count == 0)
-					return null;
-				XmlConfigurationWriter sw = new XmlConfigurationWriter ();
-				XmlDocument doc = new XmlDocument ();
-				return sw.Write (doc, it.ItemData [0]);
-			}
-			if (ctx == null)
-				throw new InvalidOperationException ("Can't deserialize property '" + name + "'. Serialization context not set.");
-			
-			DataSerializer ser = new DataSerializer (ctx);
-			ser.SerializationContext.BaseFile = sourceFile;
-			object ob = ser.Deserialize (type, node);
-			return ob;
-		}
-
-		DataCollection ICustomDataItem.Serialize (ITypeSerializer handler)
-		{
-			DataCollection data = new DataCollection ();
-
-			if (IsEmpty)
-				return data;
-
-			foreach (KeyValuePair<string,object> entry in properties) {
-				DataNode val;
-				if (entry.Value == null)
-					continue;
-				else if (entry.Value is XmlElement) {
-					DataItem xit = new DataItem ();
-					XmlConfigurationReader sr = new XmlConfigurationReader ();
-					xit.ItemData.Add (sr.Read ((XmlElement)entry.Value));
-					val = xit;
-				}
-				else if (entry.Value is DataNode) {
-					val = (DataNode) entry.Value;
-				} else if (entry.Value is DataNodeInfo) {
-					var di = (DataNodeInfo)entry.Value;
-					if (di.DataNode != null)
-						val = di.DataNode;
-					else if (di.Object != null) {
-						val = handler.SerializationContext.Serializer.Serialize (di.Object, di.Object.GetType ());
-					} else
-						continue;
-				} else {
-					val = handler.SerializationContext.Serializer.Serialize (entry.Value, entry.Value.GetType ());
-				}
-				val.Name = EscapeName (entry.Key);
-				data.Add (val);
-			}
-			return data;
-		}
-
-		void ICustomDataItem.Deserialize (ITypeSerializer handler, DataCollection data)
-		{
-			if (data.Count == 0)
-				return;
-			
-			properties = ImmutableDictionary<string,object>.Empty;
-			context = handler.SerializationContext.Serializer.DataContext;
-			sourceFile = handler.SerializationContext.BaseFile;
-			foreach (DataNode nod in data) {
-				if (nod.Name != "ctype")
-					properties = properties.SetItem (UnescapeName (nod.Name), new DataNodeInfo { DataNode = nod });
-			}
-		}
-		
-		string EscapeName (string str)
-		{
-			StringBuilder sb = new StringBuilder (str.Length);
-			for (int n=0; n<str.Length; n++) {
-				char c = str [n];
-				if (c == '_')
-					sb.Append ("__");
-				else if (c != '.' && c != '-' && !char.IsLetter (c) && (!char.IsNumber (c) || n==0)) {
-					string s = ((int)c).ToString ("X");
-					sb.Append ("_" + s.Length.ToString ());
-					sb.Append (s);
-				}
-				else
-					sb.Append (c);
-			}
-			return sb.ToString ();
-		}
-		
-		string UnescapeName (string str)
-		{
-			StringBuilder sb = new StringBuilder (str.Length);
-			for (int n=0; n<str.Length; n++) {
-				char c = str [n];
-				if (c == '_') {
-					if (n + 1 >= str.Length)
-						return sb.ToString ();
-					if (str [n + 1] == '_') {
-						sb.Append (c);
-						n++;
-					} else {
-						int len = int.Parse (str.Substring (n+1,1));
-						if (n + 2 + len - 1 >= str.Length)
-							return sb.ToString ();
-						int ic;
-						if (int.TryParse (str.Substring (n + 2, len), NumberStyles.HexNumber, null, out ic))
-							sb.Append ((char)ic);
-						n+=len+1;
-					}
-				} else
-					sb.Append (c);
-			}
-			return sb.ToString ();
 		}
 	}
 

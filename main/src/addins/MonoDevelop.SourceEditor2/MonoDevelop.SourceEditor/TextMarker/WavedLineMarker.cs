@@ -26,8 +26,6 @@
 using System;
 using Mono.TextEditor;
 using MonoDevelop.Components;
-using MonoDevelop.Debugger;
-using Pango;
 
 namespace MonoDevelop.SourceEditor
 {
@@ -51,8 +49,6 @@ namespace MonoDevelop.SourceEditor
 
 		public override void Draw (MonoTextEditor editor, Cairo.Context cr, LineMetrics layout, int startOffset, int endOffset)
 		{
-			if (DebuggingService.IsDebugging)
-				return;
 			int markerStart = Segment.Offset;
 			int markerEnd = Segment.EndOffset;
 			if (markerEnd < startOffset || markerStart > endOffset) 

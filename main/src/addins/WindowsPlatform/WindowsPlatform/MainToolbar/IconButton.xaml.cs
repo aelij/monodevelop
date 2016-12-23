@@ -152,11 +152,11 @@ namespace WindowsPlatform.MainToolbar
 			switch (icon)
 			{
 				case OperationIcon.Stop:
-					return GettextCatalog.GetString("Stop currently running operation");
+					return "Stop currently running operation";
 				case OperationIcon.Run:
-					return GettextCatalog.GetString("Run current startup project");
+					return "Run current startup project";
 				case OperationIcon.Build:
-					return GettextCatalog.GetString("Build current startup project");
+					return "Build current startup project";
 				default:
 					throw new InvalidOperationException();
 			}

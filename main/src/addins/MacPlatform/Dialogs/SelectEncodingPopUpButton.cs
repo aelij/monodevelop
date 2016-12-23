@@ -49,7 +49,7 @@ namespace MonoDevelop.MacIntegration
 			
 			if (showAutoDetected) {
 				autoDetectedItem = new NSMenuItem {
-					Title = GettextCatalog.GetString ("Auto Detected"),
+					Title = "Auto Detected",
 					Tag = -1,
 					Target = this,
 					Action = itemActivationSel,
@@ -57,7 +57,7 @@ namespace MonoDevelop.MacIntegration
 			}
 			
 			addRemoveItem = new NSMenuItem {
-				Title = GettextCatalog.GetString ("Add or Remove..."),
+				Title = "Add or Remove...",
 				Tag = -20,
 				Target = this,
 				Action = addRemoveActivationSel,

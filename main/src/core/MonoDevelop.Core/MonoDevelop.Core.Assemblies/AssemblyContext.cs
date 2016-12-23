@@ -128,19 +128,8 @@ namespace MonoDevelop.Core.Assemblies
 			if (Changed != null)
 				Changed (this, EventArgs.Empty);
 		}
-		
-		public IEnumerable<SystemPackage> GetPackages ()
-		{
-			return packages; 
-		}
 
-		[Obsolete ("Cannot de-duplicate framework assemblies")]
-		public IEnumerable<SystemPackage> GetPackages (TargetFramework fx)
-		{
-			return GetPackagesInternal (fx);
-		}
-
-		IEnumerable<SystemPackage> GetPackagesInternal (TargetFramework fx)
+	    IEnumerable<SystemPackage> GetPackagesInternal (TargetFramework fx)
 		{
 			foreach (SystemPackage pkg in packages) {
 				if (pkg.IsFrameworkPackage) {
@@ -360,12 +349,13 @@ namespace MonoDevelop.Core.Assemblies
 
 			SystemAssembly best = list [0];
 
-			for (int i = 1; i < list.Count; i++) {
-				var a = list[i];
-				var f = Runtime.SystemAssemblyService.GetTargetFramework (a.Package.TargetFramework);
-				if (f.IncludesFramework (best.Package.TargetFramework))
-					best = a;
-			}
+            // TODO-AELIJ: check if needed
+			//for (int i = 1; i < list.Count; i++) {
+			//	var a = list[i];
+			//	var f = SystemAssemblyService.Instance.GetTargetFramework (a.Package.TargetFramework);
+			//	if (f.IncludesFramework (best.Package.TargetFramework))
+			//		best = a;
+			//}
 			return best;
 		}
 		

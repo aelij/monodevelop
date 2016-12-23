@@ -94,13 +94,13 @@ namespace MonoDevelop.CSharp.CodeFixes.SimplifyTypeNames
 			switch (diagnosticId)
 			{
 			case IDEDiagnosticIds.SimplifyNamesDiagnosticId:
-				return string.Format(GettextCatalog.GetString ("Simplify name '{0}'"), nodeText);
+				return string.Format("Simplify name '{0}'", nodeText);
 
 			case IDEDiagnosticIds.SimplifyMemberAccessDiagnosticId:
-				return string.Format(GettextCatalog.GetString ("Simplify member access '{0}'"), nodeText);
+				return string.Format("Simplify member access '{0}'", nodeText);
 
 			case IDEDiagnosticIds.SimplifyThisOrMeDiagnosticId:
-				return GettextCatalog.GetString ("Remove 'this' qualification");
+				return "Remove 'this' qualification";
 
 			default:
 				throw new InvalidOperationException();

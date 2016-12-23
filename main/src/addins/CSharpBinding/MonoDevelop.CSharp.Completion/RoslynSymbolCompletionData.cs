@@ -165,7 +165,7 @@ namespace MonoDevelop.CSharp.Completion
 				if (entity is IMethodSymbol) {
 					var method = (IMethodSymbol)entity;
 					if (method.IsExtensionMethod) {
-						tooltipInfo.AddCategory (GettextCatalog.GetString ("Extension Method from"), method.ContainingType.Name);
+						tooltipInfo.AddCategory ("Extension Method from", method.ContainingType.Name);
 					}
 				}
 				if (createFooter) {

@@ -32,7 +32,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Diagnostics;
-using Mono.Addins;
 using MonoDevelop.Core.LogReporting;
 using MonoDevelop.Core.Logging;
 using Mono.Unix.Native;
@@ -59,8 +58,6 @@ namespace MonoDevelop.Core
 		// Second parameter is the exception
 		// Thirdparameter shows if the exception is fatal or not
 		public static Func<bool?, Exception, bool, bool?> UnhandledErrorOccured;
-
-		static List<CrashReporter> customCrashReporters = new List<CrashReporter> ();
 
 		static LoggingService ()
 		{
@@ -188,18 +185,6 @@ namespace MonoDevelop.Core
 			RestoreOutputRedirection ();
 		}
 
-		public static void RegisterCrashReporter (CrashReporter reporter)
-		{
-			lock (customCrashReporters)
-				customCrashReporters.Add (reporter);
-		}
-
-		public static void UnregisterCrashReporter (CrashReporter reporter)
-		{
-			lock (customCrashReporters)
-				customCrashReporters.Remove (reporter);
-		}
-
 		internal static void ReportUnhandledException (Exception ex, bool willShutDown)
 		{
 			ReportUnhandledException (ex, willShutDown, false, null);
@@ -228,11 +213,6 @@ namespace MonoDevelop.Core
 				// If crash reporting has been explicitly disabled, disregard this crash
 				if (ReportCrashes.HasValue && !ReportCrashes.Value)
 					return;
-
-				lock (customCrashReporters) {
-					foreach (var cr in customCrashReporters.Concat (AddinManager.GetExtensionObjects<CrashReporter> (true)))
-						cr.ReportCrash (ex, willShutDown, tags);
-				}
 
 				//ensure we don't lose the setting
 				if (ReportCrashes != oldReportCrashes) {

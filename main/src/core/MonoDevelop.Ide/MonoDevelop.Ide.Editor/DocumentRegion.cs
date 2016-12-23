@@ -25,7 +25,6 @@
 // THE SOFTWARE.
 using System;
 using MonoDevelop.Core.Text;
-using Microsoft.CodeAnalysis;
 
 namespace MonoDevelop.Ide.Editor
 {
@@ -39,66 +38,34 @@ namespace MonoDevelop.Ide.Editor
 		/// <summary>
 		/// Gets a value indicating whether this DocumentRegion is empty.
 		/// </summary>
-		public bool IsEmpty {
-			get {
-				return beginLine < 1;
-			}
-		}
+		public bool IsEmpty => BeginLine < 1;
 
-		readonly int beginLine;
-		public int BeginLine {
-			get {
-				return beginLine;
-			}
-		}
+	    public int BeginLine { get; }
 
-		readonly int beginColumn;
-		public int BeginColumn {
-			get {
-				return beginColumn;
-			}
-		}
+	    public int BeginColumn { get; }
 
-		readonly int endLine;
-		public int EndLine {
-			get {
-				return endLine;
-			}
-		}
+	    public int EndLine { get; }
 
-		readonly int endColumn;
-		public int EndColumn {
-			get {
-				return endColumn;
-			}
-		}
+	    public int EndColumn { get; }
 
-		public DocumentLocation Begin {
-			get {
-				return new DocumentLocation (BeginLine, BeginColumn);
-			}
-		}
-		
-		public DocumentLocation End {
-			get {
-				return new DocumentLocation (EndLine, EndColumn);
-			}
-		}
+	    public DocumentLocation Begin => new DocumentLocation (BeginLine, BeginColumn);
 
-		public DocumentRegion (int beginLine, int beginColumn, int endLine, int endColumn)
+	    public DocumentLocation End => new DocumentLocation (EndLine, EndColumn);
+
+	    public DocumentRegion (int beginLine, int beginColumn, int endLine, int endColumn)
 		{
-			this.beginLine = beginLine;
-			this.beginColumn = beginColumn;
-			this.endLine = endLine;
-			this.endColumn = endColumn;
+			BeginLine = beginLine;
+			BeginColumn = beginColumn;
+			EndLine = endLine;
+			EndColumn = endColumn;
 		}
 		
 		public DocumentRegion (DocumentLocation begin, DocumentLocation end)
 		{
-			beginLine = begin.Line;
-			beginColumn = begin.Column;
-			endLine = end.Line;
-			endColumn = end.Column;
+			BeginLine = begin.Line;
+			BeginColumn = begin.Column;
+			EndLine = end.Line;
+			EndColumn = end.Column;
 		}
 
 		public bool Contains (DocumentLocation location)
@@ -128,7 +95,7 @@ namespace MonoDevelop.Ide.Editor
 
 		public override int GetHashCode ()
 		{
-			return unchecked (Begin.GetHashCode () ^ End.GetHashCode ());
+			return Begin.GetHashCode () ^ End.GetHashCode ();
 		}
 
 		public bool Equals (DocumentRegion other)
@@ -149,33 +116,15 @@ namespace MonoDevelop.Ide.Editor
 		public TextSegment GetSegment (TextEditor document)
 		{
 			if (document == null)
-				throw new ArgumentNullException ("document");
+				throw new ArgumentNullException (nameof (document));
 			var begin = document.LocationToOffset (Begin);
 			var end = document.LocationToOffset (End);
 			return new TextSegment (begin, end - begin);
 		}
 
-		public static implicit operator Microsoft.CodeAnalysis.Text.LinePositionSpan (DocumentRegion location)
-		{
-			return new Microsoft.CodeAnalysis.Text.LinePositionSpan (location.Begin, location.End);
-		}
-
-		public static implicit operator DocumentRegion(Microsoft.CodeAnalysis.Text.LinePositionSpan location)
-		{
-			return new DocumentRegion (location.Start, location.End);
-		}
-
-
-		public static implicit operator DocumentRegion(FileLinePositionSpan location)
-		{
-			return new DocumentRegion (location.StartLinePosition, location.EndLinePosition);
-		}
-
-
 		public override string ToString ()
 		{
-			return string.Format ("[DocumentRegion: Begin={0}, End={1}]", Begin, End);
+			return $"[DocumentRegion: Begin={Begin}, End={End}]";
 		}
 	}
 }
-

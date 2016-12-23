@@ -28,7 +28,6 @@
 
 using System;
 using System.Collections.Generic;
-using MonoDevelop.Core.Serialization;
 using Mono.PkgConfig;
 
 namespace MonoDevelop.Core.Assemblies

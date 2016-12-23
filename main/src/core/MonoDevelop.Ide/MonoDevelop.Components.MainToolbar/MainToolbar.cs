@@ -25,23 +25,12 @@
 // THE SOFTWARE.
 using System;
 using Gtk;
-using MonoDevelop.Components.Commands;
 using MonoDevelop.Ide;
-using MonoDevelop.Ide.Commands;
 using MonoDevelop.Core;
 using System.Linq;
-using MonoDevelop.Components;
 using Cairo;
-using MonoDevelop.Projects;
 using System.Collections.Generic;
-using Mono.Addins;
-using MonoDevelop.Components.Commands.ExtensionNodes;
 using MonoDevelop.Ide.Gui;
-using MonoDevelop.Core.Execution;
-using MonoDevelop.Ide.TypeSystem;
-using System.Threading;
-using MonoDevelop.Ide.Editor;
-using System.Text;
 
 namespace MonoDevelop.Components.MainToolbar
 {

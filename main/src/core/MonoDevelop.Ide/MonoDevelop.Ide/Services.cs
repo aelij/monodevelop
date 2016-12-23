@@ -26,22 +26,10 @@
 //
 
 
-using MonoDevelop.Core;
-using MonoDevelop.Core.Execution;
-using MonoDevelop.Ide.Gui;
-using MonoDevelop.Ide.Tasks;
-using MonoDevelop.Projects;
 using MonoDevelop.Core.Instrumentation;
 
 namespace MonoDevelop.Ide
 {
-	internal class Services
-	{
-		public static ProjectService ProjectService {
-			get { return MonoDevelop.Projects.Services.ProjectService; }
-		}
-	}
-	
 	internal static class Counters
 	{
 		internal static TimerCounter Initialization = InstrumentationService.CreateTimerCounter ("IDE Initialization", "IDE", id:"Ide.Initialization");

@@ -27,8 +27,6 @@
 //
 
 using System;
-using System.Diagnostics;
-using Mono.Addins;
 using MonoDevelop.Core;
 
 namespace MonoDevelop.Components.Commands
@@ -68,7 +66,7 @@ namespace MonoDevelop.Components.Commands
 			try {
 				System.Diagnostics.Process.Start (url);
 			} catch (Exception) {
-				string msg = AddinManager.CurrentLocalizer.GetString ("Could not open the url {0}", url);
+				string msg = string.Format ("Could not open the url {0}", url);
 				MonoDevelop.Ide.MessageService.ShowError (((Gtk.Widget)sender).Toplevel as Gtk.Window, msg);
 			}
 		}
@@ -81,7 +79,7 @@ namespace MonoDevelop.Components.Commands
 			item.Selected += delegate {
 				CommandInfo ci = new CommandInfo (Text);
 				ci.Icon = icon;
-				ci.Description = AddinManager.CurrentLocalizer.GetString ("Open {0}", Url);
+				ci.Description = string.Format ("Open {0}", Url);
 				manager.NotifySelected (ci);
 			};
 			item.Deselected += delegate {

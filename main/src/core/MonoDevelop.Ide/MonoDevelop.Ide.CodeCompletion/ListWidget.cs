@@ -826,7 +826,7 @@ namespace MonoDevelop.Ide.CodeCompletion
 
 		void CalcVisibleRows ()
 		{
-			var icon = ImageService.GetIcon (TypeSystem.Stock.Namespace, IconSize.Menu);
+			var icon = ImageService.GetIcon ("md-name-space", IconSize.Menu);
 			rowHeight = Math.Max (1, (int)icon.Height + 2);
 
 			int newHeight = rowHeight * rows;

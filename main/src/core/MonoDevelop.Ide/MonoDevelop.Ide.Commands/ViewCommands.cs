@@ -166,25 +166,6 @@ namespace MonoDevelop.Ide.Commands
 		}
 	}
 
-	// MonoDevelop.Ide.Commands.ViewCommands.NewLayout
-	public class NewLayoutHandler : CommandHandler
-	{
-		protected override void Run ()
-		{
-			string newLayoutName = null;
-			var dlg = new NewLayoutDialog();
-			try {
-				if (MessageService.RunCustomDialog (dlg) == (int)Gtk.ResponseType.Ok) 
-					newLayoutName = dlg.LayoutName; 
-			} finally {
-				dlg.Destroy ();
-				dlg.Dispose ();
-			}
-			if (newLayoutName != null) {
-				IdeApp.Workbench.CurrentLayout = newLayoutName;
-			}
-		}
-	}
 	// MonoDevelop.Ide.Commands.ViewCommands.DeleteCurrentLayout
 	public class DeleteCurrentLayoutHandler : CommandHandler
 	{
@@ -230,43 +211,7 @@ namespace MonoDevelop.Ide.Commands
 			IdeApp.Workbench.FullScreen = !IdeApp.Workbench.FullScreen;
 		}
 	}
-
-	// MonoDevelop.Ide.Commands.ViewCommands.ShowNext
-	public class ShowNextHandler : CommandHandler
-	{
-		protected override void Run ()
-		{
-			IdeApp.Workbench.ShowNext ();
-		}
-
-		protected override void Update (CommandInfo info)
-		{
-			ILocationList list = IdeApp.Workbench.ActiveLocationList;
-			if (list == null)
-				info.Enabled = false;
-			else
-				info.Text = GettextCatalog.GetString ("Show Next ({0})", list.ItemName);
-		}
-	}
-
-	// MonoDevelop.Ide.Commands.ViewCommands.ShowPrevious
-	public class ShowPreviousHandler : CommandHandler
-	{
-		protected override void Run ()
-		{
-			IdeApp.Workbench.ShowPrevious ();
-		}
-
-		protected override void Update (CommandInfo info)
-		{
-			ILocationList list = IdeApp.Workbench.ActiveLocationList;
-			if (list == null)
-				info.Enabled = false;
-			else
-				info.Text = GettextCatalog.GetString ("Show Previous ({0})", list.ItemName);
-		}
-	}
-
+    
 	// MonoDevelop.Ide.Commands.ViewCommands.ZoomIn
 	public class ZoomIn : CommandHandler
 	{

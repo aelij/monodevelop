@@ -24,18 +24,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 using System;
-using System.Diagnostics;
-using Gtk;
-using MonoDevelop.Components;
 using Cairo;
-using MonoDevelop.Ide;
 using MonoDevelop.Ide.Gui;
-using MonoDevelop.Ide.Tasks;
-using System.Collections.Generic;
-using MonoDevelop.Ide.CodeCompletion;
-using MonoDevelop.Core;
-using MonoDevelop.Ide.Gui.Components;
-
 using StockIcons = MonoDevelop.Ide.Gui.Stock;
 
 namespace MonoDevelop.Components.MainToolbar

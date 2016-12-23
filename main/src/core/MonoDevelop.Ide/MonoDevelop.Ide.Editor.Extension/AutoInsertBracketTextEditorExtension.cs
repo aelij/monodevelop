@@ -23,10 +23,8 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using Mono.Addins;
 
 namespace MonoDevelop.Ide.Editor.Extension
 {
@@ -43,17 +41,7 @@ namespace MonoDevelop.Ide.Editor.Extension
 
 		public AutoInsertBracketTextEditorExtension ()
 		{
-			AddinManager.AddExtensionNodeHandler ("/MonoDevelop/Ide/AutoInsertBracketHandler", delegate (object sender, ExtensionNodeEventArgs args) {
-				var newHandler = (AutoInsertBracketHandler)args.ExtensionObject;
-				switch (args.Change) {
-				case ExtensionChange.Add:
-					allHandlers.Add (newHandler);
-					break;
-				case ExtensionChange.Remove:
-					allHandlers.Remove (newHandler);
-					break;
-				}
-			});
+			// TODO-AELIJ: add handlers
 		}
 
 		public override bool KeyPress (KeyDescriptor descriptor)

@@ -24,11 +24,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
 using System.Linq;
-using MonoDevelop.Ide.Gui.Pads.ProjectPad;
-using MonoDevelop.Ide.Gui.Pads;
-using System.Collections.ObjectModel;
 using System.Collections.Generic;
 
 namespace MonoDevelop.Ide.Gui
@@ -55,18 +51,6 @@ namespace MonoDevelop.Ide.Gui
 		public Pad ToolboxPad {
 			get {
 				return IdeApp.Workbench.Pads.FirstOrDefault (p => p.Id == "MonoDevelop.DesignerSupport.ToolboxPad");
-			}
-		}
-
-		public Pad SolutionPad {
-			get {
-				return IdeApp.Workbench.GetPad<ProjectSolutionPad> ();
-			}
-		}
-
-		public Pad ErrorsPad {
-			get {
-				return IdeApp.Workbench.GetPad<ErrorListPad> ();
 			}
 		}
 	}

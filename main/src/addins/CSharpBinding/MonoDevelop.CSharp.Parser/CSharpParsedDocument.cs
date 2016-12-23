@@ -272,7 +272,7 @@ namespace MonoDevelop.CSharp.Parser
 					if (createExpression.ArgumentList.Arguments.Count > 0) {
 						Tags.Add (new Tag ("High", GettextCatalog.GetString ("NotImplementedException({0}) thrown.", createExpression.ArgumentList.Arguments.First ().ToString ()), new DocumentRegion (loc.StartLinePosition, loc.EndLinePosition)));
 					} else {
-						Tags.Add (new Tag ("High", GettextCatalog.GetString ("NotImplementedException thrown."), new DocumentRegion (loc.StartLinePosition, loc.EndLinePosition)));
+						Tags.Add (new Tag ("High", "NotImplementedException thrown.", new DocumentRegion (loc.StartLinePosition, loc.EndLinePosition)));
 					}
 				}
 			}
@@ -465,7 +465,8 @@ namespace MonoDevelop.CSharp.Parser
 						return errors;
 					} finally {
 						if (locked)
-							errorLock.Release ();					}
+							errorLock.Release ();
+					}
 				});
 			}
 			return Task.FromResult (errors);

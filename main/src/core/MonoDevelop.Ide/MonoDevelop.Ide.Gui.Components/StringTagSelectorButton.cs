@@ -24,10 +24,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
-using MonoDevelop.Core.StringParsing;
 using Gtk;
-using MonoDevelop.Core;
 
 namespace MonoDevelop.Ide.Gui.Components
 {
@@ -40,8 +37,6 @@ namespace MonoDevelop.Ide.Gui.Components
 		{
 			this.Build ();
 		}
-		
-		public StringTagModelDescription TagModel { get; set; }
 		
 		public Entry TargetEntry { get; set; }
 		
@@ -56,41 +51,6 @@ namespace MonoDevelop.Ide.Gui.Components
 		
 		Menu CreateMenu (bool importantOnly)
 		{
-			if (TagModel != null) {
-				Menu menu = new Menu ();
-				
-				bool itemsAdded = false;
-				
-				foreach (StringTagDescription[] tags in TagModel.GetTagsGrouped ()) {
-					if (itemsAdded) {
-						SeparatorMenuItem sep = new SeparatorMenuItem ();
-						menu.Add (sep);
-					}
-					foreach (StringTagDescription tag in tags) {
-						if (tag.Important != importantOnly)
-							continue;
-						MenuItem item = new MenuItem (tag.Description);
-						string tagString = tag.Name;
-						item.ButtonPressEvent += delegate {
-							InsertTag (tagString);
-						};
-						menu.Add (item);
-						itemsAdded = true;
-					}
-				}
-				if (importantOnly) {
-					Menu subMenu = CreateMenu (false);
-					if (subMenu.Children.Length > 0) {
-						SeparatorMenuItem sep = new SeparatorMenuItem ();
-						menu.Add (sep);
-						MenuItem item = new MenuItem (GettextCatalog.GetString ("More"));
-						item.Submenu = subMenu;
-						menu.Add (item);
-					}
-				}
-				menu.ShowAll ();
-				return menu;
-			}
 			return null;
 		}
 		

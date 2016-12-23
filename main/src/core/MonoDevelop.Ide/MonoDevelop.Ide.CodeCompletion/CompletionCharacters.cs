@@ -26,7 +26,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Mono.Addins;
 using MonoDevelop.Core;
 
 namespace MonoDevelop.Ide.CodeCompletion
@@ -54,23 +53,7 @@ namespace MonoDevelop.Ide.CodeCompletion
 		}
 
 
-		static CompletionCharacters ()
-		{
-			AddinManager.AddExtensionNodeHandler ("/MonoDevelop/Ide/CompletionCharacters", OnCompletionCharsAdded);
-		}
-
-		static void OnCompletionCharsAdded (object sender, ExtensionNodeEventArgs args)
-		{
-			var codon = (CompletionCharacterCodon)args.ExtensionNode;
-			var c = codon.CreateCompletionChar ();
-
-			c.CompleteOnSpace = PropertyService.Get ("CompletionCharacters." + c.Language + ".CompleteOnSpace", c.CompleteOnSpace);
-			c.CompleteOnChars = PropertyService.Get ("CompletionCharacters." + c.Language + ".CompleteOnChars", c.CompleteOnChars);
-
-			completionChars.Add (c); 
-		}
-
-		internal static readonly CompletionCharacters FallbackCompletionCharacters = new CompletionCharacters ("Other", true, "{}[]().,:;+-*/%&|^!~=<>?@#'\"\\");
+	    internal static readonly CompletionCharacters FallbackCompletionCharacters = new CompletionCharacters ("Other", true, "{}[]().,:;+-*/%&|^!~=<>?@#'\"\\");
 		public static CompletionCharacters Get (string completionLanguage)
 		{
 			return GetCompletionCharacters ().FirstOrDefault (c => c.Language == completionLanguage) ?? FallbackCompletionCharacters;
@@ -85,10 +68,8 @@ namespace MonoDevelop.Ide.CodeCompletion
 
 		public static IEnumerable<CompletionCharacters> GetDefaultCompletionCharacters ()
 		{
-			foreach (var node in AddinManager.GetExtensionNodes ("/MonoDevelop/Ide/CompletionCharacters")) {
-				var codon = (CompletionCharacterCodon)node;
-				yield return codon.CreateCompletionChar ();
-			}
+            // TODO-AELIJ
+			yield break;
 		}
 
 		public static void SetCompletionCharacters (IEnumerable<CompletionCharacters> chars)

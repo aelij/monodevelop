@@ -25,7 +25,6 @@
 // THE SOFTWARE.
 using System;
 using MonoDevelop.Core.Text;
-using MonoDevelop.Ide.CodeFormatting;
 
 namespace MonoDevelop.Ide.Editor
 {
@@ -90,7 +89,8 @@ namespace MonoDevelop.Ide.Editor
 				editor.InsertText (offset, text);
 				offset += text.Length;
 				InsertNewLine (editor, LineAfter, ref offset);
-				CodeFormatterService.Format (editor, ctx, TextSegment.FromBounds (insertionOffset - 1, offset));
+                // TODO-AELIJ: formatter
+				//CodeFormatterService.Format (editor, ctx, TextSegment.FromBounds (insertionOffset - 1, offset));
 				return result;
 			}
 		}

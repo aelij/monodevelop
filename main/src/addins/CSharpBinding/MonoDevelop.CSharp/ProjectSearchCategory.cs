@@ -59,7 +59,7 @@ namespace MonoDevelop.CSharp
 			}
 		}
 
-		public ProjectSearchCategory () : base (GettextCatalog.GetString ("Solution"))
+		public ProjectSearchCategory () : base ("Solution")
 		{
 			sortOrder = FirstCategory;
 		}

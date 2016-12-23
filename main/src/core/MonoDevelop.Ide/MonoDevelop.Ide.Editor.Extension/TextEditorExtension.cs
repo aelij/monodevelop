@@ -26,11 +26,6 @@
 
 using System;
 using MonoDevelop.Components.Commands;
-using MonoDevelop.Core;
-using MonoDevelop.Ide.Editor;
-using MonoDevelop.Ide.Gui;
-using MonoDevelop.Ide.TypeSystem;
-using System.Collections;
 using System.Collections.Generic;
 
 namespace MonoDevelop.Ide.Editor.Extension
@@ -55,9 +50,9 @@ namespace MonoDevelop.Ide.Editor.Extension
 		protected internal void Initialize (TextEditor editor, DocumentContext context)
 		{
 			if (editor == null)
-				throw new ArgumentNullException ("editor");
+				throw new ArgumentNullException (nameof (editor));
 			if (context == null)
-				throw new ArgumentNullException ("context");
+				throw new ArgumentNullException (nameof (context));
 			if (DocumentContext != null)
 				throw new InvalidOperationException ("Extension is already initialized.");
 			DocumentContext = context;

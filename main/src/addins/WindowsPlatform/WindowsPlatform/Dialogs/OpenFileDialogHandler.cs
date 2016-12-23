@@ -96,7 +96,7 @@ namespace MonoDevelop.Platform
 				group.Items.Add (viewerCombo);
 				dialog.Controls.Add (group);
 
-				if (encodingCombo != null || IdeApp.Workspace.IsOpen) {
+				if (encodingCombo != null) {
 					viewerCombo.SelectedIndexChanged += (o, e) => {
 						bool solutionWorkbenchSelected = ((ViewerComboItem)viewerCombo.Items [viewerCombo.SelectedIndex]).Viewer == null;
 						if (closeSolution != null)
@@ -106,7 +106,7 @@ namespace MonoDevelop.Platform
 					};
 				}
 
-				if (IdeApp.Workspace.IsOpen) {
+				if (false) {
 					var group2 = new CommonFileDialogGroupBox ();
 
 					// "Close current workspace" is too long and splits the text on 2 lines.
@@ -189,7 +189,7 @@ namespace MonoDevelop.Platform
 			int i = 0;
 
 			if (showAutoDetected) {
-				combo.Items.Add (new EncodingComboItem (null, GettextCatalog.GetString ("Auto Detected")));
+				combo.Items.Add (new EncodingComboItem (null, "Auto Detected"));
 				combo.SelectedIndex = 0;
 				i = 1;
 			}
@@ -202,7 +202,7 @@ namespace MonoDevelop.Platform
 			}
 			if (combo.SelectedIndex == -1)
 				combo.SelectedIndex = 0;
-			combo.Items.Add (new EncodingComboItem (null, GettextCatalog.GetString ("Add or Remove...")));
+			combo.Items.Add (new EncodingComboItem (null, "Add or Remove..."));
 		}
 
 		class EncodingComboItem : CommonFileDialogComboBoxItem
@@ -233,14 +233,6 @@ namespace MonoDevelop.Platform
 			int selected = -1;
 			int i = 0;
 			bool hasBench = false;
-			var projectService = IdeApp.Services.ProjectService;
-			if (projectService.IsWorkspaceItemFile (fileName) || projectService.IsSolutionItemFile (fileName)) {
-				hasBench = true;
-				combo.Items.Add (new ViewerComboItem (null, GettextCatalog.GetString ("Solution Workbench")));
-				if (!CanBeOpenedInAssemblyBrowser (fileName))
-					selected = 0;
-				i++;
-			}
 
 			foreach (var vw in DisplayBindingService.GetFileViewers (fileName, null))
 				if (!vw.IsExternal) {

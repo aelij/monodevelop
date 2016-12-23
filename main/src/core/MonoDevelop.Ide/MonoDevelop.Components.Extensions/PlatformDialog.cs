@@ -25,7 +25,6 @@
 // THE SOFTWARE.
 
 using System;
-using Mono.Addins;
 
 namespace MonoDevelop.Components.Extensions
 {
@@ -60,15 +59,16 @@ namespace MonoDevelop.Components.Extensions
 		
 		protected IDialogHandler<T> Handler {
 			get {
-				if (!gotHandler) {
-					gotHandler = true;
-					foreach (object h in AddinManager.GetExtensionObjects ("/MonoDevelop/Components/DialogHandlers", true)) {
-						if (h is IDialogHandler<T>) {
-							handler = (IDialogHandler<T>) h;
-							break;
-						}
-					}
-				}
+                // TODO-AELIJ
+				//if (!gotHandler) {
+				//	gotHandler = true;
+				//	foreach (object h in AddinManager.GetExtensionObjects ("/MonoDevelop/Components/DialogHandlers", true)) {
+				//		if (h is IDialogHandler<T>) {
+				//			handler = (IDialogHandler<T>) h;
+				//			break;
+				//		}
+				//	}
+				//}
 				return handler;
 			}
 		}
@@ -94,10 +94,7 @@ namespace MonoDevelop.Components.Extensions
 		/// <returns> True if the user clicked OK or equivalent.</returns>
 		public virtual bool Run ()
 		{
-			if (Handler != null)
-				return Handler.Run (data);
-			else
-				return RunDefault ();
+		    return Handler?.Run (data) ?? RunDefault ();
 		}
 		
 		protected abstract bool RunDefault ();

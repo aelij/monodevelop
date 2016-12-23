@@ -25,8 +25,6 @@
 // THE SOFTWARE.
 using System;
 using MonoDevelop.Core.Text;
-using MonoDevelop.Ide.Editor.Extension;
-using MonoDevelop.Ide.TypeSystem;
 
 namespace MonoDevelop.Ide.Editor
 {
@@ -47,31 +45,11 @@ namespace MonoDevelop.Ide.Editor
 			return editor.TextMarkerFactory.CreateCurrentDebugLineTextMarker (editor, offset, length);
 		}
 
-		public static ITextLineMarker CreateAsmLineMarker (TextEditor editor)
-		{
-			return editor.TextMarkerFactory.CreateAsmLineMarker (editor);
-		}
-
-		public static IUnitTestMarker CreateUnitTestMarker (TextEditor editor, UnitTestMarkerHost host, UnitTestLocation unitTestLocation)
-		{
-			return editor.TextMarkerFactory.CreateUnitTestMarker (editor, host, unitTestLocation);
-		}
-
-		public static IMessageBubbleLineMarker CreateMessageBubbleLineMarker (TextEditor editor)
-		{
-			return editor.TextMarkerFactory.CreateMessageBubbleLineMarker (editor);
-		}
-
-
-		#endregion
+	    #endregion
 
 		#region Segment marker
-		public static ITextSegmentMarker CreateUsageMarker (TextEditor editor, Usage usage)
-		{
-			return editor.TextMarkerFactory.CreateUsageMarker (editor, usage);
-		}
 
-		public static ILinkTextMarker CreateLinkMarker (TextEditor editor, int offset, int length, Action<LinkRequest> activateLink)
+	    public static ILinkTextMarker CreateLinkMarker (TextEditor editor, int offset, int length, Action<LinkRequest> activateLink)
 		{
 			return editor.TextMarkerFactory.CreateLinkMarker (editor, offset, length, activateLink);
 		}
@@ -79,7 +57,7 @@ namespace MonoDevelop.Ide.Editor
 		public static ILinkTextMarker CreateLinkMarker (TextEditor editor, ISegment segment, Action<LinkRequest> activateLink)
 		{
 			if (segment == null)
-				throw new ArgumentNullException ("segment");
+				throw new ArgumentNullException (nameof (segment));
 			return editor.TextMarkerFactory.CreateLinkMarker (editor, segment.Offset, segment.Length, activateLink);
 		}
 
@@ -91,7 +69,7 @@ namespace MonoDevelop.Ide.Editor
 		public static IGenericTextSegmentMarker CreateGenericTextSegmentMarker (TextEditor editor, TextSegmentMarkerEffect effect, ISegment segment)
 		{
 			if (segment == null)
-				throw new ArgumentNullException ("segment");
+				throw new ArgumentNullException (nameof (segment));
 			return editor.TextMarkerFactory.CreateGenericTextSegmentMarker (editor, effect, segment.Offset, segment.Length);
 		}
 

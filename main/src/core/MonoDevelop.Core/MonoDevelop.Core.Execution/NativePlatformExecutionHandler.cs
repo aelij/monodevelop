@@ -62,7 +62,9 @@ namespace MonoDevelop.Core.Execution
 			} else
 				vars = cmd.EnvironmentVariables;
 			
-			return Runtime.ProcessService.StartConsoleProcess (cmd.Command, cmd.Arguments, cmd.WorkingDirectory, console, vars);
+            // TODO-AELIJ: probably need ProcessService back
+		    return null;
+		    //return Runtime.StartConsoleProcess (cmd.Command, cmd.Arguments, cmd.WorkingDirectory, console, vars);
 		}
 	
 		public virtual bool CanExecute (ExecutionCommand command)

@@ -25,7 +25,10 @@
 // THE SOFTWARE.
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using MonoDevelop.Core.Annotations;
 
 namespace System
 {
@@ -113,4 +116,3 @@ namespace System
 		}
 	}
 }
-

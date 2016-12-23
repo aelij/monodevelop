@@ -25,14 +25,14 @@
 // THE SOFTWARE.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
-using MonoDevelop.Core.AddIns;
 
 namespace MonoDevelop.Core.Assemblies
 {
 	public class MsNetTargetRuntimeFactory: ITargetRuntimeFactory
 	{
-		public System.Collections.Generic.IEnumerable<TargetRuntime> CreateRuntimes ()
+		public IEnumerable<TargetRuntime> CreateRuntimes ()
 		{
 			if (!Platform.IsWindows)
 				yield break;
@@ -45,4 +45,9 @@ namespace MonoDevelop.Core.Assemblies
 			}
 		}
 	}
+
+    public interface ITargetRuntimeFactory
+    {
+        IEnumerable<TargetRuntime> CreateRuntimes ();
+    }
 }

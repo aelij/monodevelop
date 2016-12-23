@@ -26,13 +26,8 @@
 //
 
 
-using System;
-using MonoDevelop.Ide.Gui.Dialogs;
-using MonoDevelop.Core;
-using Mono.Addins;
 using MonoDevelop.Components.Commands;
 using MonoDevelop.Ide.Gui;
-using MonoDevelop.Projects;
 
 namespace MonoDevelop.Ide.Commands
 {
@@ -74,22 +69,6 @@ namespace MonoDevelop.Ide.Commands
 		DeleteKey,
 		InsertGuid,
 		SortSelectedLines
-	}
-	
-	internal class MonodevelopPreferencesHandler: CommandHandler
-	{
-		protected override void Run ()
-		{
-			IdeApp.Workbench.ShowGlobalPreferencesDialog (null);
-		}
-	}
-	
-	internal class DefaultPoliciesHandler: CommandHandler
-	{
-		protected override void Run ()
-		{
-			IdeApp.Workbench.ShowDefaultPoliciesDialog (null);
-		}
 	}
 	
 	internal class DefaultDeleteKeyHandler: CommandHandler
@@ -323,25 +302,6 @@ namespace MonoDevelop.Ide.Commands
 			info.Bypass = !info.Enabled;
 		}
 	}
-	
-	internal class InsertStandardHeaderHandler: CommandHandler
-	{
-		protected override void Run ()
-		{
-			Document doc = IdeApp.Workbench.ActiveDocument;
-			string header = MonoDevelop.Ide.StandardHeader.StandardHeaderService.GetHeader (doc.Project, doc.Name, false);
-			doc.Editor.InsertText (0, header + "\n");
-		}
-		
-		protected override void Update (CommandInfo info)
-		{
-			Document doc = IdeApp.Workbench.ActiveDocument;
-			if (doc != null && doc.Editor != null) {
-				info.Enabled = doc.CommentTags != null;
-			} else
-				info.Enabled = false;
-		}
-	}	
 	
 	internal class DefaultSelectAllHandler: CommandHandler
 	{

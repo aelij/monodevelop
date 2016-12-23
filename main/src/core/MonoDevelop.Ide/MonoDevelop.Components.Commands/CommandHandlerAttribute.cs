@@ -27,9 +27,11 @@
 //
 
 using System;
+using MonoDevelop.Core.Annotations;
 
 namespace MonoDevelop.Components.Commands
 {
+    [MeansImplicitUse]
 	public class CommandMethodAttribute: Attribute
 	{
 		object commandId;
@@ -45,7 +47,7 @@ namespace MonoDevelop.Components.Commands
 		}
 	}
 
-	[AttributeUsage (AttributeTargets.Method, AllowMultiple=true)]
+	[AttributeUsage (AttributeTargets.Method, AllowMultiple=true), MeansImplicitUse]
 	public class CommandHandlerAttribute: CommandMethodAttribute
 	{
 		public CommandHandlerAttribute (object commandId): base (commandId)
@@ -53,7 +55,7 @@ namespace MonoDevelop.Components.Commands
 		}
 	}
 	
-	[AttributeUsage (AttributeTargets.Method, AllowMultiple=true)]
+	[AttributeUsage (AttributeTargets.Method, AllowMultiple=true), MeansImplicitUse]
 	public class CommandUpdateHandlerAttribute: CommandMethodAttribute
 	{
 		public CommandUpdateHandlerAttribute (object commandId): base (commandId)

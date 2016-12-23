@@ -150,7 +150,7 @@ namespace MonoDevelop.CSharp.Completion
 						newSnippets.Add (new RoslynCompletionData (null) {
 							CompletionText = ct.Shortcut,
 							DisplayText = ct.Shortcut,
-							Description = ct.Shortcut + Environment.NewLine + GettextCatalog.GetString (ct.Description),
+							Description = ct.Shortcut + Environment.NewLine + ct.Description,
 							Icon = ct.Icon
 						});
 					}

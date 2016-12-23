@@ -72,7 +72,7 @@ namespace MonoDevelop.CSharp.CodeRefactorings.IntroduceVariable
 
 			context.RegisterRefactoring(
 				new DocumentChangeAction(node.Span, DiagnosticSeverity.Info,
-				                         GettextCatalog.GetString ("Sort usings"),
+				                         "Sort usings",
 				                         (t) => OrganizeImportsCommandHandler.SortUsingsAsync(document, t)));
 		}
 	}
@@ -109,7 +109,7 @@ namespace MonoDevelop.CSharp.CodeRefactorings.IntroduceVariable
 
 			context.RegisterRefactoring(
 				new DocumentChangeAction(node.Span, DiagnosticSeverity.Info,
-				                         GettextCatalog.GetString ("Sort and remove usings"),
+				                         "Sort and remove usings",
 				                         (t) => SortAndRemoveImportsCommandHandler.SortAndRemoveAsync(document, t)));
 		}
 	}

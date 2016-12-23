@@ -28,145 +28,153 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using System.Text;
 using MonoDevelop.Components;
 using MonoDevelop.Core;
-using System.Collections.Immutable;
 using MonoDevelop.Projects;
 
 namespace MonoDevelop.Ide.Gui
 {
-	public abstract class BaseViewContent : IDisposable
-	{
-		IWorkbenchWindow workbenchWindow;
-		Project project;
+    public abstract class BaseViewContent : IDisposable
+    {
+        IWorkbenchWindow workbenchWindow;
+        Project project;
 
-		public abstract Control Control { get; }
+        public abstract Control Control { get; }
 
-		public IWorkbenchWindow WorkbenchWindow {
-			get { return workbenchWindow; }
-			set {
-				if (workbenchWindow != value) {
-					workbenchWindow = value;
-					OnWorkbenchWindowChanged ();
-				}
-			}
-		}
+        public IWorkbenchWindow WorkbenchWindow
+        {
+            get { return workbenchWindow; }
+            set
+            {
+                if (workbenchWindow != value)
+                {
+                    workbenchWindow = value;
+                    OnWorkbenchWindowChanged();
+                }
+            }
+        }
 
-		public virtual string TabPageLabel {
-			get {
-				return GettextCatalog.GetString ("Content");
-			}
-		}
+        public virtual string TabPageLabel
+        {
+            get
+            {
+                return GettextCatalog.GetString("Content");
+            }
+        }
 
-		public virtual bool CanReuseView (string fileName)
-		{
-			return false;
-		}
+        public virtual bool CanReuseView(string fileName)
+        {
+            return false;
+        }
 
-		public object GetContent (Type type)
-		{
-			return GetContents (type).FirstOrDefault ();
-		}
+        public object GetContent(Type type)
+        {
+            return GetContents(type).FirstOrDefault();
+        }
 
-		public T GetContent<T> () where T : class
-		{
-			return GetContents<T> ().FirstOrDefault ();
-		}
+        public T GetContent<T>() where T : class
+        {
+            return GetContents<T>().FirstOrDefault();
+        }
 
-		public IEnumerable<T> GetContents<T> () where T : class
-		{
-			return OnGetContents (typeof (T)).Cast<T> ();
-		}
+        public IEnumerable<T> GetContents<T>() where T : class
+        {
+            return OnGetContents(typeof(T)).Cast<T>();
+        }
 
-		public IEnumerable<object> GetContents (Type type)
-		{
-			return OnGetContents (type);
-		}
+        public IEnumerable<object> GetContents(Type type)
+        {
+            return OnGetContents(type);
+        }
 
-		protected virtual object OnGetContent (Type type)
-		{
-			if (type.IsInstanceOfType (this))
-				return this;
-			else
-				return null;
-		}
+        protected virtual object OnGetContent(Type type)
+        {
+            if (type.IsInstanceOfType(this))
+                return this;
+            else
+                return null;
+        }
 
-		protected virtual IEnumerable<object> OnGetContents (Type type)
-		{
-			var c = OnGetContent (type);
-			if (c != null)
-				yield return c;
-		}
+        protected virtual IEnumerable<object> OnGetContents(Type type)
+        {
+            var c = OnGetContent(type);
+            if (c != null)
+                yield return c;
+        }
 
-		public virtual void Dispose ()
-		{
-		}
+        public virtual void Dispose()
+        {
+        }
 
-		protected virtual void OnWorkbenchWindowChanged ()
-		{
-		}
+        protected virtual void OnWorkbenchWindowChanged()
+        {
+        }
 
-		internal protected virtual void OnSelected ()
-		{
-		}
+        internal protected virtual void OnSelected()
+        {
+        }
 
-		internal protected virtual void OnDeselected ()
-		{
-		}
+        internal protected virtual void OnDeselected()
+        {
+        }
 
-		/// <summary>
-		/// Gets or sets the project bound to the view
-		/// </summary>
-		public Project Project {
-			get {
-				return project;
-			}
-			set {
-				OnSetProject (value);
-			}
-		}
+        /// <summary>
+        /// Gets or sets the project bound to the view
+        /// </summary>
+        public Project Project
+        {
+            get
+            {
+                return project;
+            }
+            set
+            {
+                OnSetProject(value);
+            }
+        }
 
-		/// <summary>
-		/// Called to update the project bound to the view.
-		/// </summary>
-		/// <param name="project">
-		/// New project assigned to the view. It can be null.
-		/// </param>
-		protected virtual void OnSetProject (Project project)
-		{
-			this.project = project;
-		}
+        /// <summary>
+        /// Called to update the project bound to the view.
+        /// </summary>
+        /// <param name="project">
+        /// New project assigned to the view. It can be null.
+        /// </param>
+        protected virtual void OnSetProject(Project project)
+        {
+            this.project = project;
+        }
 
-		/// <summary>
-		/// Gets the capability of this view for being reassigned a project
-		/// </summary>
-		/// <value>The project reload capability.</value>
-		public virtual ProjectReloadCapability ProjectReloadCapability {
-			get {
-				return ProjectReloadCapability.None;
-			}
-		}
+        /// <summary>
+        /// Gets the capability of this view for being reassigned a project
+        /// </summary>
+        /// <value>The project reload capability.</value>
+        public virtual ProjectReloadCapability ProjectReloadCapability
+        {
+            get
+            {
+                return ProjectReloadCapability.None;
+            }
+        }
 
-		/// <summary>
-		/// Gets the display binding of this view.
-		/// </summary>
-		/// <value>The display binding used to create this view.</value>
-		public IDisplayBinding Binding { get; internal set; }
-	}
+        /// <summary>
+        /// Gets the display binding of this view.
+        /// </summary>
+        /// <value>The display binding used to create this view.</value>
+        public IDisplayBinding Binding { get; internal set; }
+    }
 
-	public enum ProjectReloadCapability
-	{
-		None = 0,
+    public enum ProjectReloadCapability
+    {
+        None = 0,
 
-		/// <summary>
-		/// It can keep unsaved data. Some status (such as undo queue) may be lost.
-		/// </summary>
-		UnsavedData = 1,
+        /// <summary>
+        /// It can keep unsaved data. Some status (such as undo queue) may be lost.
+        /// </summary>
+        UnsavedData = 1,
 
-		/// <summary>
-		/// It can keep unsaved data and status.
-		/// </summary>
-		Full = 2
-	}
+        /// <summary>
+        /// It can keep unsaved data and status.
+        /// </summary>
+        Full = 2
+    }
 }

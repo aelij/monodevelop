@@ -28,19 +28,12 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using MonoDevelop.Core.ProgressMonitoring;
-using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
-using System.Runtime.Remoting.Channels.Tcp;
-using System.Net;
-using System.Net.Sockets;
 using System.Reflection;
 using System.Diagnostics;
-using System.Collections;
 using System.Threading;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
-using MonoDevelop.Core.Execution;
-using Mono.Addins;
 
 namespace MonoDevelop.Core.Instrumentation
 {
@@ -51,12 +44,9 @@ namespace MonoDevelop.Core.Instrumentation
 		static List<CounterCategory> categories;
 		static bool enabled = true;
 		static DateTime startTime;
-		static int publicPort = -1;
 		static Thread autoSaveThread;
 		static bool stopping;
 		static int autoSaveInterval;
-		static List<InstrumentationConsumer> handlers = new List<InstrumentationConsumer> ();
-		static bool handlersLoaded;
 		
 		static InstrumentationService ()
 		{
@@ -65,91 +55,13 @@ namespace MonoDevelop.Core.Instrumentation
 			categories = new List<CounterCategory> ();
 			startTime = DateTime.Now;
 		}
-		
-		internal static void InitializeHandlers ()
-		{
-			if (!handlersLoaded && AddinManager.IsInitialized) {
-				lock (counters) {
-					handlersLoaded = true;
-					AddinManager.AddExtensionNodeHandler (typeof(InstrumentationConsumer), HandleInstrumentationHandlerExtension);
-				}
-			}
-		}
-		
+	
 		static void UpdateCounterStatus ()
 		{
 			lock (counters) {
 				foreach (var c in counters.Values)
 					c.UpdateStatus ();
 			}
-		}
-		
-		static void HandleInstrumentationHandlerExtension (object sender, ExtensionNodeEventArgs args)
-		{
-			var handler = (InstrumentationConsumer)args.ExtensionObject;
-			if (args.Change == ExtensionChange.Add) {
-				RegisterInstrumentationConsumer (handler);
-			}
-			else {
-				UnregisterInstrumentationConsumer (handler);
-			}
-		}
-
-		public static void RegisterInstrumentationConsumer (InstrumentationConsumer consumer)
-		{
-			lock (counters) {
-				handlers.Add (consumer);
-				foreach (var c in counters.Values) {
-					if (consumer.SupportsCounter (c))
-						c.Handlers.Add (consumer);
-				}
-			}
-			UpdateCounterStatus ();
-		}
-		
-		public static void UnregisterInstrumentationConsumer (InstrumentationConsumer consumer)
-		{
-			lock (counters) {
-				handlers.Remove (consumer);
-				foreach (var c in counters.Values)
-					c.Handlers.Remove (consumer);
-			}
-			UpdateCounterStatus ();
-		}
-
-		public static int PublishService ()
-		{
-			RemotingService.RegisterRemotingChannel ();
-			TcpChannel ch = (TcpChannel) ChannelServices.GetChannel ("tcp");
-			Uri u = new Uri (ch.GetUrlsForUri ("test")[0]);
-			publicPort = u.Port;
-			
-			InstrumentationServiceBackend backend = new InstrumentationServiceBackend ();
-			System.Runtime.Remoting.RemotingServices.Marshal (backend, "InstrumentationService");
-			
-			return publicPort;
-		}
-		
-		public static void StartMonitor ()
-		{
-			if (publicPort == -1)
-				throw new InvalidOperationException ("Service not published");
-			
-			if (Platform.IsMac) {
-				var macOSDir = PropertyService.EntryAssemblyPath.ParentDirectory.ParentDirectory.ParentDirectory.ParentDirectory.Combine ("MacOS");
-				var app = macOSDir.Combine ("MDMonitor.app");
-				if (Directory.Exists (app)) {
-					var psi = new ProcessStartInfo ("open", string.Format ("-n '{0}' --args -c localhost:{1} ", app, publicPort)) {
-						UseShellExecute = false,
-					};
-					Process.Start (psi);
-					return;
-				}
-			}	
-			
-			string exe = Path.Combine (Path.GetDirectoryName (Assembly.GetEntryAssembly ().Location), "mdmonitor.exe");
-			string args = "-c localhost:" + publicPort;
-			Runtime.SystemAssemblyService.CurrentRuntime.ExecuteAssembly (exe, args);
 		}
 		
 		public static void StartAutoSave (string file, int interval)
@@ -249,8 +161,6 @@ namespace MonoDevelop.Core.Instrumentation
 			if (name == null)
 				throw new ArgumentNullException ("name", "Counters must have a Name");
 
-			InitializeHandlers ();
-			
 			if (category == null)
 				category = "Global";
 				
@@ -274,10 +184,6 @@ namespace MonoDevelop.Core.Instrumentation
 					countersByID [id] = c;
 				}
 
-				foreach (var h in handlers) {
-					if (h.SupportsCounter (c))
-						c.Handlers.Add (h);
-				}
 				c.UpdateStatus ();
 				
 				return c;

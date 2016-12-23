@@ -126,7 +126,7 @@ namespace MonoDevelop.CSharp
 
 		protected override void Initialize ()
 		{
-			CurrentPath = new PathEntry[] { new PathEntry (GettextCatalog.GetString ("No selection")) { Tag = null } };
+			CurrentPath = new PathEntry[] { new PathEntry ("No selection") { Tag = null } };
 			isPathSet = false;
 			// Delay the execution of UpdateOwnerProjects since it may end calling DocumentContext.AttachToProject,
 			// which shouldn't be called while the extension chain is being initialized.
@@ -680,7 +680,7 @@ namespace MonoDevelop.CSharp
 				return null;
 			}
 			if (reg == null) {
-				entry = new PathEntry (GettextCatalog.GetString ("No region"));
+				entry = new PathEntry ("No region");
 			} else {
 				entry = new PathEntry (CompilationUnitDataProvider.Pixbuf, GLib.Markup.EscapeText (reg.Name));
 			}
@@ -783,7 +783,7 @@ namespace MonoDevelop.CSharp
 					if (CurrentPath != null && CurrentPath.Length == 2 && CurrentPath [1]?.Tag is CSharpSyntaxTree)
 						return;
 					var prevPath = CurrentPath;
-					result.Add (new PathEntry (GettextCatalog.GetString ("No selection")) { Tag = unit });
+					result.Add (new PathEntry ("No selection") { Tag = unit });
 					Gtk.Application.Invoke (delegate {
 						if (cancellationToken.IsCancellationRequested)
 							return;
@@ -831,9 +831,9 @@ namespace MonoDevelop.CSharp
 
 					PathEntry noSelection = null;
 					if (curType == null) {
-						noSelection = new PathEntry (GettextCatalog.GetString ("No selection")) { Tag = unit };
+						noSelection = new PathEntry ("No selection") { Tag = unit };
 					} else if (curMember == null && !(curType is DelegateDeclarationSyntax)) {
-						noSelection = new PathEntry (GettextCatalog.GetString ("No selection")) { Tag = curType };
+						noSelection = new PathEntry ("No selection") { Tag = curType };
 					}
 
 					if (noSelection != null)

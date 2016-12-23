@@ -1,0 +1,133 @@
+{
+  "version": 2,
+  "targets": {
+    ".NETFramework,Version=v4.6": {
+      "System.Collections.Immutable/1.3.0": {
+        "type": "package",
+        "compile": {
+          "lib/portable-net45+win8+wp8+wpa81/System.Collections.Immutable.dll": {}
+        },
+        "runtime": {
+          "lib/portable-net45+win8+wp8+wpa81/System.Collections.Immutable.dll": {}
+        }
+      },
+      "MonoDevelop.Core/1.0.0": {
+        "type": "project",
+        "framework": ".NETFramework,Version=v4.6",
+        "dependencies": {
+          "System.Collections.Immutable": "1.3.0"
+        }
+      },
+      "Xwt/1.0.0": {
+        "type": "project"
+      },
+      "Xwt.Gtk/1.0.0": {
+        "type": "project",
+        "dependencies": {
+          "Xwt": "1.0.0"
+        }
+      }
+    },
+    ".NETFramework,Version=v4.6/win": {
+      "System.Collections.Immutable/1.3.0": {
+        "type": "package",
+        "compile": {
+          "lib/portable-net45+win8+wp8+wpa81/System.Collections.Immutable.dll": {}
+        },
+        "runtime": {
+          "lib/portable-net45+win8+wp8+wpa81/System.Collections.Immutable.dll": {}
+        }
+      },
+      "MonoDevelop.Core/1.0.0": {
+        "type": "project",
+        "framework": ".NETFramework,Version=v4.6",
+        "dependencies": {
+          "System.Collections.Immutable": "1.3.0"
+        }
+      },
+      "Xwt/1.0.0": {
+        "type": "project"
+      },
+      "Xwt.Gtk/1.0.0": {
+        "type": "project",
+        "dependencies": {
+          "Xwt": "1.0.0"
+        }
+      }
+    }
+  },
+  "libraries": {
+    "System.Collections.Immutable/1.3.0": {
+      "sha512": "zukBRPUuNxwy9m4TGWLxKAnoiMc9+B+8VXeXVyPiBPvOd7yLgAlZ1DlsRWJjMx4VsvhhF2+6q6kO2GRbPja6hA==",
+      "type": "package",
+      "path": "system.collections.immutable/1.3.0",
+      "files": [
+        "ThirdPartyNotices.txt",
+        "dotnet_library_license.txt",
+        "lib/netstandard1.0/System.Collections.Immutable.dll",
+        "lib/netstandard1.0/System.Collections.Immutable.xml",
+        "lib/portable-net45+win8+wp8+wpa81/System.Collections.Immutable.dll",
+        "lib/portable-net45+win8+wp8+wpa81/System.Collections.Immutable.xml",
+        "system.collections.immutable.1.3.0.nupkg.sha512",
+        "system.collections.immutable.nuspec"
+      ]
+    },
+    "MonoDevelop.Core/1.0.0": {
+      "type": "project",
+      "path": "../MonoDevelop.Core/project.json",
+      "msbuildProject": "../MonoDevelop.Core/MonoDevelop.Core.csproj"
+    },
+    "Xwt/1.0.0": {
+      "type": "project",
+      "msbuildProject": "../../../external/xwt/Xwt/Xwt.csproj"
+    },
+    "Xwt.Gtk/1.0.0": {
+      "type": "project",
+      "msbuildProject": "../../../external/xwt/Xwt.Gtk/Xwt.Gtk.csproj"
+    }
+  },
+  "projectFileDependencyGroups": {
+    "": [
+      "System.Collections.Immutable >= 1.3.0"
+    ],
+    ".NETFramework,Version=v4.6": []
+  },
+  "packageFolders": {
+    "C:\\Users\\aelij\\.nuget\\packages\\": {}
+  },
+  "project": {
+    "restore": {
+      "projectUniqueName": "C:\\Source\\Repos\\monodevelop\\main\\src\\core\\MonoDevelop.Ide\\MonoDevelop.Ide.csproj",
+      "projectName": "MonoDevelop.Ide",
+      "projectPath": "C:\\Source\\Repos\\monodevelop\\main\\src\\core\\MonoDevelop.Ide\\MonoDevelop.Ide.csproj",
+      "projectJsonPath": "C:\\Source\\Repos\\monodevelop\\main\\src\\core\\MonoDevelop.Ide\\project.json",
+      "outputType": "UAP",
+      "frameworks": {
+        "net46": {
+          "projectReferences": {
+            "C:\\Source\\Repos\\monodevelop\\main\\external\\xwt\\Xwt.Gtk\\Xwt.Gtk.csproj": {
+              "projectPath": "C:\\Source\\Repos\\monodevelop\\main\\external\\xwt\\Xwt.Gtk\\Xwt.Gtk.csproj"
+            },
+            "C:\\Source\\Repos\\monodevelop\\main\\external\\xwt\\Xwt\\Xwt.csproj": {
+              "projectPath": "C:\\Source\\Repos\\monodevelop\\main\\external\\xwt\\Xwt\\Xwt.csproj"
+            },
+            "C:\\Source\\Repos\\monodevelop\\main\\src\\core\\MonoDevelop.Core\\MonoDevelop.Core.csproj": {
+              "projectPath": "C:\\Source\\Repos\\monodevelop\\main\\src\\core\\MonoDevelop.Core\\MonoDevelop.Core.csproj"
+            }
+          }
+        }
+      }
+    },
+    "dependencies": {
+      "System.Collections.Immutable": "1.3.0"
+    },
+    "frameworks": {
+      "net46": {}
+    },
+    "runtimes": {
+      "win": {
+        "#import": []
+      }
+    }
+  }
+}

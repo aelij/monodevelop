@@ -61,7 +61,7 @@ namespace MonoDevelop.CSharp.CodeFixes
 			CancellationToken cancellationToken)
 		{
 			var methodNode = await GetMethodDeclaration(node, semanticModel, cancellationToken).ConfigureAwait(false);
-			return string.Format(GettextCatalog.GetString ("Make {0} return Task instead of void"), methodNode.WithBody(null));
+			return string.Format("Make {0} return Task instead of void", methodNode.WithBody(null));
 		}
 
 		protected override async Task<Tuple<SyntaxTree, SyntaxNode>> GetRootInOtherSyntaxTree(

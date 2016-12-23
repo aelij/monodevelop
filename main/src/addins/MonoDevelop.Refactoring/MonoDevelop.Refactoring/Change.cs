@@ -153,7 +153,7 @@ namespace MonoDevelop.Refactoring
 		{
 			this.FileName = fileName;
 			this.Content = content;
-			this.Description = string.Format (GettextCatalog.GetString ("Create file '{0}'"), Path.GetFileName (fileName));
+			this.Description = string.Format ("Create file '{0}'", Path.GetFileName (fileName));
 		}
 		
 		public override void PerformChange (ProgressMonitor monitor, RefactoringOptions rctx)
@@ -184,7 +184,7 @@ namespace MonoDevelop.Refactoring
 				throw new ArgumentNullException (nameof (newName));
 			this.OldName = oldName;
 			this.NewName = newName;
-			this.Description = string.Format (GettextCatalog.GetString ("Rename file '{0}' to '{1}'"), Path.GetFileName (oldName), Path.GetFileName (newName));
+			this.Description = string.Format ("Rename file '{0}' to '{1}'", Path.GetFileName (oldName), Path.GetFileName (newName));
 		}
 		
 		public override void PerformChange (ProgressMonitor monitor, RefactoringOptions rctx)
@@ -206,7 +206,7 @@ namespace MonoDevelop.Refactoring
 		public SaveProjectChange (Project project)
 		{
 			this.Project = project;
-			this.Description = string.Format (GettextCatalog.GetString ("Save project {0}"), project.Name);
+			this.Description = string.Format ("Save project {0}", project.Name);
 		}
 		
 		public override void PerformChange (ProgressMonitor monitor, RefactoringOptions rctx)

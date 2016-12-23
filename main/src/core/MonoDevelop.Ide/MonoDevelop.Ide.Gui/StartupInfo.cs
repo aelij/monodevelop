@@ -31,34 +31,23 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using System.Linq;
 
 namespace MonoDevelop.Ide.Gui
 {
 	internal class StartupInfo
 	{
-		List<FileOpenInformation> requestedFileList = new List<FileOpenInformation> ();
-		List<string> parameterList = new List<string> ();
+	    private readonly List<FileOpenInformation> requestedFileList = new List<FileOpenInformation> ();
+	    private readonly List<string> parameterList = new List<string> ();
 
-		public IList<string> ParameterList {
-			get { return parameterList; }
-		}
-		
-		public IEnumerable<FileOpenInformation> RequestedFileList {
-			get { return requestedFileList; }
-		}
-		
-		public bool HasFiles {
-			get { return requestedFileList.Count > 0; }
-		}
+		public IList<string> ParameterList => parameterList;
 
-		public bool HasSolutionFile {
-			get {
-				return requestedFileList.Any (f => File.Exists (f.FileName) && (Services.ProjectService.IsWorkspaceItemFile (f.FileName) || Services.ProjectService.IsSolutionItemFile (f.FileName)));
-			}
-		}
-		
-		/// <summary>
+	    public IEnumerable<FileOpenInformation> RequestedFileList => requestedFileList;
+
+	    public bool HasFiles => requestedFileList.Count > 0;
+
+	    public bool HasSolutionFile => false;
+
+	    /// <summary>
 		/// Matches a filename string with optional line and column 
 		/// (/foo/bar/blah.cs;22;31)
 		/// </summary>
@@ -72,11 +61,11 @@ namespace MonoDevelop.Ide.Gui
 				
 				// this does not yet work with relative paths
 				if (a[0] == '~') {
-					var sf = MonoDevelop.Core.Platform.IsWindows ? Environment.SpecialFolder.UserProfile : Environment.SpecialFolder.Personal;
+					var sf = Core.Platform.IsWindows ? Environment.SpecialFolder.UserProfile : Environment.SpecialFolder.Personal;
 					a = Path.Combine (Environment.GetFolderPath (sf), a.Substring (1));
 				}
 
-				if (fileMatch != null && fileMatch.Success) {
+				if (fileMatch.Success) {
 					string filename = fileMatch.Groups["filename"].Value;
 					if (File.Exists (filename)) {
 						int line = 1, column = 1;

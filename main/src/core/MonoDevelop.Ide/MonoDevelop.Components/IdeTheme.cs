@@ -29,7 +29,6 @@ using System.IO;
 using MonoDevelop.Core;
 using MonoDevelop.Ide;
 using MonoDevelop.Ide.Gui;
-using System.Linq;
 
 #if MAC
 using AppKit;
@@ -103,8 +102,7 @@ namespace MonoDevelop.Components
 				string theme = IdeApp.Preferences.UserInterfaceThemeName;
 				if (string.IsNullOrEmpty (theme))
 					theme = DefaultTheme;
-				ValidateGtkTheme (ref theme);
-				if (theme != DefaultTheme)
+			    if (theme != DefaultTheme)
 					Gtk.Settings.Default.ThemeName = theme;
 				LoggingService.LogInfo ("GTK: Using Gtk theme from {0}", Path.Combine (Gtk.Rc.ThemeDir, Gtk.Settings.Default.ThemeName));
 			} else
@@ -153,7 +151,7 @@ namespace MonoDevelop.Components
 					Directory.CreateDirectory (UserProfile.Current.ConfigDir);
 				
 				if (Platform.IsWindows) {
-					// HACK: Gtk Bug: Rc.ReparseAll () and the include "[rcfile]" gtkrc statement are broken on Windows.
+					// HACK: Gtk bug: Rc.ReparseAll () and the include "[rcfile]" gtkrc statement are broken on Windows.
 					//                We must provide our own XDG folder structure to switch bundled themes.
 					var rc_themes = UserProfile.Current.ConfigDir.Combine ("share", "themes");
 					var rc_theme_light = rc_themes.Combine ("Light", "gtk-2.0", "gtkrc");
@@ -270,39 +268,6 @@ namespace MonoDevelop.Components
 			"Clearlooks" // GTK theme
 		};
 
-		static void ValidateGtkTheme (ref string theme)
-		{
-			if (!MonoDevelop.Ide.Gui.OptionPanels.IDEStyleOptionsPanelWidget.IsBadGtkTheme (theme))
-				return;
-
-			var themes = MonoDevelop.Ide.Gui.OptionPanels.IDEStyleOptionsPanelWidget.InstalledThemes;
-
-			string fallback = gtkThemeFallbacks
-				.Select (fb => themes.FirstOrDefault (t => string.Compare (fb, t, StringComparison.OrdinalIgnoreCase) == 0))
-				.FirstOrDefault (t => t != null);
-
-			string message = "Theme Not Supported";
-
-			string detail;
-			if (themes.Count > 0) {
-				detail =
-					"Your system is using the '{0}' GTK+ theme, which is known to be very unstable. MonoDevelop will " +
-					"now switch to an alternate GTK+ theme.\n\n" +
-					"This message will continue to be shown at startup until you set a alternate GTK+ theme as your " +
-					"default in the GTK+ Theme Selector or MonoDevelop Preferences.";
-			} else {
-				detail =
-					"Your system is using the '{0}' GTK+ theme, which is known to be very unstable, and no other GTK+ " +
-					"themes appear to be installed. Please install another GTK+ theme.\n\n" +
-					"This message will continue to be shown at startup until you install a different GTK+ theme and " +
-					"set it as your default in the GTK+ Theme Selector or MonoDevelop Preferences.";
-			}
-
-			MessageService.GenericAlert (Gtk.Stock.DialogWarning, message, BrandingService.BrandApplicationName (detail), AlertButton.Ok);
-
-			theme = fallback ?? themes.FirstOrDefault () ?? theme;
-		}
-
 #if MAC
 		static Dictionary<NSWindow, NSObject> nsWindows = new Dictionary<NSWindow, NSObject> ();
 
@@ -329,16 +294,6 @@ namespace MonoDevelop.Components
 
 			if (window is NSPanel || window.ContentView.Class.Name != "GdkQuartzView")
 				window.BackgroundColor = MonoDevelop.Ide.Gui.Styles.BackgroundColor.ToNSColor ();
-			else {
-				object[] platforms = Mono.Addins.AddinManager.GetExtensionObjects ("/MonoDevelop/Core/PlatformService");
-				if (platforms.Length > 0) {
-					var platformService = (MonoDevelop.Ide.Desktop.PlatformService)platforms [0];
-					var image = Xwt.Drawing.Image.FromResource (platformService.GetType().Assembly, "maintoolbarbg.png");
-
-					window.IsOpaque = false;
-					window.BackgroundColor = NSColor.FromPatternImage (image.ToBitmap().ToNSImage());
-				}
-			}
 			window.StyleMask |= NSWindowStyle.TexturedBackground;
 		}
 

@@ -43,21 +43,6 @@ namespace MonoDevelop.Ide.Commands
 		About
 	}
 
-	// MonoDevelop.Ide.Commands.HelpCommands.Help
-	public class HelpHandler: CommandHandler 
-	{
-		protected override void Run ()
-		{
-			IdeApp.HelpOperations.ShowHelp ("root:");
-		}
-		
-		protected override void Update (CommandInfo info)
-		{
-			if (!IdeApp.HelpOperations.CanShowHelp ("root:"))
-				info.Visible = false;
-		}
-	}
-
 	// MonoDevelop.Ide.Commands.HelpCommands.OpenLogDirectory
 	public class OpenLogDirectoryHandler : CommandHandler
 	{
@@ -70,44 +55,6 @@ namespace MonoDevelop.Ide.Commands
 			} catch (Exception ex) {
 				MonoDevelop.Core.LoggingService.LogError ("Could not open the Log Directory", ex);
 			}
-		}
-	}
-
-	// MonoDevelop.Ide.Commands.HelpCommands.TipOfTheDay
-	public class TipOfTheDayHandler : CommandHandler
-	{
-		protected override void Run ()
-		{
-			TipOfTheDayWindow dlg = new TipOfTheDayWindow ();
-			dlg.Show ();
-		}
-	}
-
-	// MonoDevelop.Ide.Commands.HelpCommands.About
-	public class AboutHandler : CommandHandler
-	{
-		protected override void Run ()
-		{
-			CommonAboutDialog.ShowAboutDialog ();
-		}
-
-		protected override void Update (CommandInfo info)
-		{
-			base.Update (info);
-			info.Icon = MonoDevelop.Core.BrandingService.HelpAboutIconId;
-		}
-	}
-	
-	class SendFeedbackHandler : CommandHandler
-	{
-		protected override void Run ()
-		{
-			FeedbackService.ShowFeedbackWindow ();
-		}
-
-		protected override void Update (CommandInfo info)
-		{
-			info.Visible = FeedbackService.Enabled;
 		}
 	}
 }

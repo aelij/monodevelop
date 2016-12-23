@@ -70,7 +70,7 @@ namespace MonoDevelop.Ide.Editor
 		public TooltipItem (object item, ISegment itemSegment) 
 		{
 			if (itemSegment == null)
-				throw new ArgumentNullException ("itemSegment");
+				throw new ArgumentNullException (nameof (itemSegment));
 			Item = item;
 			this.offset = itemSegment.Offset;
 			this.length = itemSegment.Length;

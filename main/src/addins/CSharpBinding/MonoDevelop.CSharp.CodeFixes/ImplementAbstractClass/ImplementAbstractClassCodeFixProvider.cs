@@ -61,7 +61,7 @@ namespace MonoDevelop.CSharp.CodeFixes.ImplementAbstractClass
 					node,
 					context.CancellationToken))
 				{
-					var title = GettextCatalog.GetString ("Implement Abstract Class");
+					var title = "Implement Abstract Class";
 					var abstractType = model.GetTypeInfo(node, context.CancellationToken).Type;
 					//var id = GetCodeActionId(abstractType.ContainingAssembly.Name, abstractType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat));
 					context.RegisterCodeFix(

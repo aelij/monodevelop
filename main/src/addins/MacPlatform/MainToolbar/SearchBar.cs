@@ -162,7 +162,7 @@ namespace MonoDevelop.MacIntegration.MainToolbar
 
 		static string FirstResponderPlaceholder {
 			get {
-				return GettextCatalog.GetString ("Search");
+				return "Search";
 			}
 		}
 

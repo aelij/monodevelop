@@ -59,13 +59,13 @@ namespace MonoDevelop.CSharp.ClassOutline
 		public const string GroupMethods = "Methods";
 		
 		static Dictionary<string,string> groupNames = new Dictionary<string, string> {
-			{ GroupRegions,    GettextCatalog.GetString ("Regions") },
-			{ GroupNamespaces, GettextCatalog.GetString ("Namespaces") },
-			{ GroupTypes,      GettextCatalog.GetString ("Types") },
-			{ GroupProperties, GettextCatalog.GetString ("Properties") },
-			{ GroupFields,     GettextCatalog.GetString ("Fields") },
-			{ GroupEvents,     GettextCatalog.GetString ("Events") },
-			{ GroupMethods,    GettextCatalog.GetString ("Methods") },
+			{ GroupRegions,    "Regions" },
+			{ GroupNamespaces, "Namespaces" },
+			{ GroupTypes,      "Types" },
+			{ GroupProperties, "Properties" },
+			{ GroupFields,     "Fields" },
+			{ GroupEvents,     "Events" },
+			{ GroupMethods,    "Methods" },
 		};
 		
 		OutlineSettings ()

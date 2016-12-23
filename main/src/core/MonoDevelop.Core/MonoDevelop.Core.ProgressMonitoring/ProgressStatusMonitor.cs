@@ -27,11 +27,10 @@
 
 
 using System;
-using Mono.Addins;
 
 namespace MonoDevelop.Core.ProgressMonitoring
 {
-	public class ProgressStatusMonitor: MarshalByRefObject, IProgressStatus, IDisposable
+	public class ProgressStatusMonitor: MarshalByRefObject, IDisposable
 	{
 		ProgressMonitor monitor;
 		int step;

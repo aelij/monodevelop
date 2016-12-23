@@ -40,18 +40,18 @@ namespace MonoDevelop.CSharp.Refactoring
 				throw new ArgumentNullException ("symbol");
 			switch (symbol.Kind) {
 			case SymbolKind.NamedType:
-				return GettextCatalog.GetString ("Go to _Base Type");
+				return "Go to _Base Type";
 			case SymbolKind.Property:
 				var property = (IPropertySymbol)symbol;
-				return property.OverriddenProperty != null ? GettextCatalog.GetString ("Go to _Base Property") : GettextCatalog.GetString ("Go to _Interface Property");
+				return property.OverriddenProperty != null ? "Go to _Base Property" : "Go to _Interface Property";
 			case SymbolKind.Event:
 				var evt = (IEventSymbol)symbol;
-				return evt.OverriddenEvent != null ? GettextCatalog.GetString ("Go to _Base Event") : GettextCatalog.GetString ("Go to _Interface Event");
+				return evt.OverriddenEvent != null ? "Go to _Base Event" : "Go to _Interface Event";
 			case SymbolKind.Method:
 				var method = (IMethodSymbol)symbol;
-				return method.OverriddenMethod != null ? GettextCatalog.GetString ("Go to _Base Method") : GettextCatalog.GetString ("Go to _Interface Method");
+				return method.OverriddenMethod != null ? "Go to _Base Method" : "Go to _Interface Method";
 			}
-			return GettextCatalog.GetString ("Go to _Base Symbol");
+			return "Go to _Base Symbol";
 		}
 
 		public static bool CanGotoBase (ISymbol symbol)

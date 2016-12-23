@@ -28,29 +28,21 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
-
-using Mono.Addins;
 using Mono.PkgConfig;
-using MonoDevelop.Core.AddIns;
-using MonoDevelop.Core.Serialization;
 using System.Reflection;
 
 namespace MonoDevelop.Core.Assemblies
 {
 	public class TargetFramework
 	{
-		[ItemProperty(SerializationDataType=typeof(TargetFrameworkMonikerDataType))]
 		TargetFrameworkMoniker id;
 		
-		[ItemProperty ("_name")]
 		string name;
 		
 #pragma warning disable 0649
-		[ItemProperty]
 		bool hidden;
 #pragma warning restore 0649
 		
-		[ItemProperty]
 		ClrVersion clrVersion;
 
 		List<TargetFrameworkMoniker> includedFrameworks = new List<TargetFrameworkMoniker> ();
@@ -62,7 +54,7 @@ namespace MonoDevelop.Core.Assemblies
 		TargetFrameworkToolsVersion toolsVersion;
 
 		public static TargetFramework Default {
-			get { return Runtime.SystemAssemblyService.GetTargetFramework (TargetFrameworkMoniker.Default); }
+			get { return SystemAssemblyService.Instance.GetTargetFramework (TargetFrameworkMoniker.Default); }
 		}
 
 		internal TargetFramework ()
@@ -166,7 +158,7 @@ namespace MonoDevelop.Core.Assemblies
 
 		public bool CanReferenceAssembliesTargetingFramework (TargetFrameworkMoniker fxId)
 		{
-			var fx = Runtime.SystemAssemblyService.GetTargetFramework (fxId);
+			var fx = SystemAssemblyService.Instance.GetTargetFramework (fxId);
 
 			return fx != null && CanReferenceAssembliesTargetingFramework (fx);
 		}
@@ -230,23 +222,8 @@ namespace MonoDevelop.Core.Assemblies
 			return corlibVersion = string.Empty;
 		}
 
-		internal TargetFrameworkNode FrameworkNode { get; set; }
-		
 		internal TargetFrameworkBackend CreateBackendForRuntime (TargetRuntime runtime)
 		{
-			if (FrameworkNode == null)
-				return null;
-			
-			lock (FrameworkNode) {
-				if (FrameworkNode.ChildNodes == null)
-					return null;
-			}
-			
-			foreach (TypeExtensionNode node in FrameworkNode.ChildNodes) {
-				TargetFrameworkBackend backend = (TargetFrameworkBackend) node.CreateInstance (typeof (TargetFrameworkBackend));
-				if (backend.SupportsRuntime (runtime))
-					return backend;
-			}
 			return null;
 		}
 		
@@ -259,7 +236,6 @@ namespace MonoDevelop.Core.Assemblies
 			get { return includedFrameworks; }
 		}
 
-		[ItemProperty (Name="IncludesFramework")]
 		#pragma warning disable 649
 		string includesFramework;
 		#pragma warning restore 649
@@ -280,8 +256,6 @@ namespace MonoDevelop.Core.Assemblies
 			get { return supportedFrameworks; }
 		}
 		
-		[ItemProperty]
-		[ItemProperty ("Assembly", Scope="*")]
 		internal AssemblyInfo[] Assemblies {
 			get;
 			set;
@@ -417,25 +391,18 @@ namespace MonoDevelop.Core.Assemblies
 	
 	class AssemblyInfo
 	{
-		[ItemProperty ("name")]
 		public string Name = null;
 		
-		[ItemProperty ("version")]
 		public string Version = null;
 		
-		[ItemProperty ("publicKeyToken", DefaultValue="null")]
 		public string PublicKeyToken = null;
 		
-		[ItemProperty ("package")]
 		public string Package = null;
 		
-		[ItemProperty ("culture")]
 		public string Culture = null;
 		
-		[ItemProperty ("processorArchitecture")]
 		public ProcessorArchitecture ProcessorArchitecture = ProcessorArchitecture.MSIL;
 		
-		[ItemProperty ("inGac")]
 		public bool InGac = false;
 		
 		public AssemblyInfo ()

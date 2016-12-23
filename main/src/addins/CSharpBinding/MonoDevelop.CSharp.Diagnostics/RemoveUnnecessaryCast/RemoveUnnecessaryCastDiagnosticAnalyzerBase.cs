@@ -18,8 +18,8 @@ namespace MonoDevelop.CSharp.Diagnostics.RemoveUnnecessaryCast
 {
 	internal abstract class RemoveUnnecessaryCastDiagnosticAnalyzerBase<TLanguageKindEnum> : DiagnosticAnalyzer where TLanguageKindEnum : struct
 	{
-		private static string s_localizableTitle = GettextCatalog.GetString ("Remove Unnecessary Cast");
-		private static string s_localizableMessage = GettextCatalog.GetString ("Cast is redundant.");
+		private static string s_localizableTitle = "Remove Unnecessary Cast";
+		private static string s_localizableMessage = "Cast is redundant.";
 
 		private static readonly DiagnosticDescriptor s_descriptor = new DiagnosticDescriptor(IDEDiagnosticIds.RemoveUnnecessaryCastDiagnosticId,
 			s_localizableTitle,

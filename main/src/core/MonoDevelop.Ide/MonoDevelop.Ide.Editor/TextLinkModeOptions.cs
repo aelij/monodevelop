@@ -58,7 +58,7 @@ namespace MonoDevelop.Ide.Editor
 		public TextLinkModeOptions (IList<TextLink> links, Action<TextLinkModeEventArgs> modeExitedAction = null)
 		{
 			if (links == null)
-				throw new ArgumentNullException ("links");
+				throw new ArgumentNullException (nameof (links));
 			Links = links;
 			ModeExitedAction = modeExitedAction;
 		}

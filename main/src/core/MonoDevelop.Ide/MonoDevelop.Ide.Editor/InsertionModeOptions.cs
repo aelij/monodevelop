@@ -75,11 +75,11 @@ namespace MonoDevelop.Ide.Editor
 		public InsertionModeOptions (string operation, IList<InsertionPoint> insertionPoints, Action<InsertionCursorEventArgs> modeExitedAction)
 		{
 			if (operation == null)
-				throw new ArgumentNullException ("operation");
+				throw new ArgumentNullException (nameof (operation));
 			if (insertionPoints == null)
-				throw new ArgumentNullException ("insertionPoints");
+				throw new ArgumentNullException (nameof (insertionPoints));
 			if (modeExitedAction == null)
-				throw new ArgumentNullException ("modeExitedAction");
+				throw new ArgumentNullException (nameof (modeExitedAction));
 			Operation = operation;
 			InsertionPoints = insertionPoints;
 			ModeExitedAction = modeExitedAction;

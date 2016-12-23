@@ -24,15 +24,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 using System;
+using MonoDevelop.Ide.Editor;
 using MonoDevelop.Ide.Gui;
-using MonoDevelop.Ide.Tasks;
 using Xwt;
 namespace MonoDevelop.Components
 {
 	public class XwtBoxTooltip : Widget
 	{
 		string tip;
-		TaskSeverity? severity;
+		DiagnosticSeverity? severity;
 		TooltipPopoverWindow tooltipWindow;
 		Xwt.Popover xwtPopover;
 		bool mouseOver, mouseOverTooltip;
@@ -56,7 +56,7 @@ namespace MonoDevelop.Components
 			}
 		}
 
-		public TaskSeverity? Severity {
+		public DiagnosticSeverity? Severity {
 			get {
 				return severity;
 			}
@@ -68,19 +68,19 @@ namespace MonoDevelop.Components
 					((Label)xwtPopover.Content).Font = Xwt.Drawing.Font.SystemFont.WithScaledSize (Styles.FontScale11);
 
 					switch (severity.Value) {
-					case TaskSeverity.Information:
+					case DiagnosticSeverity.Info:
 						xwtPopover.BackgroundColor = Styles.PopoverWindow.InformationBackgroundColor;
 						break;
 
-					case TaskSeverity.Comment:
+					case DiagnosticSeverity.Hidden:
 						xwtPopover.BackgroundColor = Styles.PopoverWindow.InformationBackgroundColor;
 						break;
 
-					case TaskSeverity.Error:
+					case DiagnosticSeverity.Error:
 						xwtPopover.BackgroundColor = Styles.PopoverWindow.ErrorBackgroundColor;
 						return;
 
-					case TaskSeverity.Warning:
+					case DiagnosticSeverity.Warning:
 						xwtPopover.BackgroundColor = Styles.PopoverWindow.WarningBackgroundColor;
 						return;
 					}
@@ -123,7 +123,7 @@ namespace MonoDevelop.Components
 				tooltipWindow.ShowArrow = true;
 			}
 			Position = PopupPosition.Top;
-			Severity = TaskSeverity.Information;
+			Severity = DiagnosticSeverity.Info;
 		}
 
 		protected override void OnMouseEntered (EventArgs args)

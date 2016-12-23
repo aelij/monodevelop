@@ -30,7 +30,7 @@ using System;
 
 using MonoDevelop.Core;
 using MonoDevelop.Components;
-using MonoDevelop.Ide.Tasks;
+using MonoDevelop.Ide.Editor;
 
 namespace MonoDevelop.Ide.Gui.Components
 {
@@ -190,7 +190,7 @@ namespace MonoDevelop.Ide.Gui.Components
 		public Xwt.Drawing.Image OverlayTopRight { get; set; }
 		public Xwt.Drawing.Image StatusIcon { get; set; }
 		public string StatusMessage { get; set; }
-		public TaskSeverity? StatusSeverity { get; set; }
+		public DiagnosticSeverity? StatusSeverity { get; set; }
 		public bool DisabledStyle { get; set; }
 		 
 		internal Xwt.Drawing.Image StatusIconInternal {
@@ -199,12 +199,12 @@ namespace MonoDevelop.Ide.Gui.Components
 					return StatusIcon;
 				if (StatusSeverity.HasValue) {
 					switch (StatusSeverity.Value) {
-					case TaskSeverity.Error:
+					case DiagnosticSeverity.Error:
 						return ImageService.GetIcon ("md-error");
-					case TaskSeverity.Warning:
+					case DiagnosticSeverity.Warning:
 						return ImageService.GetIcon ("md-warning");
-					case TaskSeverity.Information:
-					case TaskSeverity.Comment:
+					case DiagnosticSeverity.Info:
+					case DiagnosticSeverity.Hidden:
 						return ImageService.GetIcon ("md-information");
 					}
 				}

@@ -39,8 +39,8 @@ namespace ILAsmBinding
 			this.Build();
 			
 			var store = new ListStore (typeof (string));
-			store.AppendValues (GettextCatalog.GetString ("Executable"));
-			store.AppendValues (GettextCatalog.GetString ("Library"));
+			store.AppendValues ("Executable");
+			store.AppendValues ("Library");
 			compileTargetCombo.Model = store;
 			var cr = new CellRendererText ();
 			compileTargetCombo.PackStart (cr, true);

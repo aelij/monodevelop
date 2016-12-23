@@ -47,13 +47,13 @@ namespace MonoDevelop.CodeGeneration
 		
 		public string Text {
 			get {
-				return GettextCatalog.GetString ("Properties");
+				return "Properties";
 			}
 		}
 		
 		public string GenerateDescription {
 			get {
-				return GettextCatalog.GetString ("Select members which should be exposed.");
+				return "Select members which should be exposed.";
 			}
 		}
 		

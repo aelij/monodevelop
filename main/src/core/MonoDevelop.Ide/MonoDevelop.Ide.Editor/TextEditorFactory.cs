@@ -25,58 +25,45 @@
 // THE SOFTWARE.
 
 using MonoDevelop.Core.Text;
-using Mono.Addins;
 using MonoDevelop.Core;
 
 namespace MonoDevelop.Ide.Editor
 {
 	public static class TextEditorFactory
 	{
-		static ITextEditorFactory currentFactory;
-
-		static TextEditorFactory ()
-		{
-			AddinManager.AddExtensionNodeHandler ("/MonoDevelop/SourceEditor2/EditorFactory", delegate(object sender, ExtensionNodeEventArgs args) {
-				switch (args.Change) {
-				case ExtensionChange.Add:
-					if (currentFactory == null)
-						currentFactory = (ITextEditorFactory)args.ExtensionObject;
-					break;
-				}
-			});
-		}
-
+		internal static ITextEditorFactory CurrentFactory { get; set; }
+        
 		public static ITextDocument CreateNewDocument ()
 		{
-			return currentFactory.CreateNewDocument ();
+			return CurrentFactory.CreateNewDocument ();
 		}
 
 		public static ITextDocument CreateNewDocument (ITextSource textSource, string fileName, string mimeType = null)
 		{
 			if (textSource == null)
-				throw new System.ArgumentNullException ("textSource");
-			return currentFactory.CreateNewDocument (textSource, fileName, mimeType); 
+				throw new System.ArgumentNullException (nameof (textSource));
+			return CurrentFactory.CreateNewDocument (textSource, fileName, mimeType); 
 		}
 
 		public static ITextDocument LoadDocument (string fileName, string mimeType = null)
 		{
 			if (fileName == null)
-				throw new System.ArgumentNullException ("fileName");
-			return currentFactory.CreateNewDocument (StringTextSource.ReadFrom (fileName), fileName, mimeType); 
+				throw new System.ArgumentNullException (nameof (fileName));
+			return CurrentFactory.CreateNewDocument (StringTextSource.ReadFrom (fileName), fileName, mimeType); 
 		}
 
 		public static IReadonlyTextDocument CreateNewReadonlyDocument (ITextSource textSource, string fileName, string mimeType = null)
 		{
 			if (textSource == null)
-				throw new System.ArgumentNullException ("textSource");
-			return currentFactory.CreateNewDocument (textSource, fileName, mimeType); 
+				throw new System.ArgumentNullException (nameof (textSource));
+			return CurrentFactory.CreateNewDocument (textSource, fileName, mimeType); 
 		}
 
 		static ConfigurationProperty<double> zoomLevel = ConfigurationProperty.Create ("Editor.ZoomLevel", 1.0d);
 
 		public static TextEditor CreateNewEditor (TextEditorType textEditorType = TextEditorType.Default)
 		{
-			var result = new TextEditor (currentFactory.CreateNewEditor (), textEditorType) {
+			var result = new TextEditor (CurrentFactory.CreateNewEditor (), textEditorType) {
 				ZoomLevel = zoomLevel
 			};
 			result.ZoomLevelChanged += delegate {
@@ -88,8 +75,8 @@ namespace MonoDevelop.Ide.Editor
 		public static TextEditor CreateNewEditor (IReadonlyTextDocument document, TextEditorType textEditorType = TextEditorType.Default)
 		{
 			if (document == null)
-				throw new System.ArgumentNullException ("document");
-			var result = new TextEditor (currentFactory.CreateNewEditor (document), textEditorType) {
+				throw new System.ArgumentNullException (nameof (document));
+			var result = new TextEditor (CurrentFactory.CreateNewEditor (document), textEditorType) {
 				ZoomLevel = zoomLevel
 			};
 			result.ZoomLevelChanged += delegate {
@@ -115,10 +102,10 @@ namespace MonoDevelop.Ide.Editor
 		public static string[] GetSyntaxProperties (string mimeType, string name)
 		{
 			if (mimeType == null)
-				throw new System.ArgumentNullException ("mimeType");
+				throw new System.ArgumentNullException (nameof (mimeType));
 			if (name == null)
-				throw new System.ArgumentNullException ("name");
-			return currentFactory.GetSyntaxProperties (mimeType, name);
+				throw new System.ArgumentNullException (nameof (name));
+			return CurrentFactory.GetSyntaxProperties (mimeType, name);
 		}
 	}
 }

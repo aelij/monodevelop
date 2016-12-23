@@ -30,7 +30,6 @@ using System.Linq;
 using System.Collections.Generic;
 using Gtk;
 using System.Runtime.InteropServices;
-using Mono.Addins;
 using MonoDevelop.Core;
 
 namespace MonoDevelop.Components
@@ -668,27 +667,27 @@ namespace MonoDevelop.Components
 		{
 			var context_menu = new ContextMenu ();
 
-			var cut = new ContextMenuItem { Label = GettextCatalog.GetString ("Cut"), Context = entry };
+			var cut = new ContextMenuItem { Label =  ("Cut"), Context = entry };
 			cut.Clicked += CutClicked;
 			context_menu.Items.Add (cut);
 
-			var copy = new ContextMenuItem { Label = GettextCatalog.GetString ("Copy"), Context = entry };
+			var copy = new ContextMenuItem { Label =  ("Copy"), Context = entry };
 			copy.Clicked += CopyClicked;
 			context_menu.Items.Add (copy);
 
-			var paste = new ContextMenuItem { Label = GettextCatalog.GetString ("Paste"), Context = entry };
+			var paste = new ContextMenuItem { Label =  ("Paste"), Context = entry };
 			paste.Clicked += PasteClicked;
 			context_menu.Items.Add (paste);
 
 			context_menu.Items.Add (new SeparatorContextMenuItem ());
 
-			var delete = new ContextMenuItem { Label = GettextCatalog.GetString ("Delete"), Context = entry };
+			var delete = new ContextMenuItem { Label =  ("Delete"), Context = entry };
 			delete.Clicked += DeleteClicked;
 			context_menu.Items.Add (delete);
 
 			context_menu.Items.Add (new SeparatorContextMenuItem ());
 
-			var select_all = new ContextMenuItem { Label = GettextCatalog.GetString ("Select All"), Context = entry };
+			var select_all = new ContextMenuItem { Label =  ("Select All"), Context = entry };
 			select_all.Clicked += SelectAllClicked;
 			context_menu.Items.Add (select_all);
 

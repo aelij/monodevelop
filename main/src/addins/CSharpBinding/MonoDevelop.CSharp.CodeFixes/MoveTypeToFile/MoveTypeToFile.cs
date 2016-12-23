@@ -75,9 +75,9 @@ namespace MonoDevelop.CSharp.CodeFixes.MoveTypeToFile
 					
 			string title;
 			if (IsSingleType (root)) {
-				title = String.Format (GettextCatalog.GetString ("Rename file to '{0}'"), Path.GetFileName (GetCorrectFileName (document, type)));
+				title = String.Format ("Rename file to '{0}'", Path.GetFileName (GetCorrectFileName (document, type)));
 			} else {
-				title = String.Format (GettextCatalog.GetString ("Move type to file '{0}'"), Path.GetFileName (GetCorrectFileName (document, type)));
+				title = String.Format ("Move type to file '{0}'", Path.GetFileName (GetCorrectFileName (document, type)));
 			}
 			context.RegisterRefactoring (new MyCodeAction (document, title, root, type));
 		}

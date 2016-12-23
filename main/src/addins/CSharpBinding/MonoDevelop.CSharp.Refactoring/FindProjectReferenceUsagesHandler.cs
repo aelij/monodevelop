@@ -79,7 +79,7 @@ namespace MonoDevelop.CSharp.Refactoring
 			if (projectRef != null) {
 				await Task.Run (delegate {
 					using (var monitor = IdeApp.Workbench.ProgressMonitors.GetSearchProgressMonitor (true, true)) {
-						monitor.BeginTask (GettextCatalog.GetString ("Analyzing project"), analysisProject.Documents.Count ());
+						monitor.BeginTask ("Analyzing project", analysisProject.Documents.Count ());
 						Parallel.ForEach (analysisProject.Documents, async document => {
 							try {
 								var model = await document.GetSemanticModelAsync (monitor.CancellationToken).ConfigureAwait (false);

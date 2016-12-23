@@ -31,13 +31,7 @@ namespace MonoDevelop.Core.Assemblies
 {
 	public interface IAssemblyContext
 	{
-		[Obsolete ("Avoid use of SystemPackage")]
-		IEnumerable<SystemPackage> GetPackages ();
-
-		[Obsolete ("Avoid use of SystemPackage")]
-		IEnumerable<SystemPackage> GetPackages (TargetFramework fx);
-
-		SystemPackage GetPackage (string name);
+	    SystemPackage GetPackage (string name);
 		SystemPackage GetPackage (string name, string version);
 		SystemPackage GetPackageFromPath (string path);
 		SystemPackage[] GetPackagesFromFullName (string fullname);

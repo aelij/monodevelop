@@ -23,45 +23,41 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-using System;
-using ICSharpCode.NRefactory.Completion;
-using Microsoft.CodeAnalysis;
-using System.Collections.Immutable;
-using System.Linq;
-using System.Collections.Generic;
+
 using System.Threading;
-using MonoDevelop.Ide.TypeSystem;
-using MonoDevelop.Projects;
 using MonoDevelop.Ide.Editor;
 using System.Threading.Tasks;
 
 namespace MonoDevelop.Ide.CodeCompletion
 {
-	public abstract class ParameterHintingData
-	{
-		public ISymbol Symbol {
-			get;
-			private set;
-		}
+    public abstract class ParameterHintingData
+    {
+        public object Symbol
+        {
+            get;
+            private set;
+        }
 
-		protected ParameterHintingData (ISymbol symbol)
-		{
-			Symbol = symbol;
-		}
+        protected ParameterHintingData(object symbol)
+        {
+            Symbol = symbol;
+        }
 
-		public abstract int ParameterCount {
-			get;
-		}
+        public abstract int ParameterCount
+        {
+            get;
+        }
 
-		public abstract bool IsParameterListAllowed {
-			get;
-		}
+        public abstract bool IsParameterListAllowed
+        {
+            get;
+        }
 
-		public abstract string GetParameterName (int parameter);
+        public abstract string GetParameterName(int parameter);
 
-		public virtual Task<TooltipInformation> CreateTooltipInformation (TextEditor editor, DocumentContext ctx, int currentParameter, bool smartWrap, CancellationToken cancelToken)
-		{
-			return Task.FromResult (new TooltipInformation ());
-		}
-	}
+        public virtual Task<TooltipInformation> CreateTooltipInformation(TextEditor editor, DocumentContext ctx, int currentParameter, bool smartWrap, CancellationToken cancelToken)
+        {
+            return Task.FromResult(new TooltipInformation());
+        }
+    }
 }

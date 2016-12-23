@@ -1,0 +1,12 @@
+﻿{
+  "frameworks": {
+    "net46": {}
+  },
+  "runtimes": {
+    "win": {}
+  },
+  "dependencies": {
+    "Microsoft.CodeAnalysis.CSharp.Workspaces": "2.0.0-rc2",
+    "Microsoft.CodeAnalysis.CSharp.Features": "2.0.0-rc2"
+  }
+}

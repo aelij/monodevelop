@@ -27,10 +27,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using MonoDevelop.Components.Commands;
-using MonoDevelop.Core;
 using MonoDevelop.Core.Text;
 using MonoDevelop.Ide.Commands;
-using MonoDevelop.Ide.TypeSystem;
 
 namespace MonoDevelop.Ide.Editor.Extension
 {
@@ -254,26 +252,12 @@ namespace MonoDevelop.Ide.Editor.Extension
 			var line = Editor.GetLine (Editor.CaretLine);
 			if (line == null) {
 				info.Visible = false;
-				return;
 			}
-
-			var marker = (IMessageBubbleLineMarker)Editor.GetLineMarkers (line).FirstOrDefault (m => m is IMessageBubbleLineMarker);
-			info.Visible = marker != null;
-
-			if (info.Visible)
-				info.Text = marker.IsVisible ? GettextCatalog.GetString ("_Hide Current Message") : GettextCatalog.GetString ("_Show Hidden Message");
 		}
 
 		[CommandHandler (MessageBubbleCommands.Toggle)]
 		public void OnToggleErrorTextMarker ()
 		{
-			var line = Editor.GetLine (Editor.CaretLine);
-			if (line == null)
-				return;
-			var marker = (IMessageBubbleLineMarker)Editor.GetLineMarkers (line).FirstOrDefault (m => m is IMessageBubbleLineMarker);
-			if (marker != null) {
-				marker.IsVisible = !marker.IsVisible;
-			}
 		}
 		#endregion
 
@@ -535,11 +519,12 @@ namespace MonoDevelop.Ide.Editor.Extension
 		[CommandHandler (TextEditorCommands.CompleteStatement)]
 		void OnCompleteStatement ()
 		{
-			var doc = IdeApp.Workbench.ActiveDocument;
-			var generator = CodeGenerator.CreateGenerator (doc);
-			if (generator != null) {
-				generator.CompleteStatement (doc);
-			}
+            //TODO-AELIJ: complete statement
+			//var doc = IdeApp.Workbench.ActiveDocument;
+			//var generator = CodeGenerator.CreateGenerator (doc);
+			//if (generator != null) {
+			//	generator.CompleteStatement (doc);
+			//}
 		}
 
 		[CommandHandler (TextEditorCommands.DeletePrevWord)]

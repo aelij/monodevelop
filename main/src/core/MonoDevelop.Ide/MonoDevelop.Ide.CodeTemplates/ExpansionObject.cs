@@ -27,17 +27,8 @@
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-
-using MonoDevelop.Ide.Gui.Content;
-using MonoDevelop.Ide.TypeSystem;
 using MonoDevelop.Ide.CodeCompletion;
-using MonoDevelop.Ide.Tasks;
-using Microsoft.CodeAnalysis;
-using System.Threading.Tasks;
-using System.Linq;
 using MonoDevelop.Ide.Editor;
-using MonoDevelop.Ide.Editor.Extension;
-using System.Web.SessionState;
 
 namespace MonoDevelop.Ide.CodeTemplates
 {
@@ -48,14 +39,14 @@ namespace MonoDevelop.Ide.CodeTemplates
 			set;
 		}
 		
-		public SemanticModel Compilation {
-			get {
-				var analysisDocument = DocumentContext.ParsedDocument;
-				if (analysisDocument == null)
-					return null;
-				return analysisDocument.GetAst<SemanticModel> ();
-			}
-		}
+		//public SemanticModel Compilation {
+		//	get {
+		//		var analysisDocument = DocumentContext.ParsedDocument;
+		//		if (analysisDocument == null)
+		//			return null;
+		//		return analysisDocument.GetAst<SemanticModel> ();
+		//	}
+		//}
 
 		public DocumentLocation InsertPosition {
 			get;
@@ -97,62 +88,70 @@ namespace MonoDevelop.Ide.CodeTemplates
 		
 		public string GetCurrentClassName ()
 		{
-			var compilation = CurrentContext.Compilation;
-			if (compilation == null)
-				return null;
-			var enclosingSymbol = compilation.GetEnclosingSymbol (CurrentContext.Editor.CaretOffset);
+            // TODO-AELIJ
+		    return null;
 
-			if (!(enclosingSymbol is ITypeSymbol))
-				enclosingSymbol = enclosingSymbol.ContainingType;
+		    //var compilation = CurrentContext.Compilation;
+		    //if (compilation == null)
+		    //	return null;
+		    //var enclosingSymbol = compilation.GetEnclosingSymbol (CurrentContext.Editor.CaretOffset);
 
-			return enclosingSymbol != null ? enclosingSymbol.Name : null;
+		    //if (!(enclosingSymbol is ITypeSymbol))
+		    //	enclosingSymbol = enclosingSymbol.ContainingType;
+
+		    //return enclosingSymbol != null ? enclosingSymbol.Name : null;
 		}
 		
 		public string GetConstructorModifier ()
 		{
-			var compilation = CurrentContext.Compilation;
-			if (compilation == null)
-				return null;
-			var enclosingSymbol = compilation.GetEnclosingSymbol (CurrentContext.Editor.CaretOffset);
+            // TODO-AELIJ
+		    return null;
 
-			if (!(enclosingSymbol is ITypeSymbol))
-				enclosingSymbol = enclosingSymbol.ContainingType;
+		    //var compilation = CurrentContext.Compilation;
+		    //if (compilation == null)
+		    //	return null;
+		    //var enclosingSymbol = compilation.GetEnclosingSymbol (CurrentContext.Editor.CaretOffset);
 
-			return enclosingSymbol != null && enclosingSymbol.IsStatic ? "static " : "public ";
+		    //if (!(enclosingSymbol is ITypeSymbol))
+		    //	enclosingSymbol = enclosingSymbol.ContainingType;
+
+		    //return enclosingSymbol != null && enclosingSymbol.IsStatic ? "static " : "public ";
 		}
 		
 		public string GetLengthProperty (Func<string, string> callback, string varName)
 		{
-			SemanticModel semanticModel;
-			if (!CurrentContext.DocumentContext.AnalysisDocument.TryGetSemanticModel (out semanticModel))
-				semanticModel = CurrentContext.Compilation;
-			if (callback == null || semanticModel == null)
-				return "Count";
-			string var = callback (varName);
-			var offset = CurrentContext.Editor.CaretOffset;
-			var sym = semanticModel.LookupSymbols (offset, name: var).FirstOrDefault ();
-			if (sym == null)
-				return "Count";
-			var returnType = sym.GetReturnType ();
-			if (returnType?.Kind == SymbolKind.ArrayType)
-				return "Length";
+			//SemanticModel semanticModel;
+			//if (!CurrentContext.DocumentContext.AnalysisDocument.TryGetSemanticModel (out semanticModel))
+			//	semanticModel = CurrentContext.Compilation;
+			//if (callback == null || semanticModel == null)
+			//	return "Count";
+			//string var = callback (varName);
+			//var offset = CurrentContext.Editor.CaretOffset;
+			//var sym = semanticModel.LookupSymbols (offset, name: var).FirstOrDefault ();
+			//if (sym == null)
+			//	return "Count";
+			//var returnType = sym.GetReturnType ();
+			//if (returnType?.Kind == SymbolKind.ArrayType)
+			//	return "Length";
+
+            // TODO-AELIJ: check if needed
 			return "Count";
 		}
 		
-		ITypeSymbol GetElementType (Compilation compilation, ITypeSymbol type)
-		{
-			ITypeSymbol tmp = null;
-			foreach (var baseType in type.AllInterfaces) {
-				if (baseType != null && baseType.Name == "IEnumerable") {
-					if (baseType.TypeArguments.Length > 0) {
-						return baseType.TypeArguments [0];
-					} else if (baseType.ContainingNamespace.ToDisplayString (Ambience.LabelFormat) == "System.Collections") {
-						tmp = compilation.GetSpecialType (SpecialType.System_Object);
-					}
-				}
-			}
-			return tmp;
-		}
+		//ITypeSymbol GetElementType (Compilation compilation, ITypeSymbol type)
+		//{
+		//	ITypeSymbol tmp = null;
+		//	foreach (var baseType in type.AllInterfaces) {
+		//		if (baseType != null && baseType.Name == "IEnumerable") {
+		//			if (baseType.TypeArguments.Length > 0) {
+		//				return baseType.TypeArguments [0];
+		//			} else if (baseType.ContainingNamespace.ToDisplayString (Ambience.LabelFormat) == "System.Collections") {
+		//				tmp = compilation.GetSpecialType (SpecialType.System_Object);
+		//			}
+		//		}
+		//	}
+		//	return tmp;
+		//}
 		
 		public string GetComponentTypeOf (Func<string, string> callback, string varName)
 		{
@@ -177,84 +176,88 @@ namespace MonoDevelop.Ide.CodeTemplates
 		ICompletionDataList list;
 		public IListDataProvider<string> GetCollections ()
 		{
+            // TODO-AELIJ: collections
 			var result = new List<CodeTemplateVariableValue> ();
-			var ext = CurrentContext.DocumentContext.GetContent <CompletionTextEditorExtension> ();
-			var analysisProject = TypeSystemService.GetCodeAnalysisProject (CurrentContext.DocumentContext.Project);
-			var compilation = analysisProject != null ? analysisProject.GetCompilationAsync ().Result : null;
+			//var ext = CurrentContext.DocumentContext.GetContent <CompletionTextEditorExtension> ();
+			//var analysisProject = TypeSystemService.GetCodeAnalysisProject (CurrentContext.DocumentContext.Project);
+			//var compilation = analysisProject != null ? analysisProject.GetCompilationAsync ().Result : null;
 
-			if (ext != null) {
-				if (list == null)
-					list = ext.CodeCompletionCommand (
-						CurrentContext.DocumentContext.GetContent <MonoDevelop.Ide.CodeCompletion.ICompletionWidget> ().CurrentCodeCompletionContext).Result;
+			//if (ext != null) {
+			//	if (list == null)
+			//		list = ext.CodeCompletionCommand (
+			//			CurrentContext.DocumentContext.GetContent <MonoDevelop.Ide.CodeCompletion.ICompletionWidget> ().CurrentCodeCompletionContext).Result;
 				
-				foreach (var data in list.OfType<ISymbolCompletionData> ()) {
-					if (data.Symbol == null)
-						continue;
-					var type = data.Symbol.GetReturnType ();
-					if (type == null)
-						continue;
-					if (GetElementType (compilation, type) != null) {
-						var method = data as IMethodSymbol;
-						if (method != null) {
-							if (method.Parameters.Length == 0)
-								result.Add (new CodeTemplateVariableValue (data.Symbol.Name + " ()", ((CompletionData)data).Icon));
-							continue;
-						}
-						if (!result.Any (r => r.Text == data.Symbol.Name))
-							result.Add (new CodeTemplateVariableValue (data.Symbol.Name, ((CompletionData)data).Icon));
-					}
-				}
+			//	foreach (var data in list.OfType<ISymbolCompletionData> ()) {
+			//		if (data.Symbol == null)
+			//			continue;
+			//		var type = data.Symbol.GetReturnType ();
+			//		if (type == null)
+			//			continue;
+			//		if (GetElementType (compilation, type) != null) {
+			//			var method = data as IMethodSymbol;
+			//			if (method != null) {
+			//				if (method.Parameters.Length == 0)
+			//					result.Add (new CodeTemplateVariableValue (data.Symbol.Name + " ()", ((CompletionData)data).Icon));
+			//				continue;
+			//			}
+			//			if (!result.Any (r => r.Text == data.Symbol.Name))
+			//				result.Add (new CodeTemplateVariableValue (data.Symbol.Name, ((CompletionData)data).Icon));
+			//		}
+			//	}
 				
-				foreach (var data in list.OfType<ISymbolCompletionData> ()) {
-					var m = data.Symbol as IParameterSymbol;
-					if (m != null) {
-						if (GetElementType (compilation, m.Type) != null && !result.Any (r => r.Text == m.Name))
-							result.Add (new CodeTemplateVariableValue (m.Name, ((CompletionData)data).Icon));
-					}
-				}
+			//	foreach (var data in list.OfType<ISymbolCompletionData> ()) {
+			//		var m = data.Symbol as IParameterSymbol;
+			//		if (m != null) {
+			//			if (GetElementType (compilation, m.Type) != null && !result.Any (r => r.Text == m.Name))
+			//				result.Add (new CodeTemplateVariableValue (m.Name, ((CompletionData)data).Icon));
+			//		}
+			//	}
 				
-				foreach (var sym in list.OfType<ISymbolCompletionData> ()) {
-					var m = sym.Symbol as ILocalSymbol;
-					if (m == null)
-						continue;
-					if (GetElementType (compilation, m.Type) != null && !result.Any (r => r.Text == m.Name))
-						result.Add (new CodeTemplateVariableValue (m.Name, ((CompletionData)sym).Icon));
-				}
-			}
+			//	foreach (var sym in list.OfType<ISymbolCompletionData> ()) {
+			//		var m = sym.Symbol as ILocalSymbol;
+			//		if (m == null)
+			//			continue;
+			//		if (GetElementType (compilation, m.Type) != null && !result.Any (r => r.Text == m.Name))
+			//			result.Add (new CodeTemplateVariableValue (m.Name, ((CompletionData)sym).Icon));
+			//	}
+			//}
 			return new CodeTemplateListDataProvider (result);
 		}
 		
 		public string GetSimpleTypeName (string fullTypeName)
 		{
-			var compilation = CurrentContext.Compilation;
-			if (compilation == null)
-				return fullTypeName.Replace ("#", ".");
-			string ns = "";
-			string name = "";
-			string member = "";
-			
-			int idx = fullTypeName.IndexOf ('#');
-			if (idx < 0) {
-				name = fullTypeName;
-			} else {
-				ns = fullTypeName.Substring (0, idx);
-				name = fullTypeName.Substring (idx + 1);
-			}
-			
-			idx = name.IndexOf ('.');
-			if (idx >= 0) {
-				member = name.Substring (idx + 1);
-				name = name.Substring (0, idx);
-			}
+            // TODO-AELIJ
+            return fullTypeName.Replace("#", ".");
 
-			var metadataName = string.IsNullOrEmpty (ns) ? name : ns + "." + name;
-			var type = compilation.Compilation.GetTypeByMetadataName (metadataName);
-			if (type != null) {
-				var minimalName = type.ToMinimalDisplayString (compilation, CurrentContext.Editor.CaretOffset);
-				return string.IsNullOrEmpty (member) ? minimalName :  minimalName + "." + member;
-			}
-			return fullTypeName.Replace ("#", ".");
-		}
+            //var compilation = CurrentContext.Compilation;
+            //if (compilation == null)
+            //	return fullTypeName.Replace ("#", ".");
+            //string ns = "";
+            //string name = "";
+            //string member = "";
+
+            //int idx = fullTypeName.IndexOf ('#');
+            //if (idx < 0) {
+            //	name = fullTypeName;
+            //} else {
+            //	ns = fullTypeName.Substring (0, idx);
+            //	name = fullTypeName.Substring (idx + 1);
+            //}
+
+            //idx = name.IndexOf ('.');
+            //if (idx >= 0) {
+            //	member = name.Substring (idx + 1);
+            //	name = name.Substring (0, idx);
+            //}
+
+            //var metadataName = string.IsNullOrEmpty (ns) ? name : ns + "." + name;
+            //var type = compilation.Compilation.GetTypeByMetadataName (metadataName);
+            //if (type != null) {
+            //	var minimalName = type.ToMinimalDisplayString (compilation, CurrentContext.Editor.CaretOffset);
+            //	return string.IsNullOrEmpty (member) ? minimalName :  minimalName + "." + member;
+            //}
+            //return fullTypeName.Replace ("#", ".");
+        }
 		
 
 		static System.Text.RegularExpressions.Regex functionRegEx = new System.Text.RegularExpressions.Regex ("([^(]*)\\(([^(]*)\\)", RegexOptions.Compiled);

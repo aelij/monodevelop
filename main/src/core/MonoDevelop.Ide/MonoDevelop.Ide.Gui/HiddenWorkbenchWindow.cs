@@ -26,7 +26,6 @@
 
 using System;
 using System.Collections.Generic;
-using Mono.Addins;
 
 namespace MonoDevelop.Ide.Gui
 {
@@ -55,10 +54,6 @@ namespace MonoDevelop.Ide.Gui
 		public bool ShowNotification {
 			get { return false; }
 			set {}
-		}
-		
-		public ExtensionContext ExtensionContext {
-			get { return AddinManager.AddinEngine; }
 		}
 		
 		MonoDevelop.Ide.Gui.ViewContent viewContent;

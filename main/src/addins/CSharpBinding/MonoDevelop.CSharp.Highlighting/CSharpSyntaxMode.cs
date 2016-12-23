@@ -70,7 +70,7 @@ namespace MonoDevelop.CSharp.Highlighting
 
 		protected override void DocumentParsed ()
 		{
-			var parsedDocument = documentContext.ParsedDocument;
+			var parsedDocument = DocumentContext.ParsedDocument;
 			if (parsedDocument == null)
 				return;
 			var resolver = parsedDocument.GetAst<SemanticModel> ();
@@ -95,7 +95,7 @@ namespace MonoDevelop.CSharp.Highlighting
 								highlightTree.RemoveListener ();
 							}
 							highlightTree = newTree;
-							highlightTree.InstallListener (editor);
+							highlightTree.InstallListener (Editor);
 							NotifySemanticHighlightingUpdate ();
 						});
 					}

@@ -23,18 +23,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Xml;
-
 using Gtk;
-
-using MonoDevelop.Ide.Gui;
-using MonoDevelop.Core;
 using MonoDevelop.Ide.Fonts;
 using ICSharpCode.NRefactory.TypeSystem;
-using MonoDevelop.Ide.TypeSystem;
 using ICSharpCode.NRefactory.Semantics;
 
 namespace MonoDevelop.SourceEditor
@@ -52,23 +43,6 @@ namespace MonoDevelop.SourceEditor
 				var ur = (UnknownMemberResolveResult)result;
 				if (ur.TargetType.Kind != TypeKind.Unknown)
 					tooltip = string.Format ("error CS0117: `{0}' does not contain a definition for `{1}'", ur.TargetType.FullName, ur.MemberName);
-			} else if (result != null && ed.TextEditorResolverProvider != null) {
-				//tooltip = ed.TextEditorResolverProvider.CreateTooltip (unit, result, errorInformations, ambience, modifierState);
-				// TODO: Type sysetm conversion. (btw. this isn't required because the analyzer should provide semantic error messages.)	
-				//				if (result.ResolveErrors.Count > 0) {
-				//					StringBuilder sb = new StringBuilder ();
-				//					sb.Append (tooltip);
-				//					sb.AppendLine ();
-				//					sb.AppendLine ();
-				//					sb.AppendLine (GettextCatalog.GetPluralString ("Error:", "Errors:", result.ResolveErrors.Count));
-				//					for (int i = 0; i < result.ResolveErrors.Count; i++) {
-				//						sb.Append ('\t');
-				//						sb.Append (result.ResolveErrors[i]);
-				//						if (i + 1 < result.ResolveErrors.Count) 
-				//							sb.AppendLine ();
-				//					}
-				//					tooltip = sb.ToString ();
-				//				}
 			} else {
 				tooltip = errorInformations;
 			}

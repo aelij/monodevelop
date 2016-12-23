@@ -50,13 +50,13 @@ namespace MonoDevelop.CodeGeneration
 
 		public string Text {
 			get {
-				return GettextCatalog.GetString ("Event OnXXX method");
+				return "Event OnXXX method";
 			}
 		}
 
 		public string GenerateDescription {
 			get {
-				return GettextCatalog.GetString ("Select event to generate the method for.");
+				return "Select event to generate the method for.";
 			}
 		}
 

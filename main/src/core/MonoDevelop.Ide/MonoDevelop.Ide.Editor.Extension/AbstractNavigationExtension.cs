@@ -24,14 +24,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using ICSharpCode.NRefactory.Editor;
 using System.Threading;
 using MonoDevelop.Core;
 using Xwt;
 using System.Linq;
+using MonoDevelop.Core.Text;
 
 namespace MonoDevelop.Ide.Editor.Extension
 {

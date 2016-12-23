@@ -18,8 +18,8 @@ namespace MonoDevelop.CSharp.Diagnostics.SimplifyTypeNames
 {
 	internal abstract class SimplifyTypeNamesDiagnosticAnalyzerBase<TLanguageKindEnum> : DiagnosticAnalyzer where TLanguageKindEnum : struct
 	{
-		private static string s_localizableMessage = GettextCatalog.GetString ("Name can be simplified.");
-		private static string s_localizableTitleSimplifyNames = GettextCatalog.GetString ("Simplify Names");
+		private static string s_localizableMessage = "Name can be simplified.";
+		private static string s_localizableTitleSimplifyNames = "Simplify Names";
 
 		private static readonly DiagnosticDescriptor s_descriptorSimplifyNames = new DiagnosticDescriptor(IDEDiagnosticIds.SimplifyNamesDiagnosticId,
 			s_localizableTitleSimplifyNames,
@@ -29,7 +29,7 @@ namespace MonoDevelop.CSharp.Diagnostics.SimplifyTypeNames
 			isEnabledByDefault: true,
 			customTags: DiagnosticCustomTags.Unnecessary);
 
-		private static string s_localizableTitleSimplifyMemberAccess = GettextCatalog.GetString ("Simplify member access '{0}'");
+		private static string s_localizableTitleSimplifyMemberAccess = "Simplify member access '{0}'";
 		private static readonly DiagnosticDescriptor s_descriptorSimplifyMemberAccess = new DiagnosticDescriptor(IDEDiagnosticIds.SimplifyMemberAccessDiagnosticId,
 			s_localizableTitleSimplifyMemberAccess,
 			s_localizableMessage,
@@ -38,7 +38,7 @@ namespace MonoDevelop.CSharp.Diagnostics.SimplifyTypeNames
 			isEnabledByDefault: true,
 			customTags: DiagnosticCustomTags.Unnecessary);
 
-		private static string s_localizableTitleSimplifyThisOrMe = GettextCatalog.GetString ("Remove 'this'");
+		private static string s_localizableTitleSimplifyThisOrMe = "Remove 'this'";
 		private static readonly DiagnosticDescriptor s_descriptorSimplifyThisOrMe = new DiagnosticDescriptor(IDEDiagnosticIds.SimplifyThisOrMeDiagnosticId,
 			s_localizableTitleSimplifyThisOrMe,
 			s_localizableMessage,

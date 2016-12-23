@@ -49,7 +49,7 @@ namespace MonoDevelop.CodeGeneration
 		{
 			get
 			{
-				return GettextCatalog.GetString ("ToString() implementation");
+				return "ToString() implementation";
 			}
 		}
 
@@ -57,7 +57,7 @@ namespace MonoDevelop.CodeGeneration
 		{
 			get
 			{
-				return GettextCatalog.GetString ("Select members to be outputted.");
+				return "Select members to be outputted.";
 			}
 		}
 

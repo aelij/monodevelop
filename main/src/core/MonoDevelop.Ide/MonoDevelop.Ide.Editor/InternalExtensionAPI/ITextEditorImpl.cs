@@ -201,9 +201,7 @@ namespace MonoDevelop.Ide.Editor
 
 		void InformLoadComplete ();
 
-		void SetUsageTaskProviders (IEnumerable<UsageProviderEditorExtension> providers);
-
-		void SetQuickTaskProviders (IEnumerable<IQuickTaskProvider> providers);
+	    void SetQuickTaskProviders (IEnumerable<IQuickTaskProvider> providers);
 		#endregion
 
 		double ZoomLevel { get; set; }

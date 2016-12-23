@@ -26,12 +26,9 @@
 //
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 using MonoDevelop.Components;
 using System.Threading.Tasks;
 using MonoDevelop.Core;
-using MonoDevelop.Projects;
 using Xwt;
 
 namespace MonoDevelop.Ide.Gui
@@ -40,16 +37,12 @@ namespace MonoDevelop.Ide.Gui
 	{
 		#region ViewContent Members
 
-		string untitledName = "";
-		string contentName;
+	    string contentName;
 		bool isDirty;
 
-		public string UntitledName {
-			get { return untitledName; }
-			set { untitledName = value; }
-		}
+		public string UntitledName { get; set; } = "";
 
-		public string ContentName {
+	    public string ContentName {
 			get { return contentName; }
 			set {
 				if (value != contentName) {
@@ -59,11 +52,9 @@ namespace MonoDevelop.Ide.Gui
 			}
 		}
 
-		public bool IsUntitled {
-			get { return (ContentName == null); }
-		}
+		public bool IsUntitled => (ContentName == null);
 
-		public virtual bool IsDirty {
+	    public virtual bool IsDirty {
 			get { return isDirty; }
 			set {
 				if (value != isDirty) {
@@ -73,40 +64,29 @@ namespace MonoDevelop.Ide.Gui
 			}
 		}
 
-		public virtual bool IsReadOnly {
-			get { return false; }
-		}
+		public virtual bool IsReadOnly => false;
 
-		public virtual bool IsHidden {
-			get { return false; }
-		}
+	    public virtual bool IsHidden => false;
 
-		public virtual bool IsViewOnly {
-			get { return false; }
-		}
+	    public virtual bool IsViewOnly => false;
 
-		public virtual bool IsFile {
-			get { return true; }
-		}
+	    public virtual bool IsFile => true;
 
-		public virtual object GetDocumentObject ()
+	    public virtual object GetDocumentObject ()
 		{
-			string path = IsUntitled ? UntitledName : ContentName;
-			if (IsFile && !string.IsNullOrEmpty (path) && Project != null) {
-					return Project.Files.GetFile (path);
-			}
+            // TODO-AELIJ
+			//string path = IsUntitled ? UntitledName : ContentName;
+			//if (IsFile && !string.IsNullOrEmpty (path) && Project != null) {
+			//		return Project.Files.GetFile (path);
+			//}
 			return null;
 		}
 
-		public virtual string StockIconId {
-			get { return null; }
-		}
+		public virtual string StockIconId => null;
 
-		internal string PathRelativeToProject {
-			get { return Project == null ? null : FileService.AbsoluteToRelativePath (Project.BaseDirectory, ContentName); }
-		}
+	    internal string PathRelativeToProject => Project == null ? null : FileService.AbsoluteToRelativePath (Project.BaseDirectory, ContentName);
 
-		public virtual Task Save ()
+	    public virtual Task Save ()
 		{
 			return Save (ContentName);
 		}
@@ -132,7 +112,7 @@ namespace MonoDevelop.Ide.Gui
 		
 		public Task Load (FilePath fileName)
 		{
-			return Load (new FileOpenInformation (fileName, null));
+			return Load (new FileOpenInformation (fileName));
 		}
 		
 		public virtual Task LoadNew (System.IO.Stream content, string mimeType)
@@ -149,26 +129,20 @@ namespace MonoDevelop.Ide.Gui
 
 		protected virtual void OnDirtyChanged ()
 		{
-			if (DirtyChanged != null)
-				DirtyChanged (this, EventArgs.Empty);
+		    DirtyChanged?.Invoke (this, EventArgs.Empty);
 		}
 
 		protected virtual void OnContentNameChanged ()
 		{
-			if (ContentNameChanged != null)
-				ContentNameChanged (this, EventArgs.Empty);
+		    ContentNameChanged?.Invoke (this, EventArgs.Empty);
 		}
 	}
 
 	public abstract class AbstractXwtViewContent : ViewContent
 	{
-		public override Control Control {
-			get {
-				return (Gtk.Widget)Toolkit.CurrentEngine.GetNativeWidget (Widget);
-			}
-		}
+		public override Control Control => (Gtk.Widget)Toolkit.CurrentEngine.GetNativeWidget (Widget);
 
-		public abstract Xwt.Widget Widget {
+	    public abstract Widget Widget {
 			get;
 		}
 	}

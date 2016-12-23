@@ -31,18 +31,12 @@ using MonoDevelop.Ide.Gui;
 using MonoDevelop.Ide.Editor.Extension;
 using System.IO;
 using MonoDevelop.Ide.Editor.Highlighting;
-using Mono.Addins;
 using MonoDevelop.Core;
-using MonoDevelop.Ide.Extensions;
 using System.Linq;
 using MonoDevelop.Components;
 using System.ComponentModel;
-using MonoDevelop.Ide.TypeSystem;
 using System.Threading;
-using MonoDevelop.Ide.Editor.Projection;
 using Xwt;
-using System.Collections.Immutable;
-using MonoDevelop.Components.Commands;
 
 namespace MonoDevelop.Ide.Editor
 {
@@ -59,8 +53,6 @@ namespace MonoDevelop.Ide.Editor
 		}
 
 		public TextEditorType TextEditorType { get; internal set; }
-
-		FileTypeCondition fileTypeCondition = new FileTypeCondition ();
 
 		public event EventHandler SelectionChanged {
 			add { textEditorImpl.SelectionChanged += value; }
@@ -920,8 +912,6 @@ namespace MonoDevelop.Ide.Editor
 				return;
 			isDisposed = true;
 			DetachExtensionChain ();
-			FileNameChanged -= TextEditor_FileNameChanged;
-			MimeTypeChanged -= TextEditor_MimeTypeChanged;
 			foreach (var provider in textEditorImpl.TooltipProvider)
 				provider.Dispose ();
 			textEditorImpl.Dispose ();
@@ -935,16 +925,6 @@ namespace MonoDevelop.Ide.Editor
 		}
 
 		#region Internal API
-		ExtensionContext extensionContext;
-
-		internal ExtensionContext ExtensionContext {
-			get {
-				return extensionContext;
-			}
-			set {
-				extensionContext = value;
-			}
-		}
 
 		internal IEditorActionHost EditorActionHost {
 			get {
@@ -964,23 +944,6 @@ namespace MonoDevelop.Ide.Editor
 			}
 		}
 
-		static List<TooltipExtensionNode> allProviders = new List<TooltipExtensionNode> ();
-
-		static TextEditor ()
-		{
-			AddinManager.AddExtensionNodeHandler ("/MonoDevelop/SourceEditor2/TooltipProviders", delegate (object sender, ExtensionNodeEventArgs args) {
-				var extNode = (TooltipExtensionNode)args.ExtensionNode;
-				switch (args.Change) {
-				case ExtensionChange.Add:
-					allProviders.Add (extNode);
-					break;
-				case ExtensionChange.Remove:
-					allProviders.Remove (extNode);
-					break;
-				}
-			});
-		}
-
 		internal TextEditor (ITextEditorImpl textEditorImpl, TextEditorType textEditorType)
 		{
 			if (textEditorImpl == null)
@@ -988,26 +951,6 @@ namespace MonoDevelop.Ide.Editor
 			this.textEditorImpl = textEditorImpl;
 			this.TextEditorType = textEditorType;
 			commandRouter = new InternalCommandRouter (this);
-			fileTypeCondition.SetFileName (FileName);
-			ExtensionContext = AddinManager.CreateExtensionContext ();
-			ExtensionContext.RegisterCondition ("FileType", fileTypeCondition);
-
-			FileNameChanged += TextEditor_FileNameChanged;
-			MimeTypeChanged += TextEditor_MimeTypeChanged;
-		}
-
-		void TextEditor_FileNameChanged (object sender, EventArgs e)
-		{
-			fileTypeCondition.SetFileName (FileName);
-		}
-
-		void TextEditor_MimeTypeChanged (object sender, EventArgs e)
-		{
-			textEditorImpl.ClearTooltipProviders ();
-			foreach (var extensionNode in allProviders) {
-				if (extensionNode.IsValidFor (MimeType))
-					textEditorImpl.AddTooltipProvider ((TooltipProvider)extensionNode.CreateInstance ());
-			}
 		}
 
 		TextEditorViewContent viewContent;
@@ -1075,62 +1018,43 @@ namespace MonoDevelop.Ide.Editor
 		{
 			if (DocumentContext != null) {
 				textEditorImpl.SetQuickTaskProviders (DocumentContext.GetContents<IQuickTaskProvider> ());
-				textEditorImpl.SetUsageTaskProviders (DocumentContext.GetContents<UsageProviderEditorExtension> ());
 			} else {
 				textEditorImpl.SetQuickTaskProviders (Enumerable.Empty<IQuickTaskProvider> ());
-				textEditorImpl.SetUsageTaskProviders (Enumerable.Empty<UsageProviderEditorExtension> ());
 			}
 			var handler = DocumentContextChanged;
 			if (handler != null)
 				handler (this, e);
 		}
 
-		internal void InitializeExtensionChain (DocumentContext documentContext)
+		internal void InitializeExtensionChain (DocumentContext context)
 		{
-			if (documentContext == null)
-				throw new ArgumentNullException (nameof (documentContext));
+			if (context == null)
+				throw new ArgumentNullException (nameof (context));
 			DetachExtensionChain ();
-			var extensions = ExtensionContext.GetExtensionNodes ("/MonoDevelop/Ide/TextEditorExtensions", typeof(TextEditorExtensionNode));
-			var mimetypeChain = DesktopService.GetMimeTypeInheritanceChainForFile (FileName).ToArray ();
-			var newExtensions = new List<TextEditorExtension> ();
-
-			foreach (TextEditorExtensionNode extNode in extensions) {
-				if (!extNode.Supports (FileName, mimetypeChain))
-					continue;
-				TextEditorExtension ext;
-				try {
-					var instance = extNode.CreateInstance ();
-					ext = instance as TextEditorExtension;
-					if (ext != null)
-						newExtensions.Add (ext);
-				} catch (Exception e) {
-					LoggingService.LogError ("Error while creating text editor extension :" + extNode.Id + "(" + extNode.Type + ")", e);
-					continue;
-				}
-			}
-			SetExtensionChain (documentContext, newExtensions);
+            
+			SetExtensionChain (context, Enumerable.Empty<TextEditorExtension> ());
 		}
 
-		internal void SetExtensionChain (DocumentContext documentContext, IEnumerable<TextEditorExtension> extensions)
+		internal void SetExtensionChain (DocumentContext context, IEnumerable<TextEditorExtension> extensions)
 		{
-			if (documentContext == null)
-				throw new ArgumentNullException (nameof (documentContext));
+			if (context == null)
+				throw new ArgumentNullException (nameof (context));
 			if (extensions == null)
 				throw new ArgumentNullException (nameof (extensions));
 			
 			TextEditorExtension last = null;
 			foreach (var ext in extensions) {
-				if (ext.IsValidInContext (documentContext)) {
+				if (ext.IsValidInContext (context)) {
 					if (last != null) {
 						last.Next = ext;
 						last = ext;
 					} else {
 						textEditorImpl.EditorExtension = last = ext;
 					}
-					ext.Initialize (this, documentContext);
+					ext.Initialize (this, context);
 				}
 			}
-			DocumentContext = documentContext;
+			DocumentContext = context;
 		}
 
 
@@ -1212,12 +1136,6 @@ namespace MonoDevelop.Ide.Editor
 				throw new ArgumentNullException (nameof (segment));
 			return textEditorImpl.GetMarkup (segment.Offset, segment.Length, options);
 		}
-
-		public static implicit operator Microsoft.CodeAnalysis.Text.SourceText (TextEditor editor)
-		{
-			return new MonoDevelopSourceText (editor);
-		}
-
 
 		#region Annotations
 		// Annotations: points either null (no annotations), to the single annotation,
@@ -1333,98 +1251,6 @@ namespace MonoDevelop.Ide.Editor
 			set { textEditorImpl.SuppressTooltips = value; }
 		}
 		#endregion
-
-		List<ProjectedTooltipProvider> projectedProviders = new List<ProjectedTooltipProvider> ();
-		IReadOnlyList<Editor.Projection.Projection> projections = null;
-
-		public void SetOrUpdateProjections (DocumentContext ctx, IReadOnlyList<Editor.Projection.Projection> projections, DisabledProjectionFeatures disabledFeatures = DisabledProjectionFeatures.None)
-		{
-			if (ctx == null)
-				throw new ArgumentNullException (nameof (ctx));
-			if (this.projections != null) {
-				foreach (var projection in this.projections) {
-					projection.Dettach ();
-				}
-			}
-			this.projections = projections;
-			if (projections != null) {
-				foreach (var projection in projections) {
-					projection.Attach (this);
-				}
-			}
-
-			if ((disabledFeatures & DisabledProjectionFeatures.SemanticHighlighting) != DisabledProjectionFeatures.SemanticHighlighting) {
-				if (SemanticHighlighting is ProjectedSemanticHighlighting) {
-					((ProjectedSemanticHighlighting)SemanticHighlighting).UpdateProjection (projections);
-				} else {
-					SemanticHighlighting = new ProjectedSemanticHighlighting (this, ctx, projections);
-				}
-			}
-
-			if ((disabledFeatures & DisabledProjectionFeatures.Tooltips) != DisabledProjectionFeatures.Tooltips) {
-				projectedProviders.ForEach ((obj) => {
-					textEditorImpl.RemoveTooltipProvider (obj);
-					obj.Dispose ();
-                });
-
-				projectedProviders = new List<ProjectedTooltipProvider> ();
-				foreach (var projection in projections) {
-					foreach (var tp in allProviders) {
-						if (!tp.IsValidFor (projection.ProjectedEditor.MimeType))
-							continue;
-						var newProvider = new ProjectedTooltipProvider (projection, (TooltipProvider)tp.CreateInstance ());
-						projectedProviders.Add (newProvider);
-						textEditorImpl.AddTooltipProvider (newProvider);
-					}
-				}
-			}
-			InitializeProjectionExtensions (ctx, disabledFeatures);
-		}
-
-		bool projectionsAdded = false;
-		void InitializeProjectionExtensions (DocumentContext ctx, DisabledProjectionFeatures disabledFeatures)
-		{
-			if (projectionsAdded) {
-				TextEditorExtension ext = textEditorImpl.EditorExtension;
-				while (ext != null && ext.Next != null) {
-					var pext = ext as IProjectionExtension;
-					if (pext != null) {
-						pext.Projections = projections;
-					}
-					ext = ext.Next;
-				}
-				return;
-			}
-
-			if (projections.Count == 0)
-				return;
-
-			// no extensions -> no projections needed
-			if (textEditorImpl.EditorExtension == null)
-				return;
-
-			if ((disabledFeatures & DisabledProjectionFeatures.Completion) != DisabledProjectionFeatures.Completion) {
-				TextEditorExtension lastExtension = textEditorImpl.EditorExtension;
-				while (lastExtension != null && lastExtension.Next != null) {
-					var completionTextEditorExtension = lastExtension.Next as CompletionTextEditorExtension;
-					if (completionTextEditorExtension != null) {
-						var projectedFilterExtension = new ProjectedFilterCompletionTextEditorExtension (completionTextEditorExtension, projections) { Next = completionTextEditorExtension.Next };
-						completionTextEditorExtension.Deinitialize ();
-						lastExtension.Next = projectedFilterExtension;
-						projectedFilterExtension.Initialize (this, DocumentContext);
-					}
-					lastExtension = lastExtension.Next;
-				}
-
-
-				var projectedCompletionExtension = new ProjectedCompletionExtension (ctx, projections);
-				projectedCompletionExtension.Next = textEditorImpl.EditorExtension;
-
-				textEditorImpl.EditorExtension = projectedCompletionExtension;
-				projectedCompletionExtension.Initialize (this, DocumentContext);
-				projectionsAdded = true;
-			}
-		}
 
 		internal void AddOverlay (Control messageOverlayContent, Func<int> sizeFunc)
 		{

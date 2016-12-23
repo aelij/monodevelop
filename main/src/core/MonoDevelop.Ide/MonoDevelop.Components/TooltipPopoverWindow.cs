@@ -24,7 +24,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 using System;
-using MonoDevelop.Ide.Tasks;
+using MonoDevelop.Ide.Editor;
 using MonoDevelop.Ide.Gui;
 using MonoDevelop.Ide.Fonts;
 
@@ -33,7 +33,7 @@ namespace MonoDevelop.Components
 	public class TooltipPopoverWindow: PopoverWindow
 	{
 		Gtk.Label label;
-		TaskSeverity? severity;
+		DiagnosticSeverity? severity;
 		bool hasMarkup;
 		string text;
 		Gtk.Alignment alignment;
@@ -71,7 +71,7 @@ namespace MonoDevelop.Components
 			}
 		}
 
-		public TaskSeverity? Severity {
+		public DiagnosticSeverity? Severity {
 			get { return severity; }
 			set {
 				severity = value;
@@ -83,22 +83,22 @@ namespace MonoDevelop.Components
 					Theme.Padding = 3;
 					Theme.CornerRadius = 3;
 
-					label.ModifyFont (FontService.SansFont.CopyModified (Ide.Gui.Styles.FontScale11));
+					label.ModifyFont (FontService.SansFont.CopyModified (Styles.FontScale11));
 
 					switch (severity.Value) {
-					case TaskSeverity.Information:
+					case DiagnosticSeverity.Info:
 						Theme.SetBackgroundColor (Styles.PopoverWindow.InformationBackgroundColor.ToCairoColor ());
 						break;
 
-					case TaskSeverity.Comment:
+					case DiagnosticSeverity.Hidden:
 						Theme.SetBackgroundColor (Styles.PopoverWindow.InformationBackgroundColor.ToCairoColor ());
 						break;
 
-					case TaskSeverity.Error:
+					case DiagnosticSeverity.Error:
 						Theme.SetBackgroundColor (Styles.PopoverWindow.ErrorBackgroundColor.ToCairoColor ());
 						return;
 
-					case TaskSeverity.Warning:
+					case DiagnosticSeverity.Warning:
 						Theme.SetBackgroundColor (Styles.PopoverWindow.WarningBackgroundColor.ToCairoColor ());
 						return;
 					}
@@ -134,25 +134,25 @@ namespace MonoDevelop.Components
 
 			if (severity.HasValue) {
 				switch (severity.Value) {
-				case TaskSeverity.Information:
-					label.Markup = "<span font='" + Theme.Font.ToString () + "' color='" + Styles.ColorGetHex (Styles.PopoverWindow.InformationTextColor) + "'>" + msg + "</span>";
+				case DiagnosticSeverity.Info:
+					label.Markup = "<span font='" + Theme.Font + "' color='" + Styles.ColorGetHex (Styles.PopoverWindow.InformationTextColor) + "'>" + msg + "</span>";
 					return;
 
-				case TaskSeverity.Comment:
-					label.Markup = "<span font='" + Theme.Font.ToString () + "' color='" + Styles.ColorGetHex (Styles.PopoverWindow.InformationTextColor) + "'>" + msg + "</span>";
+				case DiagnosticSeverity.Hidden:
+					label.Markup = "<span font='" + Theme.Font + "' color='" + Styles.ColorGetHex (Styles.PopoverWindow.InformationTextColor) + "'>" + msg + "</span>";
 					return;
 
-				case TaskSeverity.Error:
-					label.Markup = "<span font='" + Theme.Font.ToString () + "' color='" + Styles.ColorGetHex (Styles.PopoverWindow.ErrorTextColor) + "'>" + msg + "</span>";
+				case DiagnosticSeverity.Error:
+					label.Markup = "<span font='" + Theme.Font + "' color='" + Styles.ColorGetHex (Styles.PopoverWindow.ErrorTextColor) + "'>" + msg + "</span>";
 					return;
 
-				case TaskSeverity.Warning:
-					label.Markup = "<span font='" + Theme.Font.ToString () + "' color='" + Styles.ColorGetHex (Styles.PopoverWindow.WarningTextColor) + "'>" + msg + "</span>";
+				case DiagnosticSeverity.Warning:
+					label.Markup = "<span font='" + Theme.Font + "' color='" + Styles.ColorGetHex (Styles.PopoverWindow.WarningTextColor) + "'>" + msg + "</span>";
 					return;
 				}
 			}
 
-			label.Markup = "<span font='" + Theme.Font.ToString () + "' color='" + Styles.ColorGetHex (Styles.PopoverWindow.DefaultTextColor) + "'>" + msg + "</span>";
+			label.Markup = "<span font='" + Theme.Font + "' color='" + Styles.ColorGetHex (Styles.PopoverWindow.DefaultTextColor) + "'>" + msg + "</span>";
 		}
 
 		void AdjustSize ()

@@ -40,7 +40,7 @@ namespace MonoDevelop.Ide.Editor
 		public LineEventArgs (IDocumentLine line)
 		{
 			if (line == null)
-				throw new ArgumentNullException ("line");
+				throw new ArgumentNullException (nameof (line));
 			this.line = line;
 		}
 	}

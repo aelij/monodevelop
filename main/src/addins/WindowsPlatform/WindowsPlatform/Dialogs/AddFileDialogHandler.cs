@@ -47,7 +47,7 @@ namespace MonoDevelop.Platform
 
 			var buildActionCombo = new CommonFileDialogComboBox ();
 			var group = new CommonFileDialogGroupBox ("overridebuildaction", "Override build action:"); 
-			buildActionCombo.Items.Add (new CommonFileDialogComboBoxItem (GettextCatalog.GetString ("Default")));
+			buildActionCombo.Items.Add (new CommonFileDialogComboBoxItem ("Default"));
 			foreach (var ba in data.BuildActions) {
 				if (ba == "--")
 					continue;

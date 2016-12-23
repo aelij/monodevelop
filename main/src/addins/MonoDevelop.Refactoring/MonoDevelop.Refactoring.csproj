@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -169,13 +169,7 @@
     <Compile Include="MonoDevelop.Refactoring\RefactoringPreviewTooltipWindow.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="MonoDevelop.Refactoring\" />
-    <Folder Include="MonoDevelop.Refactoring.Rename\" />
-    <Folder Include="MonoDevelop.AnalysisCore\" />
-    <Folder Include="MonoDevelop.CodeIssues\" />
-    <Folder Include="MonoDevelop.CodeActions\" />
     <Folder Include="MonoDevelop.AnalysisCore\Rules\" />
-    <Folder Include="MonoDevelop.CodeIssues\Pad\" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="MonoDevelop.Refactoring.addin.xml">
@@ -270,11 +264,6 @@
       <Name>MonoDevelop.Core</Name>
       <Private>False</Private>
     </ProjectReference>
-    <ProjectReference Include="..\MonoDevelop.DesignerSupport\MonoDevelop.DesignerSupport.csproj">
-      <Project>{2C24D515-4A2C-445C-8419-C09231913CFA}</Project>
-      <Name>MonoDevelop.DesignerSupport</Name>
-      <Private>False</Private>
-    </ProjectReference>
     <ProjectReference Include="..\MonoDevelop.Debugger\MonoDevelop.Debugger.csproj">
       <Project>{2357AABD-08C7-4808-A495-8FF2D3CDFDB0}</Project>
       <Name>MonoDevelop.Debugger</Name>
@@ -355,9 +344,8 @@
     <None Include="MonoDevelop.CodeIssues\Pad\AnalysisStateChangeEventArgs.cs" />
     <None Include="MonoDevelop.CodeIssues\Pad\CategoryGroupingProvider.cs" />
   </ItemGroup>
-
   <Target Name="AfterBuild">
     <Copy SourceFiles="..\..\..\build\bin\Microsoft.CodeAnalysis.CSharp.Features.dll" DestinationFolder="..\..\..\build\bin" ContinueOnError="true" />
     <Copy SourceFiles="..\..\..\build\bin\Microsoft.CodeAnalysis.Features.dll" DestinationFolder="..\..\..\build\bin" ContinueOnError="true" />
   </Target>
-  </Project>
+</Project>

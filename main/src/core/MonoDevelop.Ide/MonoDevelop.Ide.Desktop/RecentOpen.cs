@@ -34,6 +34,8 @@ using System.IO;
 
 using MonoDevelop.Core;
 using System.Linq;
+using MonoDevelop.Ide.Editor;
+using MonoDevelop.Projects;
 
 namespace MonoDevelop.Ide.Desktop
 {
@@ -206,7 +208,7 @@ namespace MonoDevelop.Ide.Desktop
 		protected abstract IList<RecentFile> OnGetProjects ();
 		protected abstract IList<RecentFile> OnGetFiles ();
 
-		public void AddFile (string fileName, MonoDevelop.Projects.Project project)
+		public void AddFile (string fileName, Project project)
 		{
 			var projectName = project != null? project.Name : null;
 			var displayName = projectName != null?

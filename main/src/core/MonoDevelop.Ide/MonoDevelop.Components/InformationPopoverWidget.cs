@@ -25,14 +25,14 @@
 // THE SOFTWARE.
 using System;
 using MonoDevelop.Ide;
-using MonoDevelop.Ide.Tasks;
+using MonoDevelop.Ide.Editor;
 using Xwt;
 
 namespace MonoDevelop.Components
 {
 	public class InformationPopoverWidget: Widget
 	{
-		TaskSeverity severity;
+        DiagnosticSeverity severity;
 		Xwt.ImageView imageView;
 		string message;
 		TooltipPopoverWindow popover;
@@ -40,13 +40,13 @@ namespace MonoDevelop.Components
 
 		public InformationPopoverWidget ()
 		{
-			severity = TaskSeverity.Information;
+			severity = DiagnosticSeverity.Info;
 			imageView = new Xwt.ImageView ();
 			Content = imageView;
 			UpdateIcon ();
 		}
 
-		public TaskSeverity Severity {
+		public DiagnosticSeverity Severity {
 			get {
 				return severity;
 			}
@@ -84,9 +84,9 @@ namespace MonoDevelop.Components
 		Xwt.Drawing.Image GetSeverityIcon ()
 		{
 			switch (severity) {
-			case TaskSeverity.Error:
+			case DiagnosticSeverity.Error:
 				return ImageService.GetIcon ("md-error");
-			case TaskSeverity.Warning:
+			case DiagnosticSeverity.Warning:
 				return ImageService.GetIcon ("md-warning");
 			}
 			return ImageService.GetIcon ("md-information");

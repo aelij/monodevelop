@@ -28,297 +28,350 @@
 
 
 using System;
-using System.Drawing;
-using MonoDevelop.Ide.Gui;
-using MonoDevelop.Ide.Codons;
 using MonoDevelop.Core;
 using MonoDevelop.Components.Docking;
-using MonoDevelop.Components.Commands;
 
 namespace MonoDevelop.Ide.Gui
 {
-	public interface IPadWindow
-	{
-		string Id { get; }
-		
-		/// <summary>
-		/// Title shown at the top of the pad, or at the tab label when in a notebook
-		/// </summary>
-		string Title { get; set; }
-		
-		/// <summary>
-		/// Title shown at the top of the pad, or at the tab label when in a notebook
-		/// </summary>
-		IconId Icon { get; set; }
-		
-		/// <summary>
-		/// True if the pad is visible in the current layout (although it may be minimized when in autohide mode
-		/// </summary>
-		bool Visible { get; set; }
-		
-		/// <summary>
-		/// True when the pad is in autohide mode
-		/// </summary>
-		bool AutoHide { get; set; }
-		
-		/// <summary>
-		/// The content of the pad is visible (that is, if the pad is active in the notebook on which it is
-		/// docked, and it is not minimized.
-		/// </summary>
-		bool ContentVisible { get; }
-		
-		/// <summary>
-		/// When set to True, the pad will be visible in all layouts
-		/// </summary>
-		bool Sticky { get; set; }
-		
-		/// <summary>
-		/// When set to True, it flags the pad as "Work in progress". The pad's title will be shown in blue.
-		/// </summary>
-		bool IsWorking { get; set; }
-		
-		/// <summary>
-		/// When set to True, it flags the pad as "Has errors". The pad's title will be shown in red. This flag
-		/// will be automatically reset when the pad is made visible.
-		/// </summary>
-		bool HasErrors { get; set; }
-		
-		/// <summary>
-		/// When set to True, it flags the pad as "Has New Data". The pad's title will be shown in bold. This flag
-		/// will be automatically reset when the pad is made visible.
-		/// </summary>
-		bool HasNewData { get; set; }
+    public interface IPadWindow
+    {
+        string Id { get; }
 
-		bool HasFocus { get; }
-		
-		/// <summary>
-		/// Interface providing the content widget
-		/// </summary>
-		PadContent Content { get; }
-		
-		/// <summary>
-		/// Returns a toolbar for the pad.
-		/// </summary>
-		DockItemToolbar GetToolbar (DockPositionType position);
-		
-		/// <summary>
-		/// Brings the pad to the front.
-		/// </summary>
-		void Activate (bool giveFocus);
-		
-		/// <summary>
-		/// Fired when the pad is shown in the current layout (although it may be minimized)
-		/// </summary>
-		event EventHandler<VisibilityChangeEventArgs> PadShown;
-		
-		/// <summary>
-		/// Fired when the pad is hidden in the current layout
-		/// </summary>
-		event EventHandler<VisibilityChangeEventArgs> PadHidden;
-		
-		/// <summary>
-		/// Fired when the content of the pad is shown
-		/// </summary>
-		event EventHandler PadContentShown;
-		
-		/// <summary>
-		/// Fired when the content of the pad is hidden
-		/// </summary>
-		event EventHandler PadContentHidden;
-		
-		/// <summary>
-		/// Fired when the pad is destroyed
-		/// </summary>
-		event EventHandler PadDestroyed;
-	}
-	
-	internal class PadWindow: IPadWindow
-	{
-		string title;
-		IconId icon;
-		bool isWorking;
-		bool hasErrors;
-		bool hasNewData;
-		PadContent content;
-		PadCodon codon;
-		DefaultWorkbench workbench;
-		
-		internal DockItem Item { get; set; }
-		
-		internal PadWindow (DefaultWorkbench workbench, PadCodon codon)
-		{
-			this.workbench = workbench;
-			this.codon = codon;
-			this.title = GettextCatalog.GetString (codon.Label);
-			this.icon = codon.Icon;
-		}
-		
-		public PadContent Content {
-			get {
-				CreateContent ();
-				return content; 
-			}
-		}
-		
-		public string Title {
-			get { return title; }
-			set {
-				if (title != value) {
-					title = value;
-					if (StatusChanged != null)
-						StatusChanged (this, EventArgs.Empty);
-				}
-			}
-		}
-		
-		public IconId Icon  {
-			get { return icon; }
-			set { 
-				if (icon != value) {
-					icon = value;
-					if (StatusChanged != null)
-						StatusChanged (this, EventArgs.Empty);
-				}
-			}
-		}
-		
-		public bool IsWorking {
-			get { return isWorking; }
-			set {
-				isWorking = value;
-				if (value) {
-					hasErrors = false;
-					hasNewData = false;
-				}
-				if (StatusChanged != null)
-					StatusChanged (this, EventArgs.Empty);
-			}
-		}
-		
-		public bool HasErrors {
-			get { return hasErrors; }
-			set {
-				hasErrors = value;
-				if (value)
-					isWorking = false;
-				if (StatusChanged != null)
-					StatusChanged (this, EventArgs.Empty);
-			}
-		}
-		
-		public bool HasNewData {
-			get { return hasNewData; }
-			set {
-				hasNewData = value;
-				if (value)
-					isWorking = false;
-				if (StatusChanged != null)
-					StatusChanged (this, EventArgs.Empty);
-			}
-		}
-		
-		public string Id {
-			get { return codon.PadId; }
-		}
-		
-		public bool Visible {
-			get {
-				return Item.Visible;
-			}
-			set {
-				Item.Visible = value;
-			}
-		}
+        /// <summary>
+        /// Title shown at the top of the pad, or at the tab label when in a notebook
+        /// </summary>
+        string Title { get; set; }
 
-		public bool HasFocus {
-			get { return Item.HasFocus; }
-		}
-		
-		public bool AutoHide {
-			get {
-				return Item.Status == DockItemStatus.AutoHide;
-			}
-			set {
-				if (value)
-					Item.Status = DockItemStatus.AutoHide;
-				else
-					Item.Status = DockItemStatus.Dockable;
-			}
-		}
+        /// <summary>
+        /// Title shown at the top of the pad, or at the tab label when in a notebook
+        /// </summary>
+        IconId Icon { get; set; }
 
-		public bool ContentVisible {
-			get { return workbench.IsContentVisible (codon); }
-		}
-		
-		public bool Sticky {
-			get {
-				return workbench.IsSticky (codon);
-			}
-			set {
-				workbench.SetSticky (codon, value);
-			}
-		}
-		
-		public DockItemToolbar GetToolbar (DockPositionType position)
-		{
-			return Item.GetToolbar (position);
-		}
-		
-		public void Activate (bool giveFocus)
-		{
-			CreateContent ();
-			workbench.ActivatePad (codon, giveFocus);
-		}
-		
-		void CreateContent ()
-		{
-			if (this.content == null) {
-				this.content = codon.InitializePadContent (this);
-			}
-		}
-		
-		internal IMementoCapable GetMementoCapable ()
-		{
-			// Don't create the content if not already created
-			return content as IMementoCapable;
-		}
-		
-		internal void NotifyShown (VisibilityChangeEventArgs args)
-		{
-			PadShown?.Invoke (this, args);
-		}
-		
-		internal void NotifyHidden (VisibilityChangeEventArgs args)
-		{
-			PadHidden?.Invoke (this, args);
-		}
-		
-		internal void NotifyContentShown ()
-		{
-			if (HasNewData)
-				HasNewData = false;
-			if (HasErrors)
-				HasErrors = false;
-			PadContentShown?.Invoke (this, EventArgs.Empty);
-		}
-		
-		internal void NotifyContentHidden ()
-		{
-			PadContentHidden?.Invoke (this, EventArgs.Empty);
-		}
-		
-		internal void NotifyDestroyed ()
-		{
-			PadDestroyed?.Invoke (this, EventArgs.Empty);
-			content?.Dispose ();
-		}
-		
-		public event EventHandler<VisibilityChangeEventArgs> PadShown;
-		public event EventHandler<VisibilityChangeEventArgs> PadHidden;
-		public event EventHandler PadContentShown;
-		public event EventHandler PadContentHidden;
-		public event EventHandler PadDestroyed;
-		
-		internal event EventHandler StatusChanged;
-	}
+        /// <summary>
+        /// True if the pad is visible in the current layout (although it may be minimized when in autohide mode
+        /// </summary>
+        bool Visible { get; set; }
+
+        /// <summary>
+        /// True when the pad is in autohide mode
+        /// </summary>
+        bool AutoHide { get; set; }
+
+        /// <summary>
+        /// The content of the pad is visible (that is, if the pad is active in the notebook on which it is
+        /// docked, and it is not minimized.
+        /// </summary>
+        bool ContentVisible { get; }
+
+        /// <summary>
+        /// When set to True, the pad will be visible in all layouts
+        /// </summary>
+        bool Sticky { get; set; }
+
+        /// <summary>
+        /// When set to True, it flags the pad as "Work in progress". The pad's title will be shown in blue.
+        /// </summary>
+        bool IsWorking { get; set; }
+
+        /// <summary>
+        /// When set to True, it flags the pad as "Has errors". The pad's title will be shown in red. This flag
+        /// will be automatically reset when the pad is made visible.
+        /// </summary>
+        bool HasErrors { get; set; }
+
+        /// <summary>
+        /// When set to True, it flags the pad as "Has New Data". The pad's title will be shown in bold. This flag
+        /// will be automatically reset when the pad is made visible.
+        /// </summary>
+        bool HasNewData { get; set; }
+
+        bool HasFocus { get; }
+
+        /// <summary>
+        /// Interface providing the content widget
+        /// </summary>
+        PadContent Content { get; }
+
+        /// <summary>
+        /// Returns a toolbar for the pad.
+        /// </summary>
+        DockItemToolbar GetToolbar(DockPositionType position);
+
+        /// <summary>
+        /// Brings the pad to the front.
+        /// </summary>
+        void Activate(bool giveFocus);
+
+        /// <summary>
+        /// Fired when the pad is shown in the current layout (although it may be minimized)
+        /// </summary>
+        event EventHandler<VisibilityChangeEventArgs> PadShown;
+
+        /// <summary>
+        /// Fired when the pad is hidden in the current layout
+        /// </summary>
+        event EventHandler<VisibilityChangeEventArgs> PadHidden;
+
+        /// <summary>
+        /// Fired when the content of the pad is shown
+        /// </summary>
+        event EventHandler PadContentShown;
+
+        /// <summary>
+        /// Fired when the content of the pad is hidden
+        /// </summary>
+        event EventHandler PadContentHidden;
+
+        /// <summary>
+        /// Fired when the pad is destroyed
+        /// </summary>
+        event EventHandler PadDestroyed;
+    }
+
+    internal class PadCodon
+    {
+        public PadCodon(PadContent padContent, string id, string label, string defaultPlacement, DockItemStatus defaultStatus, string icon)
+        {
+            PadContent = padContent;
+            Id = id;
+            Label = label;
+            DefaultPlacement = defaultPlacement;
+            DefaultStatus = defaultStatus;
+            Icon = icon;
+        }
+
+        public string Label { get; set; }
+        public string PadId { get; set; }
+        public string DefaultPlacement { get; set; }
+        public DockItemStatus DefaultStatus { get; set; }
+        public string Id { get; set; }
+        public bool Initialized { get; set; }
+        public PadContent PadContent { get; set; }
+        public string ClassName { get; set; }
+        public string Icon { get; set; }
+        public string Group { get; set; }
+
+        public PadContent InitializePadContent(PadWindow window)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    internal class PadWindow : IPadWindow
+    {
+        string title;
+        IconId icon;
+        bool isWorking;
+        bool hasErrors;
+        bool hasNewData;
+        PadContent content;
+        PadCodon codon;
+        DefaultWorkbench workbench;
+
+        internal DockItem Item { get; set; }
+
+        internal PadWindow(DefaultWorkbench workbench, PadCodon codon)
+        {
+            this.workbench = workbench;
+            this.codon = codon;
+            this.title = GettextCatalog.GetString(codon.Label);
+            this.icon = codon.Icon;
+        }
+
+        public PadContent Content
+        {
+            get
+            {
+                CreateContent();
+                return content;
+            }
+        }
+
+        public string Title
+        {
+            get { return title; }
+            set
+            {
+                if (title != value)
+                {
+                    title = value;
+                    if (StatusChanged != null)
+                        StatusChanged(this, EventArgs.Empty);
+                }
+            }
+        }
+
+        public IconId Icon
+        {
+            get { return icon; }
+            set
+            {
+                if (icon != value)
+                {
+                    icon = value;
+                    if (StatusChanged != null)
+                        StatusChanged(this, EventArgs.Empty);
+                }
+            }
+        }
+
+        public bool IsWorking
+        {
+            get { return isWorking; }
+            set
+            {
+                isWorking = value;
+                if (value)
+                {
+                    hasErrors = false;
+                    hasNewData = false;
+                }
+                if (StatusChanged != null)
+                    StatusChanged(this, EventArgs.Empty);
+            }
+        }
+
+        public bool HasErrors
+        {
+            get { return hasErrors; }
+            set
+            {
+                hasErrors = value;
+                if (value)
+                    isWorking = false;
+                if (StatusChanged != null)
+                    StatusChanged(this, EventArgs.Empty);
+            }
+        }
+
+        public bool HasNewData
+        {
+            get { return hasNewData; }
+            set
+            {
+                hasNewData = value;
+                if (value)
+                    isWorking = false;
+                if (StatusChanged != null)
+                    StatusChanged(this, EventArgs.Empty);
+            }
+        }
+
+        public string Id
+        {
+            get { return codon.PadId; }
+        }
+
+        public bool Visible
+        {
+            get
+            {
+                return Item.Visible;
+            }
+            set
+            {
+                Item.Visible = value;
+            }
+        }
+
+        public bool HasFocus
+        {
+            get { return Item.HasFocus; }
+        }
+
+        public bool AutoHide
+        {
+            get
+            {
+                return Item.Status == DockItemStatus.AutoHide;
+            }
+            set
+            {
+                if (value)
+                    Item.Status = DockItemStatus.AutoHide;
+                else
+                    Item.Status = DockItemStatus.Dockable;
+            }
+        }
+
+        public bool ContentVisible
+        {
+            get { return workbench.IsContentVisible(codon); }
+        }
+
+        public bool Sticky
+        {
+            get
+            {
+                return workbench.IsSticky(codon);
+            }
+            set
+            {
+                workbench.SetSticky(codon, value);
+            }
+        }
+
+        public DockItemToolbar GetToolbar(DockPositionType position)
+        {
+            return Item.GetToolbar(position);
+        }
+
+        public void Activate(bool giveFocus)
+        {
+            CreateContent();
+            workbench.ActivatePad(codon, giveFocus);
+        }
+
+        void CreateContent()
+        {
+            if (this.content == null)
+            {
+                this.content = codon.InitializePadContent(this);
+            }
+        }
+
+        internal IMementoCapable GetMementoCapable()
+        {
+            // Don't create the content if not already created
+            return content as IMementoCapable;
+        }
+
+        internal void NotifyShown(VisibilityChangeEventArgs args)
+        {
+            PadShown?.Invoke(this, args);
+        }
+
+        internal void NotifyHidden(VisibilityChangeEventArgs args)
+        {
+            PadHidden?.Invoke(this, args);
+        }
+
+        internal void NotifyContentShown()
+        {
+            if (HasNewData)
+                HasNewData = false;
+            if (HasErrors)
+                HasErrors = false;
+            PadContentShown?.Invoke(this, EventArgs.Empty);
+        }
+
+        internal void NotifyContentHidden()
+        {
+            PadContentHidden?.Invoke(this, EventArgs.Empty);
+        }
+
+        internal void NotifyDestroyed()
+        {
+            PadDestroyed?.Invoke(this, EventArgs.Empty);
+            content?.Dispose();
+        }
+
+        public event EventHandler<VisibilityChangeEventArgs> PadShown;
+        public event EventHandler<VisibilityChangeEventArgs> PadHidden;
+        public event EventHandler PadContentShown;
+        public event EventHandler PadContentHidden;
+        public event EventHandler PadDestroyed;
+
+        internal event EventHandler StatusChanged;
+    }
 }

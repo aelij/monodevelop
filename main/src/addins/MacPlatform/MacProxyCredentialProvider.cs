@@ -114,9 +114,9 @@ namespace MonoDevelop.MacIntegration
 						);
 
 					var alert = NSAlert.WithMessage (
-						GettextCatalog.GetString ("Credentials Required"),
-						GettextCatalog.GetString ("OK"),
-						GettextCatalog.GetString ("Cancel"),
+						"Credentials Required",
+						"OK",
+						"Cancel",
 						null,
 						message
 					);

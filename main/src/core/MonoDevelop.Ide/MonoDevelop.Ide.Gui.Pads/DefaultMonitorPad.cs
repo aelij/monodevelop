@@ -70,9 +70,6 @@ namespace MonoDevelop.Ide.Gui.Pads
 			if (instanceNum > 0)
 				logView.Name += $"-{instanceNum}";
 
-			IdeApp.Workspace.FirstWorkspaceItemOpened += OnCombineOpen;
-			IdeApp.Workspace.LastWorkspaceItemClosed += OnCombineClosed;
-
 			logView.ShowAll ();
 		}
 
@@ -219,8 +216,6 @@ namespace MonoDevelop.Ide.Gui.Pads
 		public override void Dispose ()
 		{
 			logView.Clear ();
-			IdeApp.Workspace.FirstWorkspaceItemOpened -= OnCombineOpen;
-			IdeApp.Workspace.LastWorkspaceItemClosed -= OnCombineClosed;
 
 			base.Dispose ();
 		}

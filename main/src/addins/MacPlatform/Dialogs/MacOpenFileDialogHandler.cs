@@ -72,7 +72,7 @@ namespace MonoDevelop.MacIntegration
 					var filterPopup = MacSelectFileDialogHandler.CreateFileFilterPopup (data, panel);
 
 					if (filterPopup != null) {
-						var filterLabel = new MDAlignment (new MDLabel (GettextCatalog.GetString ("Show files:")), true);
+						var filterLabel = new MDAlignment (new MDLabel ("Show files:"), true);
 						var filterBox = new MDBox (LayoutDirection.Horizontal, 2, 0) {
 							{ filterLabel },
 							{ new MDAlignment (filterPopup, true) { MinWidth = 200 } }
@@ -85,7 +85,7 @@ namespace MonoDevelop.MacIntegration
 						encodingSelector = new SelectEncodingPopUpButton (data.Action != FileChooserAction.Save);
 						encodingSelector.SelectedEncodingId = data.Encoding != null ? data.Encoding.CodePage : 0;
 						
-						var encodingLabel = new MDAlignment (new MDLabel (GettextCatalog.GetString ("Encoding:")), true);
+						var encodingLabel = new MDAlignment (new MDLabel ("Encoding:"), true);
 						var encodingBox = new MDBox (LayoutDirection.Horizontal, 2, 0) {
 							{ encodingLabel },
 							{ new MDAlignment (encodingSelector, true) { MinWidth = 200 }  }
@@ -115,7 +115,7 @@ namespace MonoDevelop.MacIntegration
 							};
 						}
 						
-						var viewSelLabel = new MDLabel (GettextCatalog.GetString ("Open with:"));
+						var viewSelLabel = new MDLabel ("Open with:");
 						var viewSelBox = new MDBox (LayoutDirection.Horizontal, 2, 0) {
 							{ viewSelLabel, true },
 							{ new MDAlignment (viewerSelector, true) { MinWidth = 200 }  }
@@ -123,7 +123,7 @@ namespace MonoDevelop.MacIntegration
 						
 						if (IdeApp.Workspace.IsOpen) {
 							closeSolutionButton = new NSButton {
-								Title = GettextCatalog.GetString ("Close current workspace"),
+								Title = "Close current workspace",
 								Hidden = true,
 								State = NSCellStateValue.On,
 							};
@@ -210,7 +210,7 @@ namespace MonoDevelop.MacIntegration
 			bool hasWorkbenchViewer = false;
 
 			if (IdeApp.Services.ProjectService.IsWorkspaceItemFile (filename) || IdeApp.Services.ProjectService.IsSolutionItemFile (filename)) {
-				button.Menu.AddItem (new NSMenuItem { Title = GettextCatalog.GetString ("Solution Workbench") });
+				button.Menu.AddItem (new NSMenuItem { Title = "Solution Workbench" });
 				currentViewers.Add (null);
 				
 				if (closeSolutionButton != null)

@@ -31,14 +31,13 @@ using System.Diagnostics;
 using Mono.TextEditor.Highlighting;
 using Mono.TextEditor.Utils;
 using System.Linq;
-using System.ComponentModel;
 using ICSharpCode.NRefactory.Editor;
 using System.Threading.Tasks;
 using System.Threading;
 
 namespace Mono.TextEditor
 {
-	public class TextDocument : ICSharpCode.NRefactory.AbstractAnnotatable, ICSharpCode.NRefactory.Editor.IDocument
+	public class TextDocument : ICSharpCode.NRefactory.AbstractAnnotatable, IDocument
 	{
 		ImmutableText buffer;
 		readonly ILineSplitter splitter;

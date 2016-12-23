@@ -26,15 +26,10 @@
 using System;
 using System.IO;
 using System.Xml;
-using System.Text;
-using System.Collections;
 using System.Collections.Generic;
-using Mono.Addins;
-
 using Unix = Mono.Unix.Native;
 
 using MonoDevelop.Core;
-using MonoDevelop.Components.Commands.ExtensionNodes;
 
 namespace MonoDevelop.Components.Commands
 {
@@ -102,21 +97,7 @@ namespace MonoDevelop.Components.Commands
 		
 		public static void LoadBindingsFromExtensionPath (string path)
 		{
-			AddinManager.AddExtensionNodeHandler (path, OnBindingExtensionChanged);
-		}
-		
-		static void OnBindingExtensionChanged (object s, ExtensionNodeEventArgs args)
-		{
-			if (args.Change == ExtensionChange.Add) {
-				SchemeExtensionNode node = (SchemeExtensionNode) args.ExtensionNode;
-				if (node.IsForMac == Platform.IsMac)
-					schemes.Add (node.Id, node);
-			}
-			else {
-				SchemeExtensionNode node = (SchemeExtensionNode) args.ExtensionNode;
-				if (node.IsForMac == Platform.IsMac)
-					schemes.Remove (node.Name);
-			}
+            // TODO-AELIJ
 		}
 		
 		public static void LoadBinding (Command cmd)
@@ -202,16 +183,9 @@ namespace MonoDevelop.Components.Commands
 			get { return "Default"; }
 		}
 		
-		public string Name {
-			get {
-				if (BrandingService.ApplicationName == "MonoDevelop")
-					return AddinManager.CurrentLocalizer.GetString ("Custom");
-				else
-					return BrandingService.ApplicationName;
-			}
-		}
-		
-		public KeyBindingSet GetKeyBindingSet ()
+		public string Name => BrandingService.ApplicationName;
+
+	    public KeyBindingSet GetKeyBindingSet ()
 		{
 			return bindings;
 		}

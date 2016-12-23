@@ -117,7 +117,7 @@ namespace MonoDevelop.CSharp.Completion
 					if (sym is IMethodSymbol) {
 						var method = (IMethodSymbol)sym;
 						if (method.IsExtensionMethod && method.ReducedFrom != null && method.ReducedFrom.ContainingType != null) {
-							tooltipInfo.AddCategory (GettextCatalog.GetString ("Extension Method from"), method.ReducedFrom.ContainingType.Name);
+							tooltipInfo.AddCategory ("Extension Method from", method.ReducedFrom.ContainingType.Name);
 						}
 					}
 					int paramIndex = currentParameter;
@@ -139,11 +139,11 @@ namespace MonoDevelop.CSharp.Completion
 							if (match.Success) {
 								text = Ambience.GetDocumentationMarkup (sym, match.Groups [1].Value);
 								if (!string.IsNullOrWhiteSpace (text))
-									tooltipInfo.AddCategory (GettextCatalog.GetString ("Parameter"), text);
+									tooltipInfo.AddCategory ("Parameter", text);
 							}
 						}
 						if (curParameter.Type.TypeKind == TypeKind.Delegate)
-							tooltipInfo.AddCategory (GettextCatalog.GetString ("Delegate Info"), sig.GetDelegateInfo (curParameter.Type));
+							tooltipInfo.AddCategory ("Delegate Info", sig.GetDelegateInfo (curParameter.Type));
 					}
 					return tooltipInfo;
 				});

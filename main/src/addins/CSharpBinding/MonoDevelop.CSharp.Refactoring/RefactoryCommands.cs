@@ -90,7 +90,7 @@ namespace MonoDevelop.CSharp.Refactoring
 				var subMenu = new CommandInfoSet ();
 				subMenu.Text = label;
 
-				var info = new CommandInfo (GettextCatalog.GetString ("_Suppress with #pragma"));
+				var info = new CommandInfo ("_Suppress with #pragma");
 				subMenu.CommandInfos.Add (info, new Action (async delegate {
 
 					var fixes = await CSharpSuppressionFixProvider.Instance.GetSuppressionsAsync (ctx.AnalysisDocument, new TextSpan (editor.CaretOffset, 0), new [] { warning }, default (CancellationToken)).ConfigureAwait (false);
@@ -126,14 +126,14 @@ namespace MonoDevelop.CSharp.Refactoring
 				//				}
 
 				if (inspector.CanDisableWithPragma) {
-					var info = new CommandInfo (GettextCatalog.GetString ("_Suppress with #pragma"));
+					var info = new CommandInfo ("_Suppress with #pragma");
 					subMenu.CommandInfos.Add (info, new Action (() => inspector.DisableWithPragma (editor, ctx, fix)));
 
-					info = new CommandInfo (GettextCatalog.GetString ("_Suppress with file"));
+					info = new CommandInfo ("_Suppress with file");
 					subMenu.CommandInfos.Add (info, new Action (() => inspector.DisableWithFile (editor, ctx, fix)));
 				}
 
-				var configInfo = new CommandInfo (GettextCatalog.GetString ("_Configure Rule"));
+				var configInfo = new CommandInfo ("_Configure Rule");
 				subMenu.CommandInfos.Add (configInfo, new Action (() => {
 					IdeApp.Workbench.ShowGlobalPreferencesDialog (null, "C#", dialog => {
 						var panel = dialog.GetPanel<CodeIssuePanel> ("C#");
@@ -156,7 +156,7 @@ namespace MonoDevelop.CSharp.Refactoring
 					if (!diagnosticAnalyzer.SupportedDiagnostics.Contains (fix.Descriptor))
 						continue;
 
-					var info = new CommandInfo (GettextCatalog.GetString ("In _Document"));
+					var info = new CommandInfo ("In _Document");
 					subMenu2.CommandInfos.Add (info, new Action (async delegate {
 
 						var fixAllDiagnosticProvider = new CodeActionEditorExtension.FixAllDiagnosticProvider (diagnosticAnalyzer.SupportedDiagnostics.Select (d => d.Id).ToImmutableHashSet (), async (Microsoft.CodeAnalysis.Document doc, ImmutableHashSet<string> diagnostics, CancellationToken token) => {
@@ -251,7 +251,7 @@ namespace MonoDevelop.CSharp.Refactoring
 					declSet.Text = GettextCatalog.GetString ("_Go to Declaration");
 					foreach (var part in type.Locations) {
 						var loc = part.GetLineSpan ();
-						declSet.CommandInfos.Add (string.Format (GettextCatalog.GetString ("{0}, Line {1}"), FormatFileName (part.SourceTree.FilePath), loc.StartLinePosition.Line + 1), new Action (() => IdeApp.ProjectOperations.JumpTo (type, part, doc.Project)));
+						declSet.CommandInfos.Add (string.Format ("{0}, Line {1}", FormatFileName (part.SourceTree.FilePath), loc.StartLinePosition.Line + 1), new Action (() => IdeApp.ProjectOperations.JumpTo (type, part, doc.Project)));
 					}
 					ainfo.Add (declSet);
 				} else {

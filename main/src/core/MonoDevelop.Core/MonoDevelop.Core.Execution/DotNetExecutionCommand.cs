@@ -61,7 +61,7 @@ namespace MonoDevelop.Core.Execution
 		public TargetRuntime TargetRuntime {
 			get {
 				if (targetRuntime == null)
-					targetRuntime = Runtime.SystemAssemblyService.DefaultRuntime;
+					targetRuntime = SystemAssemblyService.Instance.DefaultRuntime;
 				return targetRuntime;
 			}
 			set {

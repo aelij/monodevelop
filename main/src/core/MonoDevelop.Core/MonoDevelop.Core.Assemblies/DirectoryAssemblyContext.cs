@@ -47,7 +47,7 @@ namespace MonoDevelop.Core.Assemblies
 					directories = new List<string> (value);
 					if (!pendingUpdate) {
 						pendingUpdate = true;
-						Runtime.SystemAssemblyService.CurrentRuntime.Initialized += OnUpdatePackages;
+						SystemAssemblyService.Instance.CurrentRuntime.Initialized += OnUpdatePackages;
 					}
 					NotifyChanged ();
 				}
@@ -57,7 +57,7 @@ namespace MonoDevelop.Core.Assemblies
 		void OnUpdatePackages (object o, EventArgs a)
 		{
 			lock (updatesLock) {
-				Runtime.SystemAssemblyService.CurrentRuntime.Initialized -= OnUpdatePackages;
+				SystemAssemblyService.Instance.CurrentRuntime.Initialized -= OnUpdatePackages;
 			
 				foreach (SystemPackage p in packages)
 					UnregisterPackage (p);
@@ -91,7 +91,7 @@ namespace MonoDevelop.Core.Assemblies
 			spi.Description = Path.GetDirectoryName (file);
 			spi.Version = "";
 			spi.IsGacPackage = false;
-			spi.TargetFramework = Runtime.SystemAssemblyService.GetTargetFrameworkForAssembly (Runtime.SystemAssemblyService.CurrentRuntime, file);
+			spi.TargetFramework = SystemAssemblyService.Instance.GetTargetFrameworkForAssembly (SystemAssemblyService.Instance.CurrentRuntime, file);
 			
 			SystemPackage sp = RegisterPackage (spi, true, file);
 			packages.Add (sp);

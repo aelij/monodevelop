@@ -27,119 +27,141 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
-using MonoDevelop.Core.AddIns;
-using MonoDevelop.Core.Serialization;
+using System.Xml.Serialization;
 
 namespace MonoDevelop.Core.Assemblies
 {
-	class MonoTargetRuntimeFactory: ITargetRuntimeFactory
-	{
-		static RuntimeCollection customRuntimes = new RuntimeCollection ();
-		static string configFile = UserProfile.Current.ConfigDir.Combine ("mono-runtimes.xml");
-		static string[] commonLinuxPrefixes = new string[] { "/usr", "/usr/local" };
-		
-		static MonoTargetRuntimeFactory ()
-		{
-			LoadRuntimes ();
-		}
-		
-		const string MAC_FRAMEWORK_DIR = "/Library/Frameworks/Mono.framework/Versions";
+    class MonoTargetRuntimeFactory : ITargetRuntimeFactory
+    {
+        static RuntimeCollection customRuntimes = new RuntimeCollection();
+        static string configFile = UserProfile.Current.ConfigDir.Combine("mono-runtimes.xml");
+        static string[] commonLinuxPrefixes = new string[] { "/usr", "/usr/local" };
 
-		public IEnumerable<TargetRuntime> CreateRuntimes ()
-		{
-			MonoRuntimeInfo currentRuntime = MonoRuntimeInfo.FromCurrentRuntime ();
-			if (currentRuntime != null) {
-				yield return new MonoTargetRuntime (currentRuntime);
-			}
-			if (Platform.IsWindows) {
-				string progs = Environment.GetFolderPath (Environment.SpecialFolder.ProgramFiles);
-				foreach (string dir in Directory.EnumerateDirectories (progs, "Mono*")) {
-					MonoRuntimeInfo info = new MonoRuntimeInfo (dir);
-					if (info.IsValidRuntime)
-						yield return new MonoTargetRuntime (info);
-				}
-			} else if (Platform.IsMac) {
-				if (!Directory.Exists (MAC_FRAMEWORK_DIR))
-					yield break;
-				foreach (string dir in Directory.EnumerateDirectories (MAC_FRAMEWORK_DIR)) {
-					if (dir.EndsWith ("/Current", StringComparison.Ordinal) || currentRuntime.Prefix == dir)
-						continue;
-					MonoRuntimeInfo info = new MonoRuntimeInfo (dir);
-					if (info.IsValidRuntime)
-						yield return new MonoTargetRuntime (info);
-				}
-			} else {
-				foreach (string pref in commonLinuxPrefixes) {
-					if (currentRuntime != null && currentRuntime.Prefix == pref)
-						continue;
-					MonoRuntimeInfo info = new MonoRuntimeInfo (pref);
-					if (info.IsValidRuntime) {
-						// Clean up old registered runtimes
-						foreach (MonoRuntimeInfo ei in customRuntimes) {
-							if (ei.Prefix == info.Prefix) {
-								customRuntimes.Remove (ei);
-								break;
-							}
-						}
-						yield return new MonoTargetRuntime (info);
-					}
-				}
-			}
-			foreach (MonoRuntimeInfo info in customRuntimes) {
-				MonoTargetRuntime rt = new MonoTargetRuntime (info);
-				rt.UserDefined = true;
-				yield return rt;
-			}
-		}
-		
-		public static TargetRuntime RegisterRuntime (MonoRuntimeInfo info)
-		{
-			MonoTargetRuntime tr = new MonoTargetRuntime (info);
-			Runtime.SystemAssemblyService.RegisterRuntime (tr);
-			customRuntimes.Add (info);
-			SaveRuntimes ();
-			return tr;
-		}
-		
-		public static void UnregisterRuntime (MonoTargetRuntime runtime)
-		{
-			Runtime.SystemAssemblyService.UnregisterRuntime (runtime);
-			foreach (MonoRuntimeInfo ri in customRuntimes) {
-				if (ri.Prefix == runtime.MonoRuntimeInfo.Prefix) {
-					customRuntimes.Remove (ri);
-					break;
-				}
-			}
-			SaveRuntimes ();
-		}
-		
-		static void LoadRuntimes ()
-		{
-			if (!File.Exists (configFile))
-				return;
-			try {
-				XmlDataSerializer ser = new XmlDataSerializer (new DataContext ());
-				using (StreamReader sr = new StreamReader (configFile)) {
-					customRuntimes = (RuntimeCollection) ser.Deserialize (sr, typeof(RuntimeCollection));
-				}
-			} catch (Exception ex) {
-				LoggingService.LogError ("Error while loading mono-runtimes.xml.", ex);
-			}
-		}
-		
-		static void SaveRuntimes ()
-		{
-			try {
-				XmlDataSerializer ser = new XmlDataSerializer (new DataContext ());
-				using (StreamWriter sw = new StreamWriter (configFile)) {
-					ser.Serialize (sw, customRuntimes);
-				}
-			} catch {
-			}
-		}
-	}
-	
-	class RuntimeCollection: List<MonoRuntimeInfo>
-	{
-	}
+        static MonoTargetRuntimeFactory()
+        {
+            LoadRuntimes();
+        }
+
+        const string MAC_FRAMEWORK_DIR = "/Library/Frameworks/Mono.framework/Versions";
+
+        public IEnumerable<TargetRuntime> CreateRuntimes()
+        {
+            MonoRuntimeInfo currentRuntime = MonoRuntimeInfo.FromCurrentRuntime();
+            if (currentRuntime != null)
+            {
+                yield return new MonoTargetRuntime(currentRuntime);
+            }
+            if (Platform.IsWindows)
+            {
+                string progs = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
+                foreach (string dir in Directory.EnumerateDirectories(progs, "Mono*"))
+                {
+                    MonoRuntimeInfo info = new MonoRuntimeInfo(dir);
+                    if (info.IsValidRuntime)
+                        yield return new MonoTargetRuntime(info);
+                }
+            }
+            else if (Platform.IsMac)
+            {
+                if (!Directory.Exists(MAC_FRAMEWORK_DIR))
+                    yield break;
+                foreach (string dir in Directory.EnumerateDirectories(MAC_FRAMEWORK_DIR))
+                {
+                    if (dir.EndsWith("/Current", StringComparison.Ordinal) || currentRuntime.Prefix == dir)
+                        continue;
+                    MonoRuntimeInfo info = new MonoRuntimeInfo(dir);
+                    if (info.IsValidRuntime)
+                        yield return new MonoTargetRuntime(info);
+                }
+            }
+            else
+            {
+                foreach (string pref in commonLinuxPrefixes)
+                {
+                    if (currentRuntime != null && currentRuntime.Prefix == pref)
+                        continue;
+                    MonoRuntimeInfo info = new MonoRuntimeInfo(pref);
+                    if (info.IsValidRuntime)
+                    {
+                        // Clean up old registered runtimes
+                        foreach (MonoRuntimeInfo ei in customRuntimes)
+                        {
+                            if (ei.Prefix == info.Prefix)
+                            {
+                                customRuntimes.Remove(ei);
+                                break;
+                            }
+                        }
+                        yield return new MonoTargetRuntime(info);
+                    }
+                }
+            }
+            foreach (MonoRuntimeInfo info in customRuntimes)
+            {
+                MonoTargetRuntime rt = new MonoTargetRuntime(info);
+                rt.UserDefined = true;
+                yield return rt;
+            }
+        }
+
+        public static TargetRuntime RegisterRuntime(MonoRuntimeInfo info)
+        {
+            MonoTargetRuntime tr = new MonoTargetRuntime(info);
+            SystemAssemblyService.Instance.RegisterRuntime(tr);
+            customRuntimes.Add(info);
+            SaveRuntimes();
+            return tr;
+        }
+
+        public static void UnregisterRuntime(MonoTargetRuntime runtime)
+        {
+            SystemAssemblyService.Instance.UnregisterRuntime(runtime);
+            foreach (MonoRuntimeInfo ri in customRuntimes)
+            {
+                if (ri.Prefix == runtime.MonoRuntimeInfo.Prefix)
+                {
+                    customRuntimes.Remove(ri);
+                    break;
+                }
+            }
+            SaveRuntimes();
+        }
+
+        static void LoadRuntimes()
+        {
+            if (!File.Exists(configFile))
+                return;
+            try
+            {
+                var ser = new XmlSerializer(typeof(RuntimeCollection));
+                using (StreamReader sr = new StreamReader(configFile))
+                {
+                    customRuntimes = (RuntimeCollection)ser.Deserialize(sr);
+                }
+            }
+            catch (Exception ex)
+            {
+                LoggingService.LogError("Error while loading mono-runtimes.xml.", ex);
+            }
+        }
+
+        static void SaveRuntimes()
+        {
+            try
+            {
+                var ser = new XmlSerializer(typeof(RuntimeCollection));
+                using (StreamWriter sw = new StreamWriter(configFile))
+                {
+                    ser.Serialize(sw, customRuntimes);
+                }
+            }
+            catch
+            {
+            }
+        }
+    }
+
+    class RuntimeCollection : List<MonoRuntimeInfo>
+    {
+    }
 }

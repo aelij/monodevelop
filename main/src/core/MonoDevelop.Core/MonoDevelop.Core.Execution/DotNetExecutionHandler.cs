@@ -25,6 +25,7 @@
 // THE SOFTWARE.
 
 using System;
+using MonoDevelop.Core.Assemblies;
 
 namespace MonoDevelop.Core.Execution
 {
@@ -39,7 +40,7 @@ namespace MonoDevelop.Core.Execution
 		{
 			DotNetExecutionCommand cmd = (DotNetExecutionCommand) command;
 			if (cmd.TargetRuntime == null)
-				cmd.TargetRuntime = Runtime.SystemAssemblyService.DefaultRuntime;
+				cmd.TargetRuntime = SystemAssemblyService.Instance.DefaultRuntime;
 			return cmd.TargetRuntime.GetExecutionHandler ().Execute (cmd, console);
 		}
 	}

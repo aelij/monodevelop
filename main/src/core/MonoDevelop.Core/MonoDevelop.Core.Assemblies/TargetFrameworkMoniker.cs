@@ -25,12 +25,7 @@
 // THE SOFTWARE.
 
 using System;
-using System.Collections.Generic;
-using MonoDevelop.Core.Serialization;
-using System.Reflection;
-using Mono.Addins;
-using MonoDevelop.Core.AddIns;
-using Mono.PkgConfig;
+
 namespace MonoDevelop.Core.Assemblies
 {
 	/// <summary>
@@ -275,26 +270,5 @@ namespace MonoDevelop.Core.Assemblies
 		public const string ID_PORTABLE = ".NETPortable";
 		public const string ID_MONOTOUCH = "MonoTouch";
 		public const string ID_MONODROID = "MonoAndroid";
-	}
-	
-	class TargetFrameworkMonikerDataType: DataType
-	{
-		public TargetFrameworkMonikerDataType (Type dataType) : base (dataType)
-		{
-		}
-		
-		public override bool IsSimpleType { get { return true; } }
-		public override bool CanCreateInstance { get { return true; } }
-		public override bool CanReuseInstance { get { return false; } }
-		
-		internal protected override DataNode OnSerialize (SerializationContext serCtx, object mapData, object value)
-		{
-			return new DataValue (Name, ((TargetFrameworkMoniker)value).ToString ());
-		}
-		
-		internal protected override object OnDeserialize (SerializationContext serCtx, object mapData, DataNode data)
-		{
-			return TargetFrameworkMoniker.Parse (((DataValue)data).Value);
-		}
 	}
 }

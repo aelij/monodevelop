@@ -62,7 +62,7 @@ namespace MonoDevelop.CSharp.Completion
 
 		public override string GetRightSideDescription (bool isSelected)
 		{
-			return "<span size='small'>" + GettextCatalog.GetString ("Creates new method") + "</span>";
+			return "<span size='small'>" + "Creates new method" + "</span>";
 		}
 
 		public EventCreationCompletionData (ICompletionDataKeyHandler keyHandler, RoslynCodeCompletionFactory factory, ITypeSymbol delegateType, string varName, INamedTypeSymbol curType) : base (factory, keyHandler)
@@ -98,7 +98,7 @@ namespace MonoDevelop.CSharp.Completion
 				editor.CaretOffset
 			);
 			var options = new InsertionModeOptions (
-				GettextCatalog.GetString ("Create new method"),
+				"Create new method",
 				insertionPoints,
 				point => {
 					if (!point.Success) 

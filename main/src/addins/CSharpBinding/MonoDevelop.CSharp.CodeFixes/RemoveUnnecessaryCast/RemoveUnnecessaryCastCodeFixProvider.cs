@@ -66,7 +66,7 @@ namespace MonoDevelop.CSharp.CodeFixes.RemoveUnnecessaryCast
 
 			context.RegisterCodeFix(
 				new DocumentChangeAction(node.Span, DiagnosticSeverity.Warning,
-					GettextCatalog.GetString ("Remove Unnecessary Cast"),
+					"Remove Unnecessary Cast",
 					(c) => RemoveUnnecessaryCastAsync(document, node, c)),
 				context.Diagnostics);
 		}

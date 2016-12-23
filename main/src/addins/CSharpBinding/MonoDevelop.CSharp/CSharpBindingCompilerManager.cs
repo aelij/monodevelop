@@ -78,13 +78,13 @@ namespace MonoDevelop.CSharp
 					}
 				} while (count++ < 5 && !isWriteable);
 				if (!isWriteable) {
-					MessageService.ShowError (string.Format (GettextCatalog.GetString ("Can't lock file: {0}."), outputName));
+					MessageService.ShowError (string.Format ("Can't lock file: {0}.", outputName));
 					return null;
 				}
 			}
 
 			//get the runtime
-			TargetRuntime runtime = MonoDevelop.Core.Runtime.SystemAssemblyService.DefaultRuntime;
+			TargetRuntime runtime = MonoDevelop.Core.SystemAssemblyService.Instance.DefaultRuntime;
 			DotNetProject project = configuration.ParentItem as DotNetProject;
 			if (project != null)
 				runtime = project.TargetRuntime;
@@ -137,7 +137,7 @@ namespace MonoDevelop.CSharp
 					case ReferenceType.Package:
 						SystemPackage pkg = lib.Package;
 						if (pkg == null) {
-							string msg = string.Format (GettextCatalog.GetString ("{0} could not be found or is invalid."), lib.Reference);
+							string msg = string.Format ("{0} could not be found or is invalid.", lib.Reference);
 							monitor.ReportWarning (msg);
 							continue;
 						}

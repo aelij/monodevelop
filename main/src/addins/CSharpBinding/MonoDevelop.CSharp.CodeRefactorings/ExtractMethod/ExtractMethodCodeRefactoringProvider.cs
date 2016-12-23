@@ -78,7 +78,7 @@ namespace MonoDevelop.CSharp.CodeRefactorings.ExtractMethod
 				if (result.Succeeded || result.SucceededWithSuggestion)
 				{
 					var description = options.GetOption(ExtractMethodOptions.AllowMovingDeclaration, document.Project.Language) ?
-						GettextCatalog.GetString ("Extract Method + Local") : GettextCatalog.GetString ("Extract Method");
+						"Extract Method + Local" : "Extract Method";
 
 					var codeAction = new DocumentChangeAction(textSpan, DiagnosticSeverity.Info, description, (c) => AddRenameAnnotationAsync(result.Document, result.InvocationNameToken, c));
 					var methodBlock = result.MethodDeclarationNode;

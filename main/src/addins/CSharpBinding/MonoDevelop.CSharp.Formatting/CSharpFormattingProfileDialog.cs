@@ -88,7 +88,7 @@ namespace MonoDevelop.CSharp.Formatting
 			// ReSharper disable once DoNotCallOverridableMethodsInConstructor
 			this.Build ();
 			this.profile = profile;
-			this.Title = profile.IsBuiltIn ? GettextCatalog.GetString ("Show built-in profile") : GettextCatalog.GetString ("Edit Profile");
+			this.Title = profile.IsBuiltIn ? "Show built-in profile" : "Edit Profile";
 			
 			notebookCategories.SwitchPage += delegate {
 				TreeView treeView;
@@ -118,11 +118,11 @@ namespace MonoDevelop.CSharp.Formatting
 					UpdateExample (model, iter);
 			};
 			notebookCategories.ShowTabs = false;
-			comboboxCategories.AppendText (GettextCatalog.GetString ("Indentation"));
-			comboboxCategories.AppendText (GettextCatalog.GetString ("New Lines"));
-			comboboxCategories.AppendText (GettextCatalog.GetString ("Spacing"));
-			comboboxCategories.AppendText (GettextCatalog.GetString ("Wrapping"));
-			comboboxCategories.AppendText (GettextCatalog.GetString ("Style"));
+			comboboxCategories.AppendText ("Indentation");
+			comboboxCategories.AppendText ("New Lines");
+			comboboxCategories.AppendText ("Spacing");
+			comboboxCategories.AppendText ("Wrapping");
+			comboboxCategories.AppendText ("Style");
 			comboboxCategories.Changed += delegate {
 				texteditor.Text = "";
 				notebookCategories.Page = comboboxCategories.Active;
@@ -182,7 +182,7 @@ namespace MonoDevelop.CSharp.Formatting
 			treeviewIndentOptions.AppendColumn (column);
 
 
-			AddOption (indentationOptions, "IndentBlock", GettextCatalog.GetString ("Indent block contents"), @"namespace Test
+			AddOption (indentationOptions, "IndentBlock", "Indent block contents", @"namespace Test
 {
 	class AClass
 	{
@@ -193,7 +193,7 @@ namespace MonoDevelop.CSharp.Formatting
 		}
 	}
 }");
-			AddOption (indentationOptions, "IndentBraces", GettextCatalog.GetString ("Indent open and close braces"), @"class AClass
+			AddOption (indentationOptions, "IndentBraces", "Indent open and close braces", @"class AClass
 {
 	int aField;
 
@@ -201,7 +201,7 @@ namespace MonoDevelop.CSharp.Formatting
 	{
 	}
 }");
-			AddOption (indentationOptions, "IndentSwitchSection", GettextCatalog.GetString ("Indent switch sections"), @"class AClass
+			AddOption (indentationOptions, "IndentSwitchSection", "Indent switch sections", @"class AClass
 {
 	void Method(int x)
 	{
@@ -212,7 +212,7 @@ namespace MonoDevelop.CSharp.Formatting
 		}
 	}
 }");
-			AddOption (indentationOptions, "IndentSwitchCaseSection", GettextCatalog.GetString ("Indent case sections"), @"class AClass
+			AddOption (indentationOptions, "IndentSwitchCaseSection", "Indent case sections", @"class AClass
 {
 	void Method(int x)
 	{
@@ -223,7 +223,7 @@ namespace MonoDevelop.CSharp.Formatting
 		}
 	}
 }");
-			AddOption (indentationOptions, "LabelPositioning", GettextCatalog.GetString ("Label indentation"), @"class Test
+			AddOption (indentationOptions, "LabelPositioning", "Label indentation", @"class Test
 {
 	void Method()
 	{
@@ -279,14 +279,14 @@ namespace MonoDevelop.CSharp.Formatting
 			
 			treeviewNewLines.AppendColumn (column);
 
-			var category = AddOption (newLineOptions, null, GettextCatalog.GetString ("New line options for braces"), null);
-			AddOption (newLineOptions, category, "NewLinesForBracesInTypes", GettextCatalog.GetString ("Place open brace on new line for types"), @"class Example
+			var category = AddOption (newLineOptions, null, "New line options for braces", null);
+			AddOption (newLineOptions, category, "NewLinesForBracesInTypes", "Place open brace on new line for types", @"class Example
 {
 }");
-			AddOption (newLineOptions, category, "NewLinesForBracesInMethods", GettextCatalog.GetString ("Place open brace on new line for methods"), @"void Example()
+			AddOption (newLineOptions, category, "NewLinesForBracesInMethods", "Place open brace on new line for methods", @"void Example()
 {
 }");
-			AddOption (newLineOptions, category, "NewLinesForBracesInProperties", GettextCatalog.GetString ("Place open brace on new line for properties"), @"int Example { 
+			AddOption (newLineOptions, category, "NewLinesForBracesInProperties", "Place open brace on new line for properties", @"int Example { 
 	get  { 
 		return 1;
 	}
@@ -297,7 +297,7 @@ namespace MonoDevelop.CSharp.Formatting
 "
 );
 
-			AddOption (newLineOptions, category, "NewLinesForBracesInAccessors", GettextCatalog.GetString ("Place open brace on new line for property accessors"), @"int Example { 
+			AddOption (newLineOptions, category, "NewLinesForBracesInAccessors", "Place open brace on new line for property accessors", @"int Example { 
 	get  { 
 		return 1;
 	}
@@ -309,18 +309,18 @@ namespace MonoDevelop.CSharp.Formatting
 );
 
 
-			AddOption (newLineOptions, category, "NewLinesForBracesInAnonymousMethods", GettextCatalog.GetString ("Place open brace on new line for anonymous methods"), @"void Example()
+			AddOption (newLineOptions, category, "NewLinesForBracesInAnonymousMethods", "Place open brace on new line for anonymous methods", @"void Example()
 {
 	var del = new delegate (int i, int j) {
 	};
 }");
-			AddOption (newLineOptions, category, "NewLinesForBracesInControlBlocks", GettextCatalog.GetString ("Place open brace on new line for control blocks"), @"void Example()
+			AddOption (newLineOptions, category, "NewLinesForBracesInControlBlocks", "Place open brace on new line for control blocks", @"void Example()
 {
 	if (true)
 	{
 	}
 }");
-			AddOption (newLineOptions, category, "NewLinesForBracesInAnonymousTypes", GettextCatalog.GetString ("Place open brace on new line for anonymous types"), @"void Example()
+			AddOption (newLineOptions, category, "NewLinesForBracesInAnonymousTypes", "Place open brace on new line for anonymous types", @"void Example()
 {
 	var c = new
 	{
@@ -328,7 +328,7 @@ namespace MonoDevelop.CSharp.Formatting
 		B = 2
 	};
 }");
-			AddOption (newLineOptions, category, "NewLinesForBracesInObjectCollectionArrayInitializers", GettextCatalog.GetString ("Place open brace on new line for object initializers"), @"void Example()
+			AddOption (newLineOptions, category, "NewLinesForBracesInObjectCollectionArrayInitializers", "Place open brace on new line for object initializers", @"void Example()
 {
 	new MyObject
 	{
@@ -336,15 +336,15 @@ namespace MonoDevelop.CSharp.Formatting
 		B = 2 
 	};
 }");
-			AddOption (newLineOptions, category, "NewLinesForBracesInLambdaExpressionBody", GettextCatalog.GetString ("Place open brace on new line for lambda expression"), @"void Example()
+			AddOption (newLineOptions, category, "NewLinesForBracesInLambdaExpressionBody", "Place open brace on new line for lambda expression", @"void Example()
 {
 	Action act = () =>
 	{
 	};
 }");
 
-			category = AddOption (newLineOptions, null, GettextCatalog.GetString ("New line options for keywords"), null);
-			AddOption (newLineOptions, category, "NewLineForElse", GettextCatalog.GetString ("Place \"else\" on new line"), @"void Example()
+			category = AddOption (newLineOptions, null, "New line options for keywords", null);
+			AddOption (newLineOptions, category, "NewLineForElse", "Place \"else\" on new line", @"void Example()
 {
 	if (true) {
 		// ...
@@ -352,14 +352,14 @@ namespace MonoDevelop.CSharp.Formatting
 		// ...
 	}
 }");
-			AddOption (newLineOptions, category, "NewLineForCatch", GettextCatalog.GetString ("Place \"catch\" on new line"), @"void Example()
+			AddOption (newLineOptions, category, "NewLineForCatch", "Place \"catch\" on new line", @"void Example()
 {
 	try {
 	} catch {
 	} finally {
 	}
 }");
-			AddOption (newLineOptions, category, "NewLineForFinally", GettextCatalog.GetString ("Place \"finally\" on new line"), @"void Example()
+			AddOption (newLineOptions, category, "NewLineForFinally", "Place \"finally\" on new line", @"void Example()
 {
 	try {
 	} catch {
@@ -367,15 +367,15 @@ namespace MonoDevelop.CSharp.Formatting
 	}
 }");
 
-			category = AddOption (newLineOptions, null, GettextCatalog.GetString ("New line options for expressions"), null);
-			AddOption (newLineOptions, category, "NewLineForMembersInObjectInit", GettextCatalog.GetString ("Place members in object initializers on new line"), @"void Example()
+			category = AddOption (newLineOptions, null, "New line options for expressions", null);
+			AddOption (newLineOptions, category, "NewLineForMembersInObjectInit", "Place members in object initializers on new line", @"void Example()
 {
 	new MyObject {
 		A = 1,
 		B = 2
 	};
 }");
-			AddOption (newLineOptions, category, "NewLineForMembersInAnonymousTypes", GettextCatalog.GetString ("Place members in anonymous types on new line"), @"void Example()
+			AddOption (newLineOptions, category, "NewLineForMembersInAnonymousTypes", "Place members in anonymous types on new line", @"void Example()
 {
 	var c = new
 	{
@@ -383,7 +383,7 @@ namespace MonoDevelop.CSharp.Formatting
 		B = 2
 	};
 }");
-			AddOption (newLineOptions, category, "NewLineForClausesInQuery", GettextCatalog.GetString ("Place query expression clauses on new line"), @"void Example()
+			AddOption (newLineOptions, category, "NewLineForClausesInQuery", "Place query expression clauses on new line", @"void Example()
 {
 	from o in col select o.Foo;
 }");
@@ -433,121 +433,121 @@ namespace MonoDevelop.CSharp.Formatting
 
 			treeviewSpacing.AppendColumn (column);
 
-			category = AddOption (spacingOptions, null, GettextCatalog.GetString ("Set spacing for method declarations"), null);
-			AddOption (spacingOptions, category, "SpacingAfterMethodDeclarationName", GettextCatalog.GetString ("Insert space between method name and its opening parenthesis"), 
+			category = AddOption (spacingOptions, null, "Set spacing for method declarations", null);
+			AddOption (spacingOptions, category, "SpacingAfterMethodDeclarationName", "Insert space between method name and its opening parenthesis", 
 				@"void Example()
 {
 }");
 
-			AddOption (spacingOptions, category, "SpaceWithinMethodDeclarationParenthesis", GettextCatalog.GetString ("Insert space within argument list parentheses"), 
+			AddOption (spacingOptions, category, "SpaceWithinMethodDeclarationParenthesis", "Insert space within argument list parentheses", 
 				@"void Example(int i, int j)
 {
 }");
-			AddOption (spacingOptions, category, "SpaceBetweenEmptyMethodDeclarationParentheses", GettextCatalog.GetString ("Insert space within empty argument list parentheses"), @"void Example()
+			AddOption (spacingOptions, category, "SpaceBetweenEmptyMethodDeclarationParentheses", "Insert space within empty argument list parentheses", @"void Example()
 {
 }");
 
-			category = AddOption (spacingOptions, null, GettextCatalog.GetString ("Set spacing for method calls"), null);
-			AddOption (spacingOptions, category, "SpaceAfterMethodCallName", GettextCatalog.GetString ("Insert space between method name and its opening parenthesis"), @"void Example()
+			category = AddOption (spacingOptions, null, "Set spacing for method calls", null);
+			AddOption (spacingOptions, category, "SpaceAfterMethodCallName", "Insert space between method name and its opening parenthesis", @"void Example()
 {
 	Test();
 }");
-			AddOption (spacingOptions, category, "SpaceWithinMethodCallParentheses", GettextCatalog.GetString ("Insert space within argument list parentheses"), @"void Example()
+			AddOption (spacingOptions, category, "SpaceWithinMethodCallParentheses", "Insert space within argument list parentheses", @"void Example()
 {
 	Test(1, 2);
 }");
-			AddOption (spacingOptions, category, "SpaceBetweenEmptyMethodCallParentheses", GettextCatalog.GetString ("Insert space within empty argument list parentheses"), @"void Example()
+			AddOption (spacingOptions, category, "SpaceBetweenEmptyMethodCallParentheses", "Insert space within empty argument list parentheses", @"void Example()
 {
 	Test();
 }");
 
-			category = AddOption (spacingOptions, null, GettextCatalog.GetString ("Set other spacing options"), null);
-			AddOption (spacingOptions, category, "SpaceAfterControlFlowStatementKeyword", GettextCatalog.GetString ("Insert space after keywords in control flow statements"), @"void Example()
+			category = AddOption (spacingOptions, null, "Set other spacing options", null);
+			AddOption (spacingOptions, category, "SpaceAfterControlFlowStatementKeyword", "Insert space after keywords in control flow statements", @"void Example()
 {
 	if (condition)
 	{
 	}
 }");
 
-			AddOption (spacingOptions, category, "SpaceWithinExpressionParentheses", GettextCatalog.GetString ("Insert space within parentheses of expressions"), @"void Example()
+			AddOption (spacingOptions, category, "SpaceWithinExpressionParentheses", "Insert space within parentheses of expressions", @"void Example()
 {
 	i = (5 + 3) * 2;
 }");
-			AddOption (spacingOptions, category, "SpaceWithinCastParentheses", GettextCatalog.GetString ("Insert space within parentheses of type casts"), @"void Example()
+			AddOption (spacingOptions, category, "SpaceWithinCastParentheses", "Insert space within parentheses of type casts", @"void Example()
 {
 	test = (ITest)o;
 }");
-			AddOption (spacingOptions, category, "SpaceWithinOtherParentheses", GettextCatalog.GetString ("Insert space within parentheses of control flow statements"), @"void Example()
+			AddOption (spacingOptions, category, "SpaceWithinOtherParentheses", "Insert space within parentheses of control flow statements", @"void Example()
 {
 	if (condition)
 	{
 	}
 }");
 
-			AddOption (spacingOptions, category, "SpaceAfterCast", GettextCatalog.GetString ("Insert space after casts"), @"void Example()
+			AddOption (spacingOptions, category, "SpaceAfterCast", "Insert space after casts", @"void Example()
 {
 	test = (ITest)o;
 }");
-			AddOption (spacingOptions, category, "SpacesIgnoreAroundVariableDeclaration", GettextCatalog.GetString ("Ignore spaces in declaration statements"), @"void Example()
+			AddOption (spacingOptions, category, "SpacesIgnoreAroundVariableDeclaration", "Ignore spaces in declaration statements", @"void Example()
 {
 	int x=5;
 }");
 
-			category = AddOption (spacingOptions, null, GettextCatalog.GetString ("Set spacing for brackets"), null);
-			AddOption (spacingOptions, category, "SpaceBeforeOpenSquareBracket", GettextCatalog.GetString ("Insert space before open square bracket"), @"void Example()
+			category = AddOption (spacingOptions, null, "Set spacing for brackets", null);
+			AddOption (spacingOptions, category, "SpaceBeforeOpenSquareBracket", "Insert space before open square bracket", @"void Example()
 {
 	i[5] = 3;
 }");
-			AddOption (spacingOptions, category, "SpaceBetweenEmptySquareBrackets", GettextCatalog.GetString ("Insert space within empty square brackets"), @"void Example()
+			AddOption (spacingOptions, category, "SpaceBetweenEmptySquareBrackets", "Insert space within empty square brackets", @"void Example()
 {
 	new int[] {1, 2};
 }");
-			AddOption (spacingOptions, category, "SpaceWithinSquareBrackets", GettextCatalog.GetString ("Insert space within square brackets"), @"void Example()
+			AddOption (spacingOptions, category, "SpaceWithinSquareBrackets", "Insert space within square brackets", @"void Example()
 {
 	i[5] = 3;
 }");
 
-			category = AddOption (spacingOptions, null, GettextCatalog.GetString ("Set spacing for brackets"), null);
-			AddOption (spacingOptions, category, "SpaceAfterColonInBaseTypeDeclaration", GettextCatalog.GetString ("Insert space after colon for base or interface in type declaration"), @"class Foo : Bar
+			category = AddOption (spacingOptions, null, "Set spacing for brackets", null);
+			AddOption (spacingOptions, category, "SpaceAfterColonInBaseTypeDeclaration", "Insert space after colon for base or interface in type declaration", @"class Foo : Bar
 {
 }");
-			AddOption (spacingOptions, category, "SpaceAfterComma", GettextCatalog.GetString ("Insert space after comma"), @"void Example()
+			AddOption (spacingOptions, category, "SpaceAfterComma", "Insert space after comma", @"void Example()
 {
 	for (int i =0; i < 10, i >5;i++)
 	{
 	}
 }");
-			AddOption (spacingOptions, category, "SpaceAfterDot", GettextCatalog.GetString ("Insert space after dot"), @"void Example()
+			AddOption (spacingOptions, category, "SpaceAfterDot", "Insert space after dot", @"void Example()
 {
 	Foo.Bar.Test();
 }");
-			AddOption (spacingOptions, category, "SpaceAfterSemicolonsInForStatement", GettextCatalog.GetString ("Insert space after semicolon in \"for\" statement"), @"void Example()
+			AddOption (spacingOptions, category, "SpaceAfterSemicolonsInForStatement", "Insert space after semicolon in \"for\" statement", @"void Example()
 {
 	for (int i = 0; i< 10; i++)
 	{
 	}
 }");
-			AddOption (spacingOptions, category, "SpaceBeforeColonInBaseTypeDeclaration", GettextCatalog.GetString ("Insert space before colon for base or interface in type declaration"), @"class Foo : Bar
+			AddOption (spacingOptions, category, "SpaceBeforeColonInBaseTypeDeclaration", "Insert space before colon for base or interface in type declaration", @"class Foo : Bar
 {
 }");
-			AddOption (spacingOptions, category, "SpaceBeforeComma", GettextCatalog.GetString ("Insert space before comma"), @"void Example()
+			AddOption (spacingOptions, category, "SpaceBeforeComma", "Insert space before comma", @"void Example()
 {
 	for (int i =0; i < 10, i >5;i++)
 	{
 	}
 }");
-			AddOption (spacingOptions, category, "SpaceBeforeDot", GettextCatalog.GetString ("Insert space before dot"), @"void Example()
+			AddOption (spacingOptions, category, "SpaceBeforeDot", "Insert space before dot", @"void Example()
 {
 	Foo.Bar.Test();
 }");
-			AddOption (spacingOptions, category, "SpaceBeforeSemicolonsInForStatement", GettextCatalog.GetString ("Insert space before semicolon in \"for\" statement"), @"void Example()
+			AddOption (spacingOptions, category, "SpaceBeforeSemicolonsInForStatement", "Insert space before semicolon in \"for\" statement", @"void Example()
 {
 	for (int i = 0; i< 10; i++)
 	{
 	}
 }");
 
-			AddOption (spacingOptions, category, "SpacingAroundBinaryOperator", GettextCatalog.GetString ("Set spacing for operators"), @"void Example()
+			AddOption (spacingOptions, category, "SpacingAroundBinaryOperator", "Set spacing for operators", @"void Example()
 {
 	i = (5 + 3) * 2;
 }");
@@ -599,7 +599,7 @@ namespace MonoDevelop.CSharp.Formatting
 
 			treeviewStyle.AppendColumn (column);
 
-			AddOption (styleOptions, "PlaceSystemDirectiveFirst", GettextCatalog.GetString ("Place System directives first when sorting usings"), "");
+			AddOption (styleOptions, "PlaceSystemDirectiveFirst", "Place System directives first when sorting usings", "");
 
 			// AddOption (styleOptions, category, null, GettextCatalog.GetString ("Qualify member access with 'this'"), null);
 			// AddOption (styleOptions, category, null, GettextCatalog.GetString ("Use 'var' when generating locals"), null);
@@ -650,8 +650,8 @@ namespace MonoDevelop.CSharp.Formatting
 
 			treeviewWrapping.AppendColumn (column);
 
-			AddOption (wrappingOptions, "WrappingPreserveSingleLine", GettextCatalog.GetString ("Leave block on single line"), "");
-			AddOption (wrappingOptions, "WrappingKeepStatementsOnSingleLine", GettextCatalog.GetString ("Leave statements and member declarations on the same line"), "");
+			AddOption (wrappingOptions, "WrappingPreserveSingleLine", "Leave block on single line", "");
+			AddOption (wrappingOptions, "WrappingKeepStatementsOnSingleLine", "Leave statements and member declarations on the same line", "");
 
 			treeviewWrapping.ExpandAll ();
 			#endregion

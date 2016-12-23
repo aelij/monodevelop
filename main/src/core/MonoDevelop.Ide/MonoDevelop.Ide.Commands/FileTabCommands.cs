@@ -32,8 +32,6 @@ using Gtk;
 
 using MonoDevelop.Components.Commands;
 using MonoDevelop.Ide.Gui;
-using MonoDevelop.Ide.Navigation;
-using MonoDevelop.Core;
 using System.Linq;
 using MonoDevelop.Ide.Gui.Dialogs;
 
@@ -122,12 +120,11 @@ namespace MonoDevelop.Ide.Commands
 	{
 		protected override void Run ()
 		{
-			NavigationHistoryService.OpenLastClosedDocument ();
+            // TODO-AELIJ
 		}
 
 		protected override void Update (CommandInfo info)
 		{
-			info.Enabled = NavigationHistoryService.HasClosedDocuments;
 		}
 	}
 }

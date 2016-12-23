@@ -29,7 +29,6 @@ using System.Collections.Generic;
 using System.Linq;
 using MonoDevelop.Core;
 using MonoDevelop.Ide;
-using Mono.Addins;
 
 namespace MonoDevelop.Components.Extensions
 {
@@ -92,7 +91,7 @@ namespace MonoDevelop.Components.Extensions
 		
 		public static SelectFileDialogFilter AllFiles {
 			get {
-				return new SelectFileDialogFilter (GettextCatalog.GetString ("All Files"), "*");
+				return new SelectFileDialogFilter ( ("All Files"), "*");
 			}
 		}
 	}

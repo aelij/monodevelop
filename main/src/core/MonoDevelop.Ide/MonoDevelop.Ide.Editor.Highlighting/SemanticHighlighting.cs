@@ -28,49 +28,47 @@ using MonoDevelop.Core.Text;
 using System.Collections.Generic;
 
 namespace MonoDevelop.Ide.Editor.Highlighting
-{	
-	/// <summary>
-	/// Semantic highlighting adds the ability to add highlighting for things that require
-	/// a background parser to be colored. For example type names.
-	/// </summary>
-	public abstract class SemanticHighlighting : IDisposable
-	{
-		protected readonly internal TextEditor editor;
-		protected readonly internal DocumentContext documentContext;
+{
+    /// <summary>
+    /// Semantic highlighting adds the ability to add highlighting for things that require
+    /// a background parser to be colored. For example type names.
+    /// </summary>
+    public abstract class SemanticHighlighting : IDisposable
+    {
+        protected internal TextEditor Editor { get; }
+        protected internal DocumentContext DocumentContext { get; }
 
-		protected SemanticHighlighting (TextEditor editor, DocumentContext documentContext)
-		{
-			this.editor = editor;
-			this.documentContext = documentContext;
-			this.documentContext.DocumentParsed += HandleDocumentParsed;
-		}
+        protected SemanticHighlighting(TextEditor editor, DocumentContext documentContext)
+        {
+            Editor = editor;
+            DocumentContext = documentContext;
+            DocumentContext.DocumentParsed += HandleDocumentParsed;
+        }
 
-		protected abstract void DocumentParsed ();
+        protected abstract void DocumentParsed();
 
-		public void NotifySemanticHighlightingUpdate ()
-		{
-			var handler = SemanticHighlightingUpdated;
-			if (handler != null)
-				handler (this, EventArgs.Empty);
-		}
+        public void NotifySemanticHighlightingUpdate()
+        {
+            SemanticHighlightingUpdated?.Invoke(this, EventArgs.Empty);
+        }
 
-		/// <summary>
-		/// Colorize the specified offset, count and colorizeCallback.
-		/// </summary>
-		/// <param name="segment">The area to run the colorizer in.</param>
-		public abstract IEnumerable<ColoredSegment> GetColoredSegments (ISegment segment);
+        /// <summary>
+        /// Colorize the specified offset, count and colorizeCallback.
+        /// </summary>
+        /// <param name="segment">The area to run the colorizer in.</param>
+        public abstract IEnumerable<ColoredSegment> GetColoredSegments(ISegment segment);
 
-		void HandleDocumentParsed (object sender, EventArgs e)
-		{
-			if (DefaultSourceEditorOptions.Instance.EnableSemanticHighlighting)
-				DocumentParsed (); 
-		}
+        void HandleDocumentParsed(object sender, EventArgs e)
+        {
+            if (DefaultSourceEditorOptions.Instance.EnableSemanticHighlighting)
+                DocumentParsed();
+        }
 
-		public virtual void Dispose ()
-		{
-			documentContext.DocumentParsed -= HandleDocumentParsed;
-		}
+        public virtual void Dispose()
+        {
+            DocumentContext.DocumentParsed -= HandleDocumentParsed;
+        }
 
-		internal event EventHandler SemanticHighlightingUpdated;
-	}
+        internal event EventHandler SemanticHighlightingUpdated;
+    }
 }

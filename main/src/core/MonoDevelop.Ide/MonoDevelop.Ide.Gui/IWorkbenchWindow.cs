@@ -28,8 +28,6 @@
 using System;
 using System.ComponentModel;
 using System.Collections.Generic;
-using Mono.Addins;
-using MonoDevelop.Components.Docking;
 
 namespace MonoDevelop.Ide.Gui
 {
@@ -44,7 +42,6 @@ namespace MonoDevelop.Ide.Gui
 		string DocumentType { get; set; }
 		string Title { get; set; }
 		bool ShowNotification { get; set; }
-		ExtensionContext ExtensionContext { get; }
 
 		void AttachViewContent (BaseViewContent subViewContent);
 		void InsertViewContent (int index, BaseViewContent subViewContent);

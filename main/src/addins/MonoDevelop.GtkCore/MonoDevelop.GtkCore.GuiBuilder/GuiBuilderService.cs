@@ -37,8 +37,6 @@ using MonoDevelop.Projects;
 using MonoDevelop.Projects.Text;
 using MonoDevelop.Core;
 using MonoDevelop.Core.Execution;
-using MonoDevelop.Deployment;
-using MonoDevelop.Projects.Policies;
 using MonoDevelop.Ide;
 using MonoDevelop.Ide.Gui.Content;
 using MonoDevelop.Ide.TypeSystem;
@@ -140,7 +138,7 @@ namespace MonoDevelop.GtkCore.GuiBuilder
 		
 		static string OnAssemblyResolve (string assemblyName)
 		{
-			return Runtime.SystemAssemblyService.DefaultAssemblyContext.GetAssemblyLocation (assemblyName, null);
+			return SystemAssemblyService.Instance.DefaultAssemblyContext.GetAssemblyLocation (assemblyName, null);
 		}
 		
 		static string OnMimeResolve (string url)
@@ -579,7 +577,7 @@ namespace MonoDevelop.GtkCore.GuiBuilder
 			string mt = DesktopService.GetMimeTypeForUri (file);
 			var formatter = MonoDevelop.Ide.CodeFormatting.CodeFormatterService.GetFormatter (mt);
 			if (formatter != null)
-				content = formatter.FormatText (PolicyService.InvariantPolicies, content) ?? content;
+				content = formatter.FormatText (content) ?? content;
 			
 			// The project policies should be taken for generated files (windows git eol problem)
 			var pol = project.Policies.Get<TextStylePolicy> (DesktopService.GetMimeTypeForUri (file));

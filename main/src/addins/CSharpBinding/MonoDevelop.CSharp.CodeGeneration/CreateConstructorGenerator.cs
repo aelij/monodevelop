@@ -54,7 +54,7 @@ namespace MonoDevelop.CodeGeneration
 		{
 			get
 			{
-				return GettextCatalog.GetString ("Constructor");
+				return "Constructor";
 			}
 		}
 
@@ -62,7 +62,7 @@ namespace MonoDevelop.CodeGeneration
 		{
 			get
 			{
-				return GettextCatalog.GetString ("Select members to be initialized by the constructor.");
+				return "Select members to be initialized by the constructor.";
 			}
 		}
 

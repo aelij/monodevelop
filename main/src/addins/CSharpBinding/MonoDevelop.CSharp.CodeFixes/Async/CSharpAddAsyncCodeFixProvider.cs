@@ -100,7 +100,7 @@ namespace MonoDevelop.CSharp.CodeFixes
 
 		protected override string GetDescription(Diagnostic diagnostic, SyntaxNode node, SemanticModel semanticModel, CancellationToken cancellationToken)
 		{
-			return GettextCatalog.GetString ("Make async");
+			return "Make async";
 		}
 
 		protected override async Task<SyntaxNode> GetNewRoot(SyntaxNode root, SyntaxNode oldNode, SemanticModel semanticModel, Diagnostic diagnostic, Document document, CancellationToken cancellationToken)

@@ -26,45 +26,44 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-
 namespace MonoDevelop.Components.Commands
 {
-	/// <summary>
-	/// A container which can be used to redirect the command
-	/// route to a different parent
-	/// </summary>
-	public class CommandRouterContainer: Gtk.HBox, ICommandDelegatorRouter
-	{
-		bool continueToParent;
-		
-		protected object Delegated {
-			get;
-			set;
-		}
-		
-		protected CommandRouterContainer (bool continueToParent)
-		{
-			this.continueToParent = continueToParent;
-		}
+    /// <summary>
+    /// A container which can be used to redirect the command
+    /// route to a different parent
+    /// </summary>
+    public class CommandRouterContainer : Gtk.HBox, ICommandDelegatorRouter
+    {
+        private readonly bool continueToParent;
 
-		public CommandRouterContainer (Control child, object target, bool continueToParent) : this (continueToParent)
-		{
-			if (child != null) {
-				PackStart (child, true, true, 0);
-				child = null;
-			}
-			Delegated = target;
-		}
-		
-		public virtual object GetNextCommandTarget ()
-		{
-			return continueToParent ? Parent : null;
-		}
-		
-		public virtual object GetDelegatedCommandTarget ()
-		{
-			return Delegated;
-		}
-	}
+        protected object Delegated
+        {
+            get;
+            set;
+        }
+
+        protected CommandRouterContainer(bool continueToParent)
+        {
+            this.continueToParent = continueToParent;
+        }
+
+        public CommandRouterContainer(Control child, object target, bool continueToParent) : this(continueToParent)
+        {
+            if (child != null)
+            {
+                PackStart(child, true, true, 0);
+            }
+            Delegated = target;
+        }
+
+        public virtual object GetNextCommandTarget()
+        {
+            return continueToParent ? Parent : null;
+        }
+
+        public virtual object GetDelegatedCommandTarget()
+        {
+            return Delegated;
+        }
+    }
 }

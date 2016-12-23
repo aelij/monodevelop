@@ -24,19 +24,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
-using System.Linq;
-using System.Collections;
-using System.Runtime.InteropServices;
-using System.Text;
-using MonoDevelop.Core;
-using MonoDevelop.Core.Assemblies;
-using MonoDevelop.Core.AddIns;
-using MonoDevelop.Core.Execution;
-using Mono.Addins;
-using Mono.Addins.Setup;
-using MonoDevelop.Core.Instrumentation;
-using System.Threading;
 namespace MonoDevelop.Core
 {
 	public interface IApplicationInfo

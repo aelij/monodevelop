@@ -118,7 +118,7 @@ namespace MonoDevelop.Refactoring
 		{
 			var workspace = TypeSystemService.Workspace;
 			try {
-				using (var monitor = IdeApp.Workbench.ProgressMonitors.GetStatusProgressMonitor (GettextCatalog.GetString ("Analyzing solution"), null, false, true, false, null, true)) {
+				using (var monitor = IdeApp.Workbench.ProgressMonitors.GetStatusProgressMonitor ("Analyzing solution", null, false, true, false, null, true)) {
 					CancellationToken token = monitor.CancellationToken;
 					var solution = IdeApp.ProjectOperations.CurrentSelectedSolution;
 					var allDiagnostics = await Task.Run (async delegate {
@@ -147,7 +147,7 @@ namespace MonoDevelop.Refactoring
 
 		internal static void Report (ProgressMonitor monitor, List<Diagnostic> allDiagnostics, Projects.WorkspaceObject parent)
 		{
-			monitor.BeginTask (GettextCatalog.GetString ("Reporting results..."), allDiagnostics.Count);
+			monitor.BeginTask ("Reporting results...", allDiagnostics.Count);
 			TaskService.Errors.Clear ();
 			TaskService.Errors.AddRange (allDiagnostics.Select (diagnostic => {
 				var startLinePosition = diagnostic.Location.GetLineSpan ().StartLinePosition;

@@ -65,7 +65,6 @@ namespace MonoDevelop.Ide
 			
 			// Feedback button
 			
-			if (FeedbackService.Enabled) {
 				CustomFrame fr = new CustomFrame (0, 0, 1, 0);
 				var px = Xwt.Drawing.Image.FromResource ("feedback-16.png");
 				HBox b = new HBox (false, 3);
@@ -83,18 +82,17 @@ namespace MonoDevelop.Ide
 				feedbackButton.ButtonPressEvent += HandleFeedbackButtonButtonPressEvent;
 				;
 				feedbackButton.ClickOnRelease = true;
-				FeedbackService.FeedbackPositionGetter = delegate {
-					int x, y;
-					if (feedbackButton.GdkWindow != null) {
-						feedbackButton.GdkWindow.GetOrigin (out x, out y);
-						x += feedbackButton.Allocation.Width;
-						y -= 6;
-					} else {
-						x = y = -1;
-					}
-					return new Gdk.Point (x, y);
-				};
-			}
+				//FeedbackService.FeedbackPositionGetter = delegate {
+				//	int x, y;
+				//	if (feedbackButton.GdkWindow != null) {
+				//		feedbackButton.GdkWindow.GetOrigin (out x, out y);
+				//		x += feedbackButton.Allocation.Width;
+				//		y -= 6;
+				//	} else {
+				//		x = y = -1;
+				//	}
+				//	return new Gdk.Point (x, y);
+				//};
 			
 			// Dock area
 			
@@ -144,8 +142,9 @@ namespace MonoDevelop.Ide
 		static readonly bool FeedbackButtonThrowsException = Environment.GetEnvironmentVariable ("MONODEVELOP_TEST_CRASH_REPORTING") != null;
 		void HandleFeedbackButtonButtonPressEvent (object o, ButtonPressEventArgs args)
 		{
-			if (FeedbackService.IsFeedbackWindowVisible)
-				ignoreFeedbackButtonClick = true;
+            // TODO-AELIJ
+			//if (FeedbackService.IsFeedbackWindowVisible)
+			//	ignoreFeedbackButtonClick = true;
 
 			if (FeedbackButtonThrowsException) {
 				// Control == hard crash
@@ -166,8 +165,9 @@ namespace MonoDevelop.Ide
 		bool ignoreFeedbackButtonClick;
 		void HandleFeedbackButtonClicked (object sender, EventArgs e)
 		{
-			if (!ignoreFeedbackButtonClick)
-				FeedbackService.ShowFeedbackWindow ();
+            // TODO-AELIJ
+			//if (!ignoreFeedbackButtonClick)
+			//	FeedbackService.ShowFeedbackWindow ();
 			ignoreFeedbackButtonClick = false;
 		}
 

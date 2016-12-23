@@ -31,81 +31,86 @@ using System.IO;
 
 namespace MonoDevelop.Core.Logging
 {
-	
-	public class FileLogger : ILogger, IDisposable
-	{
-		TextWriter writer;
-		string name;
-		EnabledLoggingLevel enabledLevel = EnabledLoggingLevel.UpToInfo;
-		
-		public FileLogger (string filename)
-			: this (filename, false)
-		{
-		}
-		
-		public FileLogger (string filename, bool append)
-		{
-			writer = new StreamWriter (filename, append) {
-				AutoFlush = true	
-			};
-			name = filename;
-		}
 
-		public void Log (LogLevel level, string message)
-		{
-			string header;
-			
-			switch (level) {
-			case LogLevel.Fatal:
-				header = GettextCatalog.GetString ("FATAL ERROR");
-				break;
-			case LogLevel.Error:
-				header = GettextCatalog.GetString ("ERROR");
-				break;
-			case LogLevel.Warn:
-				header = GettextCatalog.GetString ("WARNING");
-				break;
-			case LogLevel.Info:
-				header = GettextCatalog.GetString ("INFO");
-				break;
-			case LogLevel.Debug:
-				header = GettextCatalog.GetString ("DEBUG");
-				break;
-			default:
-				header = GettextCatalog.GetString ("LOG");
-				break;
-			}
-			
-			writer.WriteLine ("{0}[{1}]: {2}", header, DateTime.Now.ToString ("u"), message);
-		}
-		
-		public EnabledLoggingLevel EnabledLevel {
-			get { return enabledLevel; }
-			set { enabledLevel = value; }
-		}
+    public class FileLogger : ILogger, IDisposable
+    {
+        TextWriter writer;
+        string name;
+        EnabledLoggingLevel enabledLevel = EnabledLoggingLevel.UpToInfo;
 
-		public string Name {
-			get { return name; }
-			set { name = value; }
-		}
-		
-		public void Dispose ()
-		{
-			Dispose (true);
-			GC.SuppressFinalize (this);
-		}
+        public FileLogger(string filename)
+            : this(filename, false)
+        {
+        }
 
-		protected void Dispose (bool disposing)
-		{
-			if (disposing && writer != null) {
-				writer.Dispose ();
-				writer = null;
-			}
-		}
-		
-		~FileLogger ()
-		{
-			Dispose (false);
-		}
-	}
+        public FileLogger(string filename, bool append)
+        {
+            writer = new StreamWriter(filename, append)
+            {
+                AutoFlush = true
+            };
+            name = filename;
+        }
+
+        public void Log(LogLevel level, string message)
+        {
+            string header;
+
+            switch (level)
+            {
+                case LogLevel.Fatal:
+                    header = "FATAL ERROR";
+                    break;
+                case LogLevel.Error:
+                    header = "ERROR";
+                    break;
+                case LogLevel.Warn:
+                    header = "WARNING";
+                    break;
+                case LogLevel.Info:
+                    header = "INFO";
+                    break;
+                case LogLevel.Debug:
+                    header = "DEBUG";
+                    break;
+                default:
+                    header = "LOG";
+                    break;
+            }
+
+            writer.WriteLine("{0}[{1}]: {2}", header, DateTime.Now.ToString("u"), message);
+        }
+
+        public EnabledLoggingLevel EnabledLevel
+        {
+            get { return enabledLevel; }
+            set { enabledLevel = value; }
+        }
+
+        public string Name
+        {
+            get { return name; }
+            set { name = value; }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected void Dispose(bool disposing)
+        {
+            if (disposing && writer != null)
+            {
+                writer.Dispose();
+                writer = null;
+            }
+        }
+
+        ~FileLogger()
+        {
+            Dispose(false);
+        }
+    }
 }

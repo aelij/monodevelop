@@ -206,7 +206,7 @@ namespace MonoDevelop.Ide.Gui.Components
 			
 			public void AddChild (object dataObject, bool moveToChild)
 			{
-				if (dataObject == null) throw new ArgumentNullException ("dataObject");
+				if (dataObject == null) throw new ArgumentNullException (nameof (dataObject));
 				
 				NodeBuilder[] chain = pad.GetBuilderChain (dataObject.GetType ());
 				if (chain == null) return;

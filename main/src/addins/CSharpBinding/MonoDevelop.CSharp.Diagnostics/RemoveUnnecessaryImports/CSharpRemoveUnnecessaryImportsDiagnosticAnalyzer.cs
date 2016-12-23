@@ -18,7 +18,7 @@ namespace MonoDevelop.CSharp.Diagnostics.RemoveUnnecessaryImports
 	[DiagnosticAnalyzer(LanguageNames.CSharp)]
 	internal sealed class CSharpRemoveUnnecessaryImportsDiagnosticAnalyzer : RemoveUnnecessaryImportsDiagnosticAnalyzerBase
 	{
-		private static readonly string s_TitleAndMessageFormat = GettextCatalog.GetString ("Using directive is unnecessary.");
+		private static readonly string s_TitleAndMessageFormat = "Using directive is unnecessary.";
 
 		protected override LocalizableString GetTitleAndMessageFormatForClassificationIdDescriptor()
 		{

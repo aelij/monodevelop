@@ -45,13 +45,13 @@ namespace MonoDevelop.CodeGeneration
 
 		public string Text {
 			get {
-				return GettextCatalog.GetString ("Partial methods");
+				return "Partial methods";
 			}
 		}
 
 		public string GenerateDescription {
 			get {
-				return GettextCatalog.GetString ("Select methods to be implemented.");
+				return "Select methods to be implemented.";
 			}
 		}
 

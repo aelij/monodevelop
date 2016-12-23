@@ -53,7 +53,7 @@ namespace MonoDevelop.MacIntegration
 			
 			var view = new NSView (new CGRect (0, 0, size.Width, size.Height));
 			var okButton = new NSButton {
-				Title = GettextCatalog.GetString ("OK"),
+				Title = "OK",
 				Bordered = true,
 				BezelStyle = NSBezelStyle.Rounded,
 			};
@@ -64,7 +64,7 @@ namespace MonoDevelop.MacIntegration
 			this.DefaultButtonCell = okButton.Cell;
 			
 			var cancelButton = new NSButton {
-				Title = GettextCatalog.GetString ("Cancel"),
+				Title = "Cancel",
 				Bordered = true,
 				BezelStyle = NSBezelStyle.Rounded,
 			};
@@ -85,7 +85,7 @@ namespace MonoDevelop.MacIntegration
 			
 			var buttonAreaTop = buttonRect.Height + padding * 2;
 
-			var label = CreateLabel (GettextCatalog.GetString ("Available encodings:"));
+			var label = CreateLabel ("Available encodings:");
 			var labelSize = label.Frame.Size;
 			var labelBottom = size.Height - 12 - labelSize.Height;
 			label.Frame = new CGRect (12, labelBottom, labelSize.Width, labelSize.Height);
@@ -107,7 +107,7 @@ namespace MonoDevelop.MacIntegration
 			
 			nfloat center = (size.Width + padding) / 2;
 			
-			var selectedLabel = CreateLabel (GettextCatalog.GetString ("Encodings shown in menu:"));
+			var selectedLabel = CreateLabel ("Encodings shown in menu:");
 			var selectedLabelSize = selectedLabel.Frame.Size;
 			selectedLabel.Frame = new CGRect (center, labelBottom, selectedLabelSize.Width, selectedLabelSize.Height);
 			view.AddSubview (selectedLabel);

@@ -69,7 +69,7 @@ namespace MonoDevelop.SourceEditor
 						UrlMarker urlMarker = marker as UrlMarker;
 						if (urlMarker != null) {
 							if (urlMarker.StartColumn <= location.Column && location.Column < urlMarker.EndColumn) {
-								ainfo.Add (urlMarker.UrlType == UrlType.Email ? GettextCatalog.GetString ("_Write an e-mail to...") : GettextCatalog.GetString ("_Open URL..."), urlMarker);
+								ainfo.Add (urlMarker.UrlType == UrlType.Email ? "_Write an e-mail to..." : "_Open URL...", urlMarker);
 								ainfo.AddSeparator ();
 							}
 						}

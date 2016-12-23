@@ -27,7 +27,7 @@
 
 using Gtk;
 using System;
-using MonoDevelop.Ide.Tasks;
+using MonoDevelop.Ide.Editor;
 
 namespace MonoDevelop.Components
 {
@@ -109,7 +109,7 @@ namespace MonoDevelop.Components
 			}
 		}
 
-		public TaskSeverity? Severity { get; set; }
+		public DiagnosticSeverity Severity { get; set; }
 		public PopupPosition Position { get; set; }
 	}
 }

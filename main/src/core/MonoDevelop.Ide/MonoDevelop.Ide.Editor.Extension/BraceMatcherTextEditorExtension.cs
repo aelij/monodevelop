@@ -30,7 +30,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Gtk;
-using Mono.Addins;
 using MonoDevelop.Core;
 
 namespace MonoDevelop.Ide.Editor.Extension
@@ -42,16 +41,7 @@ namespace MonoDevelop.Ide.Editor.Extension
 		bool isSubscribed;
 		static BraceMatcherTextEditorExtension()
 		{
-			AddinManager.AddExtensionNodeHandler ("/MonoDevelop/Ide/BraceMatcher", delegate(object sender, ExtensionNodeEventArgs args) {
-				switch (args.Change) {
-				case ExtensionChange.Add:
-					braceMatcher.Add ((AbstractBraceMatcher)args.ExtensionObject);
-					break;
-				case ExtensionChange.Remove:
-					braceMatcher.Remove ((AbstractBraceMatcher)args.ExtensionObject);
-					break;
-				}
-			});
+			// TODO-AELIJ: add handlers
 			braceMatcher.Add (new DefaultBraceMatcher());
 		}
 

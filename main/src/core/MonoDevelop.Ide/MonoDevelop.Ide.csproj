@@ -1,4 +1,4 @@
-﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="12.0">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -8,7 +8,8 @@
     <OutputType>Library</OutputType>
     <AssemblyName>MonoDevelop.Ide</AssemblyName>
     <RootNamespace>MonoDevelop.Ide</RootNamespace>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>True</DebugSymbols>
@@ -108,7 +109,6 @@
     <Reference Include="System.Web.Services" />
     <Reference Include="Mono.Posix" />
     <Reference Include="System.Runtime.Remoting" />
-    <Reference Include="monodoc, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756" />
     <Reference Include="gdk-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f">
       <SpecificVersion>False</SpecificVersion>
     </Reference>
@@ -131,14 +131,6 @@
     <Reference Include="System.Design" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Runtime.Serialization" />
-    <Reference Include="Xamarin.Mac" Condition=" '$(Configuration)' == 'DebugMac' Or '$(Configuration)' == 'ReleaseMac' ">
-      <HintPath>..\..\..\external\Xamarin.Mac.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Windows" Condition=" '$(Configuration)' == 'DebugWin32' Or '$(Configuration)' == 'ReleaseWin32' " />
-    <Reference Include="PresentationCore" Condition=" '$(Configuration)' == 'DebugWin32' Or '$(Configuration)' == 'ReleaseWin32' " />
-    <Reference Include="PresentationFramework" Condition=" '$(Configuration)' == 'DebugWin32' Or '$(Configuration)' == 'ReleaseWin32' " />
-    <Reference Include="WindowsBase" Condition=" '$(Configuration)' == 'DebugWin32' Or '$(Configuration)' == 'ReleaseWin32' " />
-    <Reference Include="WindowsFormsIntegration" Condition=" '$(Configuration)' == 'DebugWin32' Or '$(Configuration)' == 'ReleaseWin32' " />
     <Reference Include="System.Xaml" />
     <Reference Include="ICSharpCode.SharpZipLib">
       <HintPath>..\..\..\packages\SharpZipLib.0.86.0\lib\20\ICSharpCode.SharpZipLib.dll</HintPath>
@@ -148,89 +140,23 @@
       <HintPath>..\..\..\packages\Newtonsoft.Json.8.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="System.Collections.Immutable">
-      <HintPath>..\..\..\build\bin\System.Collections.Immutable.dll</HintPath>
-    </Reference>
     <Reference Include="System.Reflection.Metadata">
       <HintPath>..\..\..\build\bin\System.Reflection.Metadata.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.CodeAnalysis">
-      <HintPath>..\..\..\build\bin\Microsoft.CodeAnalysis.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.CodeAnalysis.Workspaces">
-      <HintPath>..\..\..\build\bin\Microsoft.CodeAnalysis.Workspaces.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Composition.AttributedModel">
-      <HintPath>..\..\..\build\bin\System.Composition.AttributedModel.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Composition.Runtime">
-      <HintPath>..\..\..\build\bin\System.Composition.Runtime.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\external\xwt\Xwt.Gtk\Xwt.Gtk.csproj">
+      <Project>{c3887a93-b2bd-4097-8e2f-3a063eff32fd}</Project>
+      <Name>Xwt.Gtk</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\external\xwt\Xwt\Xwt.csproj">
+      <Project>{92494904-35fa-4dc9-bde9-3a3e87ac49d3}</Project>
+      <Name>Xwt</Name>
+    </ProjectReference>
     <ProjectReference Include="..\MonoDevelop.Core\MonoDevelop.Core.csproj">
       <Project>{7525BB88-6142-4A26-93B9-A30C6983390A}</Project>
       <Name>MonoDevelop.Core</Name>
       <Private>False</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\MonoDevelop.Projects.Formats.MSBuild\MonoDevelop.Projects.Formats.MSBuild.csproj">
-      <Project>{A437F1A3-78DF-4F00-8053-D32A8B1EB679}</Project>
-      <Name>MonoDevelop.Projects.Formats.MSBuild</Name>
-      <Private>False</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\external\nrefactory\ICSharpCode.NRefactory\ICSharpCode.NRefactory.csproj">
-      <Project>{3B2A5653-EC97-4001-BB9B-D90F1AF2C371}</Project>
-      <Name>ICSharpCode.NRefactory</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\external\nrefactory\ICSharpCode.NRefactory.CSharp\ICSharpCode.NRefactory.CSharp.csproj">
-      <Project>{53DCA265-3C3C-42F9-B647-F72BA678122B}</Project>
-      <Name>ICSharpCode.NRefactory.CSharp</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\external\xwt\Xwt\Xwt.csproj">
-      <Project>{92494904-35FA-4DC9-BDE9-3A3E87AC49D3}</Project>
-      <Name>Xwt</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\external\xwt\Xwt.Gtk\Xwt.Gtk.csproj">
-      <Project>{C3887A93-B2BD-4097-8E2F-3A063EFF32FD}</Project>
-      <Name>Xwt.Gtk</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\external\mono-addins\Mono.Addins\Mono.Addins.csproj">
-      <Project>{91DD5A2D-9FE3-4C3C-9253-876141874DAD}</Project>
-      <Name>Mono.Addins</Name>
-      <Private>False</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\external\mono-addins\Mono.Addins.Setup\Mono.Addins.Setup.csproj">
-      <Project>{A85C9721-C054-4BD8-A1F3-0227615F0A36}</Project>
-      <Name>Mono.Addins.Setup</Name>
-      <Private>False</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\external\mono-addins\Mono.Addins.Gui\Mono.Addins.Gui.csproj">
-      <Project>{FEC19BDA-4904-4005-8C09-68E82E8BEF6A}</Project>
-      <Name>Mono.Addins.Gui</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\external\cecil\Mono.Cecil.csproj">
-      <Project>{D68133BD-1E63-496E-9EDE-4FBDBF77B486}</Project>
-      <Name>Mono.Cecil</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\external\debugger-libs\Mono.Debugging\Mono.Debugging.csproj">
-      <Project>{90C99ADB-7D4B-4EB4-98C2-40BD1B14C7D2}</Project>
-      <Name>Mono.Debugging</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\external\nrefactory\ICSharpCode.NRefactory.IKVM\ICSharpCode.NRefactory.IKVM.csproj">
-      <Project>{A727169F-D94F-443F-B305-B057D7F3B420}</Project>
-      <Name>ICSharpCode.NRefactory.IKVM</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\external\ikvm\reflect\IKVM.Reflection.csproj">
-      <Project>{4CB170EF-DFE6-4A56-9E1B-A85449E827A7}</Project>
-      <Name>IKVM.Reflection</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\external\nrefactory\ICSharpCode.NRefactory.Cecil\ICSharpCode.NRefactory.Cecil.csproj">
-      <Project>{2B8F4F83-C2B3-4E84-A27B-8DEE1BE0E006}</Project>
-      <Name>ICSharpCode.NRefactory.Cecil</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\external\RefactoringEssentials\RefactoringEssentials\RefactoringEssentials.csproj">
-      <Project>{C465A5DC-AD28-49A2-89C0-F81838814A7E}</Project>
-      <Name>RefactoringEssentials</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -456,38 +382,8 @@
     <EmbeddedResource Include="options\KeyBindingSchemeMonoDevelop2.xml">
       <LogicalName>KeyBindingSchemeMonoDevelop2.xml</LogicalName>
     </EmbeddedResource>
-    <EmbeddedResource Include="MonoDevelop.Ide.StandardHeader\MITX11LicencePolicy.xml">
-      <LogicalName>MITX11LicencePolicy.xml</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="MonoDevelop.Ide.StandardHeader\Apache2LicencePolicy.xml">
-      <LogicalName>Apache2LicencePolicy.xml</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="MonoDevelop.Ide.StandardHeader\GPL2LicencePolicy.xml">
-      <LogicalName>GPL2LicencePolicy.xml</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="MonoDevelop.Ide.StandardHeader\GPL3LicencePolicy.xml">
-      <LogicalName>GPL3LicencePolicy.xml</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="MonoDevelop.Ide.StandardHeader\LGPL2-1LicencePolicy.xml">
-      <LogicalName>LGPL2-1LicencePolicy.xml</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="MonoDevelop.Ide.StandardHeader\NewBSDLicencePolicy.xml">
-      <LogicalName>NewBSDLicencePolicy.xml</LogicalName>
-    </EmbeddedResource>
     <EmbeddedResource Include="MonoDevelop.Ide.CodeTemplates\MonoDevelop-templates.xml">
       <LogicalName>MonoDevelop-templates.xml</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="MonoDevelop.Ide.CodeFormatting\MonoTextStylePolicy.xml">
-      <LogicalName>MonoTextStylePolicy.xml</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="MonoDevelop.Ide.CodeFormatting\VisualStudioTextStylePolicy.xml">
-      <LogicalName>VisualStudioTextStylePolicy.xml</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="MonoDevelop.Ide.StandardHeader\LGPL3LicencePolicy.xml">
-      <LogicalName>LGPL3LicencePolicy.xml</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="MonoDevelop.Ide.CodeFormatting\InvariantTextStylePolicy.xml">
-      <LogicalName>InvariantTextStylePolicy.xml</LogicalName>
     </EmbeddedResource>
     <EmbeddedResource Include="icons\new-namespace-16.png">
       <LogicalName>new-namespace-16.png</LogicalName>
@@ -1989,51 +1885,6 @@
     <EmbeddedResource Include="MonoDevelop.Components.Docking\icons\pad-dock-9~dark%402x.png">
       <LogicalName>pad-dock-9~dark@2x.png</LogicalName>
     </EmbeddedResource>
-    <EmbeddedResource Include="MonoDevelop.Ide.Gui.Pads.ProjectPad\ProjectPadContextMenu.addin.xml">
-      <LogicalName>ProjectPadContextMenu.addin.xml</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="ExtensionModel\Commands.addin.xml">
-      <LogicalName>Commands.addin.xml</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="ExtensionModel\DefaultPolicyPanels.addin.xml">
-      <LogicalName>DefaultPolicyPanels.addin.xml</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="ExtensionModel\GlobalOptionsDialog.addin.xml">
-      <LogicalName>GlobalOptionsDialog.addin.xml</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="ExtensionModel\ItemOptionPanels.addin.xml">
-      <LogicalName>ItemOptionPanels.addin.xml</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="ExtensionModel\MainMenu.addin.xml">
-      <LogicalName>MainMenu.addin.xml</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="ExtensionModel\MainToolbar.addin.xml">
-      <LogicalName>MainToolbar.addin.xml</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="ExtensionModel\MimeTypes.addin.xml">
-      <LogicalName>MimeTypes.addin.xml</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="ExtensionModel\Pads.addin.xml">
-      <LogicalName>Pads.addin.xml</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="ExtensionModel\StockIcons.addin.xml">
-      <LogicalName>StockIcons.addin.xml</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="ExtensionModel\Templates.addin.xml">
-      <LogicalName>Templates.addin.xml</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="ExtensionModel\MonoDevelop.Ide.addin.xml">
-      <LogicalName>MonoDevelop.Ide.addin.xml</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="ExtensionModel\Policies.addin.xml">
-      <LogicalName>Policies.addin.xml</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="MonoDevelop.Components.Commands\CommandsExtensionModel.addin.xml">
-      <LogicalName>CommandsExtensionModel.addin.xml</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="MonoDevelop.Ide.Gui.Pads.ClassPad\ClassPadContextMenu.addin.xml">
-      <LogicalName>ClassPadContextMenu.addin.xml</LogicalName>
-    </EmbeddedResource>
     <EmbeddedResource Include="icons\feedback-16.png">
       <LogicalName>feedback-16.png</LogicalName>
     </EmbeddedResource>
@@ -2081,24 +1932,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="icons\updates-16~dark~disabled%402x.png">
       <LogicalName>updates-16~dark~disabled@2x.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="branding\welcome-logo.png">
-      <LogicalName>welcome-logo.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="branding\welcome-logo%402x.png">
-      <LogicalName>welcome-logo@2x.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="branding\welcome-tile.png">
-      <LogicalName>welcome-tile.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="branding\welcome-tile%402x.png">
-      <LogicalName>welcome-tile@2x.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="branding\AboutImage.png">
-      <LogicalName>AboutImage.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="branding\AboutImage%402x.png">
-      <LogicalName>AboutImage@2x.png</LogicalName>
     </EmbeddedResource>
     <EmbeddedResource Include="icons\popup-close-16.png">
       <LogicalName>popup-close-16.png</LogicalName>
@@ -3218,78 +3051,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="icons\clear-16~dark~disabled%402x.png">
       <LogicalName>clear-16~dark~disabled@2x.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="MonoDevelop.Ide.WelcomePage\icons\welcome-link-chat-16.png">
-      <LogicalName>welcome-link-chat-16.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="MonoDevelop.Ide.WelcomePage\icons\welcome-link-chat-16%402x.png">
-      <LogicalName>welcome-link-chat-16@2x.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="MonoDevelop.Ide.WelcomePage\icons\welcome-link-chat-16~dark.png">
-      <LogicalName>welcome-link-chat-16~dark.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="MonoDevelop.Ide.WelcomePage\icons\welcome-link-chat-16~dark%402x.png">
-      <LogicalName>welcome-link-chat-16~dark@2x.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="MonoDevelop.Ide.WelcomePage\icons\welcome-link-md-16.png">
-      <LogicalName>welcome-link-md-16.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="MonoDevelop.Ide.WelcomePage\icons\welcome-link-md-16%402x.png">
-      <LogicalName>welcome-link-md-16@2x.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="MonoDevelop.Ide.WelcomePage\icons\welcome-link-md-16~dark.png">
-      <LogicalName>welcome-link-md-16~dark.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="MonoDevelop.Ide.WelcomePage\icons\welcome-link-md-16~dark%402x.png">
-      <LogicalName>welcome-link-md-16~dark@2x.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="MonoDevelop.Ide.WelcomePage\icons\welcome-link-support-16.png">
-      <LogicalName>welcome-link-support-16.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="MonoDevelop.Ide.WelcomePage\icons\welcome-link-support-16%402x.png">
-      <LogicalName>welcome-link-support-16@2x.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="MonoDevelop.Ide.WelcomePage\icons\welcome-link-support-16~dark.png">
-      <LogicalName>welcome-link-support-16~dark.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="MonoDevelop.Ide.WelcomePage\icons\welcome-link-support-16~dark%402x.png">
-      <LogicalName>welcome-link-support-16~dark@2x.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="MonoDevelop.Ide.WelcomePage\icons\welcome-link-info-16.png">
-      <LogicalName>welcome-link-info-16.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="MonoDevelop.Ide.WelcomePage\icons\welcome-link-info-16%402x.png">
-      <LogicalName>welcome-link-info-16@2x.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="MonoDevelop.Ide.WelcomePage\icons\welcome-link-info-16~dark.png">
-      <LogicalName>welcome-link-info-16~dark.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="MonoDevelop.Ide.WelcomePage\icons\welcome-link-info-16~dark%402x.png">
-      <LogicalName>welcome-link-info-16~dark@2x.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="MonoDevelop.Ide.WelcomePage\icons\welcome-new-solution-16.png">
-      <LogicalName>welcome-new-solution-16.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="MonoDevelop.Ide.WelcomePage\icons\welcome-new-solution-16%402x.png">
-      <LogicalName>welcome-new-solution-16@2x.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="MonoDevelop.Ide.WelcomePage\icons\welcome-new-solution-16~dark.png">
-      <LogicalName>welcome-new-solution-16~dark.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="MonoDevelop.Ide.WelcomePage\icons\welcome-new-solution-16~dark%402x.png">
-      <LogicalName>welcome-new-solution-16~dark@2x.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="MonoDevelop.Ide.WelcomePage\icons\welcome-open-solution-16.png">
-      <LogicalName>welcome-open-solution-16.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="MonoDevelop.Ide.WelcomePage\icons\welcome-open-solution-16%402x.png">
-      <LogicalName>welcome-open-solution-16@2x.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="MonoDevelop.Ide.WelcomePage\icons\welcome-open-solution-16~dark.png">
-      <LogicalName>welcome-open-solution-16~dark.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="MonoDevelop.Ide.WelcomePage\icons\welcome-open-solution-16~dark%402x.png">
-      <LogicalName>welcome-open-solution-16~dark@2x.png</LogicalName>
     </EmbeddedResource>
     <EmbeddedResource Include="icons\link-overlay-16.png">
       <LogicalName>link-overlay-16.png</LogicalName>
@@ -7359,7 +7120,6 @@
     <EmbeddedResource Include="icons\redo-16~dark~disabled%402x.png">
       <LogicalName>redo-16~dark~disabled@2x.png</LogicalName>
     </EmbeddedResource>
-
     <EmbeddedResource Include="icons\folder-services-16.png">
       <LogicalName>folder-services-16.png</LogicalName>
     </EmbeddedResource>
@@ -7384,7 +7144,6 @@
     <EmbeddedResource Include="icons\folder-services-16~sel%402x.png">
       <LogicalName>folder-services-16~sel@2x.png</LogicalName>
     </EmbeddedResource>
-
     <EmbeddedResource Include="icons\folder-code-16.png">
       <LogicalName>folder-code-16.png</LogicalName>
     </EmbeddedResource>
@@ -7409,7 +7168,6 @@
     <EmbeddedResource Include="icons\folder-code-16~sel%402x.png">
       <LogicalName>folder-code-16~sel@2x.png</LogicalName>
     </EmbeddedResource>
-
     <EmbeddedResource Include="icons\service-16.png">
       <LogicalName>service-16.png</LogicalName>
     </EmbeddedResource>
@@ -7458,7 +7216,6 @@
     <EmbeddedResource Include="icons\service-24~dark~sel%402x.png">
       <LogicalName>service-24~dark~sel@2x.png</LogicalName>
     </EmbeddedResource>
-
     <EmbeddedResource Include="icons\expander-arrow-closed-8.png">
       <LogicalName>expander-arrow-closed-8.png</LogicalName>
     </EmbeddedResource>
@@ -7483,7 +7240,6 @@
     <EmbeddedResource Include="icons\expander-arrow-closed-8~dark~sel%402x.png">
       <LogicalName>expander-arrow-closed-8~dark~sel@2x.png</LogicalName>
     </EmbeddedResource>
-
     <EmbeddedResource Include="icons\expander-arrow-expanded-8.png">
       <LogicalName>expander-arrow-expanded-8.png</LogicalName>
     </EmbeddedResource>
@@ -7508,7 +7264,6 @@
     <EmbeddedResource Include="icons\expander-arrow-expanded-8~dark~sel%402x.png">
       <LogicalName>expander-arrow-expanded-8~dark~sel@2x.png</LogicalName>
     </EmbeddedResource>
-
     <EmbeddedResource Include="icons\code-16.png">
       <LogicalName>code-16.png</LogicalName>
     </EmbeddedResource>
@@ -7533,7 +7288,6 @@
     <EmbeddedResource Include="icons\code-16~dark~sel%402x.png">
       <LogicalName>code-16~dark~sel@2x.png</LogicalName>
     </EmbeddedResource>
-
     <EmbeddedResource Include="icons\checkmark-16.png">
       <LogicalName>checkmark-16.png</LogicalName>
     </EmbeddedResource>
@@ -7558,7 +7312,6 @@
     <EmbeddedResource Include="icons\checkmark-16~dark~sel%402x.png">
       <LogicalName>checkmark-16~dark~sel@2x.png</LogicalName>
     </EmbeddedResource>
-
     <EmbeddedResource Include="icons\dependency-16.png">
       <LogicalName>dependency-16.png</LogicalName>
     </EmbeddedResource>
@@ -7583,7 +7336,6 @@
     <EmbeddedResource Include="icons\dependency-16~dark~sel%402x.png">
       <LogicalName>dependency-16~dark~sel@2x.png</LogicalName>
     </EmbeddedResource>
-
     <EmbeddedResource Include="templates\images\workspace-template.png">
       <LogicalName>workspace-template.png</LogicalName>
     </EmbeddedResource>
@@ -7961,39 +7713,19 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MonoDevelop.Ide.Commands\CustomStringTagProvider.cs" />
     <Compile Include="MonoDevelop.Ide.Commands\EditCommands.cs" />
     <Compile Include="MonoDevelop.Ide.Commands\FileCommands.cs" />
     <Compile Include="MonoDevelop.Ide.Commands\HelpCommands.cs" />
-    <Compile Include="MonoDevelop.Ide.Commands\ProjectCommands.cs" />
     <Compile Include="MonoDevelop.Ide.Commands\SearchCommands.cs" />
-    <Compile Include="MonoDevelop.Ide.Commands\ToolsCommands.cs" />
     <Compile Include="MonoDevelop.Ide.Commands\ViewCommands.cs" />
     <Compile Include="MonoDevelop.Ide.Commands\WindowCommands.cs" />
+    <Compile Include="MonoDevelop.Ide.Gui.Components\NodeBuilder.cs" />
+    <Compile Include="MonoDevelop.Ide.Gui.Components\NodeBuilderExtension.cs" />
     <Compile Include="MonoDevelop.Ide.Gui\DisplayBindingService.cs" />
     <Compile Include="MonoDevelop.Ide.Gui\BackgroundProgressMonitor.cs" />
     <Compile Include="MonoDevelop.Ide.Gui\StatusProgressMonitor.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects.OptionPanels\PortableRuntimeSelectorDialog.cs" />
-    <Compile Include="MonoDevelop.Ide.Tasks\TaskService.cs" />
-    <Compile Include="MonoDevelop.Ide.Codons\ContextPadCodon.cs" />
-    <Compile Include="MonoDevelop.Ide.Codons\WorkbenchContextCodon.cs" />
-    <Compile Include="MonoDevelop.Ide.Codons\CombineOpenCondition.cs" />
-    <Compile Include="MonoDevelop.Ide.Codons\LanguageActiveCondition.cs" />
-    <Compile Include="MonoDevelop.Ide.Codons\ProjectActiveCondition.cs" />
-    <Compile Include="MonoDevelop.Ide.ExternalTools\ExternalTool.cs" />
     <Compile Include="MonoDevelop.Ide.CodeTemplates\CodeTemplate.cs" />
     <Compile Include="MonoDevelop.Ide.CodeTemplates\CodeTemplateService.cs" />
-    <Compile Include="MonoDevelop.Ide.Templates\FileDescriptionTemplate.cs" />
-    <Compile Include="MonoDevelop.Ide.Templates\FileTemplate.cs" />
-    <Compile Include="MonoDevelop.Ide.Templates\ICustomProjectCIEntry.cs" />
-    <Compile Include="MonoDevelop.Ide.Templates\INewFileCreator.cs" />
-    <Compile Include="MonoDevelop.Ide.Templates\ProjectDescriptor.cs" />
-    <Compile Include="MonoDevelop.Ide.Templates\ProjectTemplate.cs" />
-    <Compile Include="MonoDevelop.Ide.Templates\TextFileDescriptionTemplate.cs" />
-    <Compile Include="MonoDevelop.Ide.Templates\CodeDomFileDescriptionTemplate.cs" />
-    <Compile Include="MonoDevelop.Ide.Templates\SingleFileDescriptionTemplate.cs" />
-    <Compile Include="MonoDevelop.Ide.Templates\SolutionDescriptor.cs" />
-    <Compile Include="MonoDevelop.Ide.Templates\ResourceFileDescriptionTemplate.cs" />
     <Compile Include="MonoDevelop.Ide.Gui\BaseViewContent.cs" />
     <Compile Include="MonoDevelop.Ide.Gui\ViewContent.cs" />
     <Compile Include="MonoDevelop.Ide.Gui\PadContent.cs" />
@@ -8002,112 +7734,41 @@
     <Compile Include="MonoDevelop.Ide.Gui.Content\IBookmarkBuffer.cs" />
     <Compile Include="MonoDevelop.Ide.Gui.Content\IClipboardHandler.cs" />
     <Compile Include="MonoDevelop.Ide.Gui.Content\IPrintable.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Dialogs\CommonAboutDialog.cs" />
     <Compile Include="MonoDevelop.Ide.Gui.Dialogs\DirtyFilesDialog.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Dialogs\NewLayoutDialog.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Dialogs\AboutMonoDevelopTabPage.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Dialogs\VersionInformationTabPage.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Dialogs\TipOfTheDay.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Dialogs\AddinLoadErrorDialog.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.OptionPanels\BuildPanel.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.OptionPanels\LoadSavePanel.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.OptionPanels\AddInsOptionsPanel.cs" />
     <Compile Include="MonoDevelop.Ide.Gui.Pads\DefaultMonitorPad.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Pads\MonodocTreePad.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Pads.ProjectPad\SolutionFolderNodeBuilder.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Pads.ProjectPad\FolderNodeBuilder.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Pads.ProjectPad\ProjectFileNodeBuilder.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Pads.ProjectPad\ProjectFolder.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Pads.ProjectPad\ProjectFolderNodeBuilder.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Pads.ProjectPad\ProjectNodeBuilder.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Pads.ProjectPad\ProjectReferenceFolderNodeBuilder.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Pads.ProjectPad\ProjectReferenceNodeBuilder.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Pads.ProjectPad\ProjectSolutionPad.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Pads.ProjectPad\ShowAllFilesBuilderExtension.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Pads.ProjectPad\SystemFile.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Pads.ProjectPad\SystemFileNodeBuilder.cs" />
     <Compile Include="MonoDevelop.Ide.Gui.Pads\SolutionPad.cs" />
     <Compile Include="MonoDevelop.Ide.Gui.Pads\TreeViewPad.cs" />
     <Compile Include="MonoDevelop.Ide.Gui\DefaultWorkbench.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui\WorkbenchMemento.cs" />
     <Compile Include="MonoDevelop.Ide.Gui\SdiWorkspaceWindow.cs" />
-    <Compile Include="MonoDevelop.Ide.Codons\DisplayBindingCodon.cs" />
-    <Compile Include="MonoDevelop.Ide.Codons\FileTemplateTypeCodon.cs" />
-    <Compile Include="MonoDevelop.Ide.Codons\ProjectTemplateCodon.cs" />
-    <Compile Include="MonoDevelop.Ide.Codons\NodeBuilderCodon.cs" />
-    <Compile Include="MonoDevelop.Ide.Codons\PadCodon.cs" />
-    <Compile Include="MonoDevelop.Ide.Codons\PadOptionCodon.cs" />
-    <Compile Include="MonoDevelop.Ide.Codons\SolutionPadCodon.cs" />
-    <Compile Include="MonoDevelop.Ide.Templates\ISolutionItemDescriptor.cs" />
-    <Compile Include="MonoDevelop.Ide.Templates\SolutionItemDescriptor.cs" />
     <Compile Include="MonoDevelop.Ide.Gui\ConfigurationComboBox.cs" />
     <Compile Include="MonoDevelop.Ide.Gui\IPadContainer.cs" />
     <Compile Include="MonoDevelop.Ide.Gui\Document.cs" />
     <Compile Include="MonoDevelop.Ide.Gui\Pad.cs" />
     <Compile Include="MonoDevelop.Ide.Gui\Workbench.cs" />
     <Compile Include="MonoDevelop.Ide.Gui\StartupInfo.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui\ProgressMonitors.cs" />
+    <Compile Include="MonoDevelop.Ide.Editor\Error.cs" />
+    <Compile Include="MonoDevelop.Ide.Editor\FoldingRegion.cs" />
     <Compile Include="MonoDevelop.Ide\Services.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.OptionPanels\TasksOptionsPanel.cs" />
     <Compile Include="MonoDevelop.Ide.Gui\FileViewer.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Pads\TaskListPad.cs" />
-    <Compile Include="MonoDevelop.Ide.Templates\CodeTranslationFileDescriptionTemplate.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Dialogs\SelectEncodingsDialog.cs" />
     <Compile Include="MonoDevelop.Ide.Gui.Dialogs\FileSelectorDialog.cs" />
-    <Compile Include="MonoDevelop.Ide.Tasks\TaskPriority.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Pads\ErrorListPad.cs" />
     <Compile Include="gtk-gui\generated.cs" />
-    <Compile Include="MonoDevelop.Ide.Tasks\ITaskListView.cs" />
-    <Compile Include="MonoDevelop.Ide.Codons\TaskListViewCodon.cs" />
-    <Compile Include="MonoDevelop.Ide.Tasks\CommentTasksView.cs" />
-    <Compile Include="MonoDevelop.Ide.Tasks\UserTasksView.cs" />
     <Compile Include="MonoDevelop.Ide.Gui\LayoutComboBox.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Pads.ProjectPad\UnknownEntryNodeBuilder.cs" />
-    <Compile Include="MonoDevelop.Ide.Commands\NavigationCommands.cs" />
-    <Compile Include="MonoDevelop.Ide.StandardHeader\StandardHeaderService.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.OptionPanels\KeyBindingsPanel.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.Gui.OptionPanels.KeyBindingsPanel.cs" />
     <Compile Include="MonoDevelop.Ide.Commands\TextEditorCommands.cs" />
     <Compile Include="MonoDevelop.Ide.Commands\FileTabCommands.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.Gui.OptionPanels.BuildPanelWidget.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.Gui.OptionPanels.LoadSavePanelWidget.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.Gui.Dialogs.NewLayoutDialog.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.SelectEncodingsDialog.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.Gui.OptionPanels.TasksPanelWidget.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.Gui.Dialogs.TipOfTheDayWindow.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.Gui.OptionPanels.AddInsPanelWidget.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.Gui.Dialogs.AddinLoadErrorDialog.cs" />
-    <Compile Include="MonoDevelop.Ide.Codons\FileFilterCodon.cs" />
-    <Compile Include="MonoDevelop.Ide.ExternalTools\ExternalToolService.cs" />
-    <Compile Include="MonoDevelop.Ide.Templates\FileTemplateReference.cs" />
-    <Compile Include="MonoDevelop.Ide.Codons\FileTemplateConditionTypeCodon.cs" />
-    <Compile Include="MonoDevelop.Ide.Templates\ClrVersionFileTemplateCondition.cs" />
-    <Compile Include="MonoDevelop.Ide.Templates\FileTemplateCondition.cs" />
-    <Compile Include="MonoDevelop.Ide.Templates\PartialTypeFileTemplateCondition.cs" />
-    <Compile Include="MonoDevelop.Ide.Templates\ParentProjectFileTemplateCondition.cs" />
     <Compile Include="MonoDevelop.Ide.Gui\ToolbarComboBox.cs" />
     <Compile Include="MonoDevelop.Ide.Gui.Content\ISplittable.cs" />
     <Compile Include="MonoDevelop.Ide.Gui.Content\IFoldable.cs" />
-    <Compile Include="MonoDevelop.Ide.ExternalTools\ExternalToolPanel.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.ExternalTools.ExternalToolPanelWidget.cs" />
     <Compile Include="MonoDevelop.Ide.Gui\MonoDevelopStatusBar.cs" />
     <Compile Include="MonoDevelop.Ide.Gui\DocumentSwitcher.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.OptionPanels\IDEStyleOptionsPanel.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.Gui.OptionPanels.IDEStyleOptionsPanelWidget.cs" />
     <Compile Include="MonoDevelop.Ide.Gui.Content\IZoomable.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Pads.ProjectPad\SolutionNodeBuilder.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Pads.ProjectPad\WorkspaceNodeBuilder.cs" />
     <Compile Include="MonoDevelop.Ide.Gui.Content\DocumentStateTracker.cs" />
     <Compile Include="MonoDevelop.Ide.Gui.Content\IPathedDocument.cs" />
-    <Compile Include="MonoDevelop.Ide.Codons\CategoryNode.cs" />
     <Compile Include="MonoDevelop.Ide.Gui.Components\ExtensibleTreeView.cs" />
     <Compile Include="MonoDevelop.Ide.Gui.Components\ITreeBuilder.cs" />
     <Compile Include="MonoDevelop.Ide.Gui.Components\ITreeBuilderContext.cs" />
     <Compile Include="MonoDevelop.Ide.Gui.Components\ITreeNavigator.cs" />
     <Compile Include="MonoDevelop.Ide.Gui.Components\ITreeOptions.cs" />
     <Compile Include="MonoDevelop.Ide.Gui.Components\NodeAttributes.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Components\NodeBuilder.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Components\NodeBuilderExtension.cs" />
     <Compile Include="MonoDevelop.Ide.Gui.Components\NodeCommandHandler.cs" />
     <Compile Include="MonoDevelop.Ide.Gui.Components\NodeState.cs" />
     <Compile Include="MonoDevelop.Ide.Gui.Components\DragOperation.cs" />
@@ -8118,83 +7779,24 @@
     <Compile Include="MonoDevelop.Ide.Gui.Components\TreeBuilder.cs" />
     <Compile Include="MonoDevelop.Ide.Gui.Components\TreeOptions.cs" />
     <Compile Include="MonoDevelop.Ide.Gui.Components\TransactedTreeBuilder.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Content\INavigable.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Content\IOpenNamedElementHandler.cs" />
     <Compile Include="AssemblyInfo.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Content\ITextEditorResolver.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.OptionPanels\AuthorInformationPanel.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.OptionPanels\GlobalAuthorInformationPanel.cs" />
-    <Compile Include="MonoDevelop.Ide.StandardHeader\StandardHeaderPolicyPanel.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.Gui.OptionPanels.AuthorInformationPanelWidget.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.Gui.OptionPanels.GlobalAuthorInformationPanelWidget.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.StandardHeader.StandardHeaderPolicyPanelWidget.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.OptionPanels\TextStylePolicyPanel.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.Gui.OptionPanels.TextStylePolicyPanelWidget.cs" />
     <Compile Include="MonoDevelop.Ide.Gui.Content\TextStylePolicy.cs" />
     <Compile Include="MonoDevelop.Ide.Gui\PadFontChanger.cs" />
     <Compile Include="MonoDevelop.Ide.Gui.Components\PadTreeView.cs" />
-    <Compile Include="MonoDevelop.Ide.Codons\PadContextMenuExtensionNode.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Pads.ProjectPad\FileOperationsBuilderExtension.cs" />
-    <Compile Include="MonoDevelop.Ide.Templates\DirectoryTemplate.cs" />
     <Compile Include="MonoDevelop.Ide.Gui.Content\IUndoHandler.cs" />
-    <Compile Include="MonoDevelop.Ide.CodeFormatting\CodeFormatterService.cs" />
-    <Compile Include="MonoDevelop.Ide.CodeTemplates\CodeTemplatePanel.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.CodeTemplates.CodeTemplatePanelWidget.cs" />
-    <Compile Include="MonoDevelop.Ide.CodeTemplates\EditTemplateDialog.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.CodeTemplates.EditTemplateDialog.cs" />
     <Compile Include="MonoDevelop.Ide.CodeTemplates\CodeTemplateVariable.cs" />
     <Compile Include="MonoDevelop.Ide.CodeTemplates\ExpansionObject.cs" />
     <Compile Include="MonoDevelop.Ide.CodeTemplates\CodeTemplateCompletionData.cs" />
     <Compile Include="MonoDevelop.Ide.CodeTemplates\CodeTemplateListDataProvider.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.OptionPanels\MonoRuntimePanel.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.Gui.OptionPanels.MonoRuntimePanelWidget.cs" />
-    <Compile Include="MonoDevelop.Ide.FindInFiles\SearchResult.cs" />
-    <Compile Include="MonoDevelop.Ide.FindInFiles\SearchResultPad.cs" />
-    <Compile Include="MonoDevelop.Ide.FindInFiles\FindInFilesDialog.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.FindInFiles.FindInFilesDialog.cs" />
-    <Compile Include="MonoDevelop.Ide.FindInFiles\Commands.cs" />
-    <Compile Include="MonoDevelop.Ide.FindInFiles\Scope.cs" />
-    <Compile Include="MonoDevelop.Ide.FindInFiles\FileProvider.cs" />
-    <Compile Include="MonoDevelop.Ide.FindInFiles\FilterOptions.cs" />
-    <Compile Include="MonoDevelop.Ide.FindInFiles\FindReplace.cs" />
-    <Compile Include="MonoDevelop.Ide.FindInFiles\SearchResultWidget.cs" />
-    <Compile Include="MonoDevelop.Ide.FindInFiles\ISearchProgressMonitor.cs" />
-    <Compile Include="MonoDevelop.Ide.FindInFiles\SearchProgressMonitor.cs" />
-    <Compile Include="MonoDevelop.Ide.CodeFormatting\CodeFormattingCommands.cs" />
-    <Compile Include="MonoDevelop.Ide.Execution\ParameterizedExecutionHandler.cs" />
-    <Compile Include="MonoDevelop.Ide.Execution\ExecutionModeCommandService.cs" />
-    <Compile Include="MonoDevelop.Ide.Execution\CustomArgsCustomizer.cs" />
-    <Compile Include="MonoDevelop.Ide.Execution\CommandExecutionContext.cs" />
-    <Compile Include="MonoDevelop.Ide.Execution\IExecutionConfigurationEditor.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Components\ExecutionModeComboBox.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.Gui.Components.ExecutionModeComboBox.cs" />
-    <Compile Include="MonoDevelop.Ide.Execution\IExecutionCommandCustomizer.cs" />
-    <Compile Include="MonoDevelop.Ide.Execution\CustomExecutionMode.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Dialogs\SelectFileFormatDialog.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.Gui.Dialogs.SelectFileFormatDialog.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.OptionPanels\MaintenanceOptionsPanel.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.Gui.OptionPanels.MaintenanceOptionsPanelWidget.cs" />
-    <Compile Include="MonoDevelop.Ide.Tasks\TaskStore.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.OptionPanels\AssemblyFoldersPanel.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.Gui.OptionPanels.AssemblyFoldersPanelWidget.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.OptionPanels\BuildMessagePanel.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.Gui.OptionPanels.BuildMessagePanelWidget.cs" />
     <Compile Include="MonoDevelop.Ide.Gui\HiddenWorkbenchWindow.cs" />
     <Compile Include="MonoDevelop.Ide.Gui\HiddenTextEditorViewContent.cs" />
     <Compile Include="MonoDevelop.Ide.Gui\WorkbenchWindow.cs" />
-    <Compile Include="MonoDevelop.Ide.CodeTemplates\CodeTemplateCodon.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Content\ILocationList.cs" />
     <Compile Include="MonoDevelop.Ide.Gui.Dialogs\OpenFileDialog.cs" />
     <Compile Include="MonoDevelop.Ide.Extensions\IOpenFileDialogHandler.cs" />
     <Compile Include="MonoDevelop.Ide.Extensions\IAddFileDialogHandler.cs" />
-    <Compile Include="MonoDevelop.Ide.Extensions\TextEditorExtensionNode.cs" />
     <Compile Include="MonoDevelop.Ide.Gui\DockItemToolbarLoader.cs" />
     <Compile Include="MonoDevelop.Ide.Gui.Components\LogView.cs" />
     <Compile Include="MonoDevelop.Ide.Gui\WorkbenchContext.cs" />
-    <Compile Include="MonoDevelop.Ide.Extensions\LayoutExtensionNode.cs" />
-    <Compile Include="MonoDevelop.Ide.Extensions\CustomToolExtensionNode.cs" />
-    <Compile Include="MonoDevelop.Ide.CustomTools\CustomTool.cs" />
-    <Compile Include="MonoDevelop.Ide.CustomTools\CustomToolService.cs" />
     <Compile Include="MonoDevelop.Components\FileSelector.cs" />
     <Compile Include="MonoDevelop.Components\BaseFileEntry.cs" />
     <Compile Include="MonoDevelop.Components\FileEntry.cs" />
@@ -8219,15 +7821,6 @@
     <Compile Include="MonoDevelop.Components\SelectFolderDialog.cs" />
     <Compile Include="MonoDevelop.Components\RoundedFrame.cs" />
     <Compile Include="MonoDevelop.Components\CairoExtensions.cs" />
-    <Compile Include="MonoDevelop.Components.Chart\Axis.cs" />
-    <Compile Include="MonoDevelop.Components.Chart\AxisDimension.cs" />
-    <Compile Include="MonoDevelop.Components.Chart\AxisPosition.cs" />
-    <Compile Include="MonoDevelop.Components.Chart\BasicChart.cs" />
-    <Compile Include="MonoDevelop.Components.Chart\ChartCursor.cs" />
-    <Compile Include="MonoDevelop.Components.Chart\DateTimeAxis.cs" />
-    <Compile Include="MonoDevelop.Components.Chart\IntegerAxis.cs" />
-    <Compile Include="MonoDevelop.Components.Chart\Serie.cs" />
-    <Compile Include="MonoDevelop.Components.Chart\TickEnumerator.cs" />
     <Compile Include="MonoDevelop.Components.Commands\ActionCommand.cs" />
     <Compile Include="MonoDevelop.Components.Commands\ActionType.cs" />
     <Compile Include="MonoDevelop.Components.Commands\Command.cs" />
@@ -8268,39 +7861,8 @@
     <Compile Include="MonoDevelop.Components.Commands\KeyBindingScheme.cs" />
     <Compile Include="MonoDevelop.Components.Commands\KeyBindingSet.cs" />
     <Compile Include="MonoDevelop.Components.Commands\ICommandBar.cs" />
-    <Compile Include="MonoDevelop.Components.Commands.ExtensionNodes\CommandCategoryCodon.cs" />
-    <Compile Include="MonoDevelop.Components.Commands.ExtensionNodes\CommandCodon.cs" />
-    <Compile Include="MonoDevelop.Components.Commands.ExtensionNodes\CommandItemCodon.cs" />
-    <Compile Include="MonoDevelop.Components.Commands.ExtensionNodes\ItemSetCodon.cs" />
-    <Compile Include="MonoDevelop.Components.Commands.ExtensionNodes\LinkItemCodon.cs" />
-    <Compile Include="MonoDevelop.Components.Commands.ExtensionNodes\SeparatorItemCodon.cs" />
-    <Compile Include="MonoDevelop.Components.Commands.ExtensionNodes\LocalCommandItemCodon.cs" />
-    <Compile Include="MonoDevelop.Components.Commands.ExtensionNodes\SchemeExtensionNode.cs" />
     <Compile Include="MonoDevelop.Components.Extensions\PlatformDialog.cs" />
     <Compile Include="MonoDevelop.Components.Extensions\ISelectFileDialog.cs" />
-    <Compile Include="MonoDevelop.Components.PropertyGrid\DefaultPropertyTab.cs" />
-    <Compile Include="MonoDevelop.Components.PropertyGrid\EditorManager.cs" />
-    <Compile Include="MonoDevelop.Components.PropertyGrid\EventPropertyTab.cs" />
-    <Compile Include="MonoDevelop.Components.PropertyGrid\PropertyEditorCell.cs" />
-    <Compile Include="MonoDevelop.Components.PropertyGrid\PropertyEditorTypeAttribute.cs" />
-    <Compile Include="MonoDevelop.Components.PropertyGrid\PropertyGrid.cs" />
-    <Compile Include="MonoDevelop.Components.PropertyGrid\PropertyValueChangedEventArgs.cs" />
-    <Compile Include="MonoDevelop.Components.PropertyGrid\PropertyValueChangedEventHandler.cs" />
-    <Compile Include="MonoDevelop.Components.PropertyGrid\SurrogateUITypeEditorAttribute.cs" />
-    <Compile Include="MonoDevelop.Components.PropertyGrid.Editors\CharPropertyEditor.cs" />
-    <Compile Include="MonoDevelop.Components.PropertyGrid.Editors\CollectionEditor.cs" />
-    <Compile Include="MonoDevelop.Components.PropertyGrid.Editors\ColorEditorCell.cs" />
-    <Compile Include="MonoDevelop.Components.PropertyGrid.Editors\DateTimeEditor.cs" />
-    <Compile Include="MonoDevelop.Components.PropertyGrid.Editors\DefaultEditor.cs" />
-    <Compile Include="MonoDevelop.Components.PropertyGrid.Editors\EnumerationEditorCell.cs" />
-    <Compile Include="MonoDevelop.Components.PropertyGrid.Editors\EventEditor.cs" />
-    <Compile Include="MonoDevelop.Components.PropertyGrid.Editors\FlagsEditorCell.cs" />
-    <Compile Include="MonoDevelop.Components.PropertyGrid.Editors\FlagsSelectorDialog.cs" />
-    <Compile Include="MonoDevelop.Components.PropertyGrid.Editors\FloatRange.cs" />
-    <Compile Include="MonoDevelop.Components.PropertyGrid.Editors\IntRange.cs" />
-    <Compile Include="MonoDevelop.Components.PropertyGrid.Editors\TextEditorDialog.cs" />
-    <Compile Include="MonoDevelop.Components.PropertyGrid.Editors\TimeSpanEditor.cs" />
-    <Compile Include="MonoDevelop.Components.PropertyGrid.Editors\BooleanEditorCell.cs" />
     <Compile Include="MonoDevelop.Components.Theming\GtkColors.cs" />
     <Compile Include="MonoDevelop.Components.Theming\GtkTheme.cs" />
     <Compile Include="MonoDevelop.Components.Theming\Theme.cs" />
@@ -8327,23 +7889,12 @@
     <Compile Include="MonoDevelop.Components.Docking\PlaceholderWindow.cs" />
     <Compile Include="MonoDevelop.Components.Docking\TabStrip.cs" />
     <Compile Include="MonoDevelop.Components\MenuButtonEntry.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Dialogs\IOptionsPanel.cs" />
     <Compile Include="MonoDevelop.Ide.Gui.Dialogs\MultiMessageDialog.cs" />
     <Compile Include="MonoDevelop.Ide.Gui.Dialogs\MultiTaskProgressDialog.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Dialogs\OptionsDialog.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Dialogs\OptionsPanel.cs" />
     <Compile Include="MonoDevelop.Ide.Gui.Dialogs\ProgressDialog.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Dialogs\SetupApp.cs" />
     <Compile Include="MonoDevelop.Ide.ProgressMonitoring\BaseProgressMonitor.cs" />
     <Compile Include="MonoDevelop.Ide.ProgressMonitoring\MessageDialogProgressMonitor.cs" />
     <Compile Include="MonoDevelop.Ide.ProgressMonitoring\MultiTaskDialogProgressMonitor.cs" />
-    <Compile Include="MonoDevelop.Ide.WebBrowser\IWebBrowser.cs" />
-    <Compile Include="MonoDevelop.Ide.WebBrowser\LocationChangedEventArgs.cs" />
-    <Compile Include="MonoDevelop.Ide.WebBrowser\TitleChangedEventArgs.cs" />
-    <Compile Include="MonoDevelop.Ide.WebBrowser\StatusMessageChangedEventArgs.cs" />
-    <Compile Include="MonoDevelop.Ide.WebBrowser\LoadingProgressChangedEventArgs.cs" />
-    <Compile Include="MonoDevelop.Ide.WebBrowser\LocationChangingEventArgs.cs" />
-    <Compile Include="MonoDevelop.Ide.WebBrowser\IWebBrowserLoader.cs" />
     <Compile Include="MonoDevelop.Ide.CodeCompletion\CompletionListWindow.cs" />
     <Compile Include="MonoDevelop.Ide.CodeCompletion\ICompletionWidget.cs" />
     <Compile Include="MonoDevelop.Ide.CodeCompletion\ListWindow.cs" />
@@ -8363,7 +7914,6 @@
     <Compile Include="MonoDevelop.Ide\DispatchService.cs" />
     <Compile Include="MonoDevelop.Ide\Ide.cs" />
     <Compile Include="MonoDevelop.Ide\IdePreferences.cs" />
-    <Compile Include="MonoDevelop.Ide\RootWorkspace.cs" />
     <Compile Include="MonoDevelop.Ide.Desktop\DefaultPlatformService.cs" />
     <Compile Include="MonoDevelop.Ide.Desktop\DesktopApplication.cs" />
     <Compile Include="MonoDevelop.Ide.Desktop\RecentFileStorage.cs" />
@@ -8373,7 +7923,6 @@
     <Compile Include="MonoDevelop.Ide\ImageService.cs" />
     <Compile Include="MonoDevelop.Ide.Desktop\PlatformService.cs" />
     <Compile Include="MonoDevelop.Ide\MessageService.cs" />
-    <Compile Include="MonoDevelop.Ide\WebBrowserService.cs" />
     <Compile Include="MonoDevelop.Ide.Gui\AsyncDispatchAttribute.cs" />
     <Compile Include="MonoDevelop.Ide.Gui\FreeDispatchAttribute.cs" />
     <Compile Include="MonoDevelop.Ide.Gui\GuiSyncContext.cs" />
@@ -8383,240 +7932,51 @@
     <Compile Include="MonoDevelop.Ide.Gui\SyncContext.cs" />
     <Compile Include="MonoDevelop.Ide.Gui\SyncContextAttribute.cs" />
     <Compile Include="MonoDevelop.Ide.Gui\SyncObject.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Components\ProjectFileEntry.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Dialogs\ItemOptionsDialog.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Dialogs\ItemOptionsPanel.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Dialogs\MimeTypePolicyOptionsPanel.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Dialogs\MimeTypePolicyOptionsSection.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Dialogs\MultiConfigItemOptionsDialog.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Dialogs\MultiConfigItemOptionsPanel.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects\ProjectOptionsDialog.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects\RenameConfigDialog.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects\NewFileDialog.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects\AddFileDialog.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects\AddMimeTypeDialog.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects\AssemblyReferencePanel.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects\CombineOptionsDialog.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects\ConfirmProjectDeleteDialog.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects\DefaultPolicyOptionsDialog.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects\DeleteConfigDialog.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects\NewConfigurationDialog.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects\ProjectFileSelectorDialog.cs" />
-    <Compile Include="MonoDevelop.Ide\ProjectOperations.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects\IncludeNewFilesDialog.cs" />
-    <Compile Include="MonoDevelop.Ide.Execution\CustomExecutionModeDialog.cs" />
-    <Compile Include="MonoDevelop.Ide.Execution\CustomExecutionModeManagerDialog.cs" />
-    <Compile Include="MonoDevelop.Ide.Execution\CustomExecutionModeWidget.cs" />
-    <Compile Include="MonoDevelop.Ide.Execution\MonoExecutionParametersPreview.cs" />
-    <Compile Include="MonoDevelop.Ide.Execution\MonoExecutionParametersWidget.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects\ProjectReferencePanel.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects\SelectReferenceDialog.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.OptionPanels.BaseDirectoryPanelWidget.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.OptionPanels.CodeFormattingPanelWidget.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.OptionPanels.CombineBuildOptionsWidget.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.OptionPanels.CombineConfigurationPanelWidget.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.OptionPanels.CombineInformationWidget.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.OptionPanels.CommonAssemblySigningPreferences.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.OptionPanels.CustomCommandPanelWidget.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.OptionPanels.CustomCommandWidget.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.OptionPanels.GeneralProjectOptionsWidget.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.OptionPanels.NamespaceSynchronisationPanelWidget.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.OptionPanels.OutputOptionsPanelWidget.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.OptionPanels.RunOptionsPanelWidget.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.OptionPanels.RuntimeOptionsPanelWidget.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.OptionPanels.CombineEntryConfigurationsPanelWidget.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.OptionPanels.StartupOptionsPanelWidget.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects.OptionPanels\BaseDirectoryPanel.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects.OptionPanels\BaseDirectoryPanelWidget.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects.OptionPanels\CodeFormattingPanel.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects.OptionPanels\CombineBuildOptions.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects.OptionPanels\CombineConfigurationPanel.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects.OptionPanels\CombineInformationPanel.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects.OptionPanels\CommonAssemblySigningPreferences.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects.OptionPanels\CustomCommandPanel.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects.OptionPanels\CustomCommandPanelWidget.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects.OptionPanels\CustomCommandWidget.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects.OptionPanels\GeneralProjectOptions.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects.OptionPanels\NamespaceSynchronisationPanel.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects.OptionPanels\OutputOptionsPanel.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects.OptionPanels\RunOptionsPanel.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects.OptionPanels\RuntimeOptionsPanel.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects.OptionPanels\SolutionItemConfigurationsPanel.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects.OptionPanels\StartupOptionsPanel.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.AddMimeTypeDialog.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.ConfirmProjectDeleteDialog.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.DeleteConfigDialog.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.IncludeNewFilesDialog.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.NewConfigurationDialog.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.NewFileDialog.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Dialogs\PolicyOptionsPanel.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.ProjectFileSelectorDialog.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.RenameConfigDialog.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.SelectReferenceDialog.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.Execution.CustomExecutionModeDialog.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.Execution.CustomExecutionModeManagerDialog.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.Execution.CustomExecutionModeWidget.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.Execution.MonoExecutionParametersPreview.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.Execution.MonoExecutionParametersWidget.cs" />
     <Compile Include="MonoDevelop.Ide.Gui.Components\EnvVarList.cs" />
-    <Compile Include="MonoDevelop.Ide\HelpOperations.cs" />
     <Compile Include="MonoDevelop.Ide\ExitEventHandler.cs" />
-    <Compile Include="MonoDevelop.Ide\AddEntryEventHandler.cs" />
     <Compile Include="MonoDevelop.Ide\IdeStartup.cs" />
-    <Compile Include="MonoDevelop.Ide.Extensions\MimeTypeNode.cs" />
-    <Compile Include="MonoDevelop.Ide.Extensions\MimeTypeOptionsPanelNode.cs" />
-    <Compile Include="MonoDevelop.Ide.Extensions\OptionsDialogSection.cs" />
-    <Compile Include="MonoDevelop.Ide.Extensions\OptionsPanelNode.cs" />
-    <Compile Include="MonoDevelop.Ide.Extensions\StockIconCodon.cs" />
     <Compile Include="MonoDevelop.Ide.Gui.Components\StringTagSelectorButton.cs" />
     <Compile Include="gtk-gui\MonoDevelop.Ide.Gui.Components.StringTagSelectorButton.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Pads.ProjectPad\SolutionFolderFileNodeBuilder.cs" />
     <Compile Include="MonoDevelop.Components\CompactScrolledWindow.cs" />
-    <Compile Include="MonoDevelop.Ide.CodeCompletion\MemberCompletionData.cs" />
-    <Compile Include="MonoDevelop.Ide.Navigation\DocumentNavigationPoint.cs" />
-    <Compile Include="MonoDevelop.Ide.Navigation\NavigationHistoryService.cs" />
-    <Compile Include="MonoDevelop.Ide.Navigation\TextFileNavigationPoint.cs" />
-    <Compile Include="MonoDevelop.Ide.Navigation\NavigationHistoryItem.cs" />
-    <Compile Include="MonoDevelop.Ide.Navigation\NavigationPoint.cs" />
-    <Compile Include="MonoDevelop.Ide.Navigation\HistoryList.cs" />
-    <Compile Include="MonoDevelop.Components.AutoTest\AutoTestService.cs" />
-    <Compile Include="MonoDevelop.Components.AutoTest\AutoTestSession.cs" />
-    <Compile Include="MonoDevelop.Components.AutoTest\AutoTestClientSession.cs" />
     <Compile Include="MonoDevelop.Components\DropDownBoxListWindow.cs" />
     <Compile Include="MonoDevelop.Ide.CodeCompletion\CompletionMatcher.cs" />
     <Compile Include="MonoDevelop.Components\Tabstrip.cs" />
-    <Compile Include="MonoDevelop.Ide.Fonts\FontChooserPanelWidget.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.Fonts.FontChooserPanelWidget.cs" />
-    <Compile Include="MonoDevelop.Ide.Fonts\FontChooserPanel.cs" />
     <Compile Include="MonoDevelop.Ide.Fonts\FontService.cs" />
-    <Compile Include="MonoDevelop.Ide.Fonts\FontDescriptionCodon.cs" />
     <Compile Include="MonoDevelop.Components.Extensions\AlertDialog.cs" />
     <Compile Include="MonoDevelop.Ide.Gui.Dialogs\GtkAlertDialog.cs" />
     <Compile Include="MonoDevelop.Components.Extensions\TextQuestionDialog.cs" />
-    <Compile Include="MonoDevelop.Ide.CodeFormatting\DefaultCodeFormatter.cs" />
-    <Compile Include="MonoDevelop.Ide.CodeFormatting\CodeFormatterExtensionNode.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects\NewPolicySetDialog.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.NewPolicySetDialog.cs" />
     <Compile Include="MonoDevelop.Components\HeaderBox.cs" />
-    <Compile Include="MonoDevelop.Ide.Extensions\StartupHandlerExtensionAttribute.cs" />
     <Compile Include="MonoDevelop.Components\SectionList.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects\TemplatePickerWidget.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects\NewProjectOptionsWidget.cs" />
-    <Compile Include="MonoDevelop.Ide.Extensions\FileTypeCondition.cs" />
     <Compile Include="MonoDevelop.Ide.Gui\IDisplayBinding.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects\ExportProjectPolicyDialog.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.ExportProjectPolicyDialog.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects\ApplyPolicyDialog.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.ApplyPolicyDialog.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Components\ProjectSelectorWidget.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.Gui.Components.ProjectSelectorWidget.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects\ProjectSelectorDialog.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.ProjectSelectorDialog.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects\ImportProjectPolicyDialog.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.ImportProjectPolicyDialog.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects\AddExternalFileDialog.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.AddExternalFileDialog.cs" />
     <Compile Include="MonoDevelop.Ide.Gui.Components\PriorityList.cs" />
     <Compile Include="gtk-gui\MonoDevelop.Ide.Gui.Components.PriorityList.cs" />
-    <Compile Include="MonoDevelop.Components.PropertyGrid.Editors\FilePathEditor.cs" />
-    <Compile Include="MonoDevelop.Ide.Tasks\CommentTag.cs" />
-    <Compile Include="MonoDevelop.Ide.Tasks\CommentTasksChangedEventHandler.cs" />
-    <Compile Include="MonoDevelop.Ide.FindInFiles\MemberReference.cs" />
-    <Compile Include="MonoDevelop.Ide.Templates\XmlCodeDomReader.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Pads.ClassPad\ClassData.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Pads.ClassPad\ClassNodeBuilder.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Pads.ClassPad\ClassBrowserPad.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Pads.ClassPad\ClassBrowserPadWidget.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Pads.ClassPad\CombineNodeBuilder.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Pads.ClassPad\EventNodeBuilder.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Pads.ClassPad\FieldNodeBuilder.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Pads.ClassPad\MemberNodeBuilder.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Pads.ClassPad\MemberNodeCommandHandler.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Pads.ClassPad\MethodNodeBuilder.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Pads.ClassPad\NamespaceData.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Pads.ClassPad\NamespaceNodeBuilder.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Pads.ClassPad\ProjectNodeBuilder.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Pads.ClassPad\PropertyNodeBuilder.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Pads.ClassPad\SolutionNodeBuilder.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Pads.ClassPad\ReferenceNodeBuilder.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Dialogs\FeedbackDialog.cs" />
-    <Compile Include="MonoDevelop.Ide\FeedbackService.cs" />
-    <Compile Include="MonoDevelop.Ide.Updater\UpdateService.cs" />
-    <Compile Include="MonoDevelop.Ide.Updater\IUpdateHandler.cs" />
-    <Compile Include="MonoDevelop.Ide.Updater\AddinsUpdateHandler.cs" />
-    <Compile Include="MonoDevelop.Ide.Updater\UpdateCheckHandler.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.OptionPanels\SdkLocationPanel.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects\PackageReferencePanel.cs" />
-    <Compile Include="MonoDevelop.Ide.WelcomePage\WelcomePageCommands.cs" />
-    <Compile Include="MonoDevelop.Ide.WelcomePage\WelcomePageOptionPanel.cs" />
-    <Compile Include="MonoDevelop.Ide.WelcomePage\WelcomePageWidget.cs" />
-    <Compile Include="MonoDevelop.Ide.WelcomePage\WelcomePageOptions.cs" />
-    <Compile Include="MonoDevelop.Ide.WelcomePage\WelcomePageLinkButton.cs" />
-    <Compile Include="MonoDevelop.Ide.WelcomePage\WelcomePageNewsFeed.cs" />
-    <Compile Include="MonoDevelop.Ide.WelcomePage\WelcomePageRecentProjectsList.cs" />
-    <Compile Include="MonoDevelop.Ide.WelcomePage\WelcomePageLinksList.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui\ProjectLoadProgressMonitor.cs" />
     <Compile Include="MonoDevelop.Components\FileFilterSet.cs" />
     <Compile Include="MonoDevelop.Ide\IdeVersionInfo.cs" />
     <Compile Include="MonoDevelop.Components\ContextMenuTreeView.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.OptionPanels\LogAgentOptionsPanel.cs" />
     <Compile Include="MonoDevelop.Ide\LogReportingStartup.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects\ExportSolutionDialog.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.ExportSolutionDialog.cs" />
     <Compile Include="MonoDevelop.Components.Commands\CustomCommandTargetAttribute.cs" />
-    <Compile Include="MonoDevelop.Ide.Extensions\ServiceUrlExtensionNode.cs" />
     <Compile Include="MonoDevelop.Ide\ProjectCreatedEventArgs.cs" />
-    <Compile Include="MonoDevelop.Ide.TypeSystem\TypeSystemService.cs" />
-    <Compile Include="MonoDevelop.Ide.TypeSystem\Ambience.cs" />
-    <Compile Include="MonoDevelop.Ide.TypeSystem\StockIcons.cs" />
-    <Compile Include="MonoDevelop.Ide.TypeSystem\FoldingRegion.cs" />
-    <Compile Include="MonoDevelop.Ide.TypeSystem\ParsedDocument.cs" />
-    <Compile Include="MonoDevelop.Ide.TypeSystem\Comment.cs" />
-    <Compile Include="MonoDevelop.Ide.TypeSystem\Tag.cs" />
-    <Compile Include="MonoDevelop.Ide.TypeSystem\MarkupUtilities.cs" />
-    <Compile Include="MonoDevelop.Ide.TypeSystem\CodeGenerator.cs" />
-    <Compile Include="MonoDevelop.Ide.TypeSystem\TypeSystemParserNode.cs" />
-    <Compile Include="MonoDevelop.Ide.TypeSystem\MonoDocDocumentationProvider.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects.OptionPanels\PortableRuntimeOptionsPanel.cs" />
     <Compile Include="MonoDevelop.Ide.Gui\Styles.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui\StylesStringTagModel.cs" />
     <Compile Include="MonoDevelop.Ide.Gui\DocumentToolbar.cs" />
     <Compile Include="MonoDevelop.Components.MainToolbar\MainToolbar.cs" />
     <Compile Include="MonoDevelop.Components.MainToolbar\StatusArea.cs" />
     <Compile Include="MonoDevelop.Components.MainToolbar\RoundButton.cs" />
     <Compile Include="MonoDevelop.Components.MainToolbar\ButtonBar.cs" />
-    <Compile Include="MonoDevelop.Components.MainToolbar\SearchCategory.cs" />
     <Compile Include="MonoDevelop.Components.MainToolbar\ISearchDataSource.cs" />
-    <Compile Include="MonoDevelop.Components.MainToolbar\FileSearchCategory.cs" />
-    <Compile Include="MonoDevelop.Components.PropertyGrid\PropertyGridTable.cs" />
     <Compile Include="MonoDevelop.Components\CompactDialog.cs" />
     <Compile Include="MonoDevelop.Components.Docking\DockVisualStyle.cs" />
     <Compile Include="MonoDevelop.Components.MainToolbar\StyledProgressBar.cs" />
-    <Compile Include="MonoDevelop.Components.MainToolbar\SearchPopupWindow.cs" />
     <Compile Include="MonoDevelop.Components\PopoverWindow.cs" />
     <Compile Include="MonoDevelop.Components\TooltipPopoverWindow.cs" />
     <Compile Include="MonoDevelop.Ide.Gui.Components\AnimatedIcon.cs" />
-    <Compile Include="MonoDevelop.Ide\DefaultWebCertificateProvider.cs" />
-    <Compile Include="MonoDevelop.Ide.Extensions\MimeTypeExtensionNode.cs" />
     <Compile Include="MonoDevelop.Ide.Gui\DocumentView.cs" />
     <Compile Include="MonoDevelop.Components\VPanedThin.cs" />
     <Compile Include="MonoDevelop.Components\HPanedThin.cs" />
-    <Compile Include="MonoDevelop.Components.MainToolbar\CommandSearchCategory.cs" />
     <Compile Include="MonoDevelop.Components\ExtendedLabel.cs" />
     <Compile Include="MonoDevelop.Ide.CodeCompletion\TooltipInformation.cs" />
     <Compile Include="MonoDevelop.Ide.CodeCompletion\TooltipInformationWindow.cs" />
-    <Compile Include="MonoDevelop.Ide.TypeSystem\TypeSystemParser.cs" />
-    <Compile Include="MonoDevelop.Ide.WelcomePage\WelcomePageSection.cs" />
-    <Compile Include="MonoDevelop.Ide.WelcomePage\Style.cs" />
-    <Compile Include="MonoDevelop.Ide.WelcomePage\WelcomePageFeedItem.cs" />
-    <Compile Include="MonoDevelop.Ide.WelcomePage\WelcomePageListButton.cs" />
-    <Compile Include="MonoDevelop.Ide.WelcomePage\WelcomePageButtonBar.cs" />
-    <Compile Include="MonoDevelop.Ide.WelcomePage\WelcomePageBarButton.cs" />
     <Compile Include="MonoDevelop.Components\MouseTracker.cs" />
-    <Compile Include="MonoDevelop.Components.MainToolbar\SearchPopupSearchPattern.cs" />
     <Compile Include="MonoDevelop.Components\PopoverWindowTheme.cs" />
-    <Compile Include="MonoDevelop.Ide.WelcomePage\WelcomePageYoutubeFeed.cs" />
-    <Compile Include="MonoDevelop.Ide\EditReferencesEventArgs.cs" />
     <Compile Include="MonoDevelop.Components.MainToolbar\StatusAreaTheme.cs" />
     <Compile Include="MonoDevelop.Components\PopoverWidget.cs" />
     <Compile Include="MonoDevelop.Ide.TextEditing\TextEditorService.cs" />
@@ -8630,20 +7990,9 @@
     <Compile Include="MonoDevelop.Ide.TextEditing\FileExtensionEventArgs.cs" />
     <Compile Include="MonoDevelop.Components.MainToolbar\StatusAreaBuildTheme.cs" />
     <Compile Include="MonoDevelop.Components\ThreadedRenderer.cs" />
-    <Compile Include="MonoDevelop.Components.MainToolbar\ConfigurationMerger.cs" />
     <Compile Include="MonoDevelop.Components.MainToolbar\NavigateToCommand.cs" />
-    <Compile Include="MonoDevelop.Components.MainToolbar\ResultsDataSource.cs" />
-    <Compile Include="MonoDevelop.Components.MainToolbar\SearchResult.cs" />
     <Compile Include="MonoDevelop.Components\ImageButton.cs" />
-    <Compile Include="MonoDevelop.Ide.WelcomePage\DefaultWelcomePage.cs" />
-    <Compile Include="MonoDevelop.Ide.WelcomePage\WelcomePageService.cs" />
-    <Compile Include="MonoDevelop.Ide.WelcomePage\WelcomePageFrame.cs" />
-    <Compile Include="MonoDevelop.Ide.WelcomePage\WelcomePageRow.cs" />
-    <Compile Include="MonoDevelop.Ide.WelcomePage\WelcomePageColumn.cs" />
-    <Compile Include="MonoDevelop.Ide.WelcomePage\IWelcomePageProvider.cs" />
-    <Compile Include="MonoDevelop.Ide.WelcomePage\WelcomePageTipOfTheDaySection.cs" />
     <Compile Include="MonoDevelop.Components.Docking\DockItemTitleTab.cs" />
-    <Compile Include="MonoDevelop.Ide.WelcomePage\WelcomePageFirstRun.cs" />
     <Compile Include="MonoDevelop.Ide.Gui\StatusBar.cs" />
     <Compile Include="MonoDevelop.Ide.Gui\StatusBarContextBase.cs" />
     <Compile Include="MonoDevelop.Ide.Gui\StatusBarContext.cs" />
@@ -8651,35 +8000,16 @@
     <Compile Include="MonoDevelop.Ide.Gui\StatusBarContextImpl.cs" />
     <Compile Include="MonoDevelop.Components.MainToolbar\MainStatusBarContextImpl.cs" />
     <Compile Include="MonoDevelop.Components.Commands\ICommandDelegator.cs" />
-    <Compile Include="MonoDevelop.Ide.CustomTools\ResXFileCodeGenerator.cs" />
     <Compile Include="MonoDevelop.Components\CellRendererImage.cs" />
     <Compile Include="MonoDevelop.Components\ImageView.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects\IdeFileSystemExtensionExtension.cs" />
-    <Compile Include="AddinInfo.cs" />
     <Compile Include="MonoDevelop.Ide.CodeCompletion\CompletionCharacters.cs" />
-    <Compile Include="MonoDevelop.Ide.CodeCompletion\CompletionCharacterCodon.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Pads.ProjectPad\ImplicitFrameworkAssemblyReferenceNodeBuilder.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Pads.ProjectPad\PortableFrameworkSubsetNodeBuilder.cs" />
-    <Compile Include="MonoDevelop.Components.MainToolbar\SearchInSolutionSearchCategory.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects.OptionPanels\CombineMSBuildOptions.cs" />
     <Compile Include="MonoDevelop.Ide.Gui\PadCollection.cs" />
-    <Compile Include="MonoDevelop.Ide.Extensions\IdeCustomizer.cs" />
     <Compile Include="MonoDevelop.Components\ExtendedTitleBarWindow.cs" />
     <Compile Include="MonoDevelop.Components.Extensions\IExtendedTitleBarWindowBackend.cs" />
     <Compile Include="MonoDevelop.Components\DropDownBox.cs" />
     <Compile Include="MonoDevelop.Components.Extensions\IExtendedTitleBarDialogBackend.cs" />
     <Compile Include="MonoDevelop.Components\ExtendedTitleBarDialog.cs" />
-    <Compile Include="MonoDevelop.Ide.Templates\ProjectTemplatePackageReference.cs" />
-    <Compile Include="MonoDevelop.Ide.Templates\PackageRepositoryNode.cs" />
-    <Compile Include="MonoDevelop.Ide.Templates\WorkspaceItemCreatedInformation.cs" />
-    <Compile Include="MonoDevelop.Ide.Templates\PackageReferencesForCreatedProject.cs" />
-    <Compile Include="MonoDevelop.Ide.Templates\ProjectTemplatePackageInstaller.cs" />
-    <Compile Include="MonoDevelop.Ide.TypeSystem\MonoDevelopTextLoader.cs" />
-    <Compile Include="MonoDevelop.Ide.TypeSystem\MonoDevelopSourceTextContainer.cs" />
-    <Compile Include="MonoDevelop.Ide.CustomTools\PublicResXFileCodeGenerator.cs" />
-    <Compile Include="MonoDevelop.Components\ImageLoader.cs" />
     <Compile Include="MonoDevelop.Ide.CodeCompletion\ParameterHintingData.cs" />
-    <Compile Include="MonoDevelop.Ide.TypeSystem\MonoDevelopWorkspace.cs" />
     <Compile Include="MonoDevelop.Ide.Editor\IDocumentLine.cs" />
     <Compile Include="MonoDevelop.Ide.CodeTemplates\IListDataProvider.cs" />
     <Compile Include="MonoDevelop.Ide.Editor\ITextEditorOptions.cs" />
@@ -8708,7 +8038,6 @@
     <Compile Include="MonoDevelop.Ide.Editor\TextEditor.cs" />
     <Compile Include="MonoDevelop.Ide.Editor\ITextDocument.cs" />
     <Compile Include="MonoDevelop.Ide.Editor\TextEditorDisplayBinding.cs" />
-    <Compile Include="MonoDevelop.Ide.Editor.Extension\AbstractUsagesExtension.cs" />
     <Compile Include="MonoDevelop.Ide.Editor\TextEditorViewContent.cs" />
     <Compile Include="MonoDevelop.Ide.Editor.Extension\IndentationTracker.cs" />
     <Compile Include="MonoDevelop.Ide.Editor.Extension\SelectionSurroundingProvider.cs" />
@@ -8718,9 +8047,7 @@
     <Compile Include="MonoDevelop.Ide.Editor.Highlighting\AmbientColor.cs" />
     <Compile Include="MonoDevelop.Ide.Editor.Highlighting\ColorScheme.cs" />
     <Compile Include="MonoDevelop.Ide.Editor.Highlighting\ColorDescriptionAttribute.cs" />
-    <Compile Include="MonoDevelop.Ide.Editor.Highlighting\TemplateCodon.cs" />
     <Compile Include="MonoDevelop.Ide.Editor.Highlighting\IStreamProvider.cs" />
-    <Compile Include="MonoDevelop.Ide.Editor.Highlighting\TemplateExtensionNodeLoader.cs" />
     <Compile Include="MonoDevelop.Ide.Editor\TextLinkModeEventArgs.cs" />
     <Compile Include="MonoDevelop.Ide.Editor\InsertionModeOptions.cs" />
     <Compile Include="MonoDevelop.Ide.Editor\TextLinkModeOptions.cs" />
@@ -8742,7 +8069,6 @@
     <Compile Include="MonoDevelop.Components\ContextMenuExtensionsGtk.cs" />
     <Compile Include="MonoDevelop.Ide.Gui\Split.cs" />
     <Compile Include="MonoDevelop.Components.DockNotebook\DockWindow.cs" />
-    <Compile Include="MonoDevelop.Ide.CustomTools\MSBuildCustomTool.cs" />
     <Compile Include="MonoDevelop.Components\Mac\GtkMacInterop.cs" />
     <Compile Include="MonoDevelop.Components\Control.cs" />
     <Compile Include="MonoDevelop.Ide.Editor.Extension\TextEditorExtension.cs" />
@@ -8757,42 +8083,7 @@
     <Compile Include="MonoDevelop.Ide.Editor\InternalExtensionAPI\ITextEditorFactory.cs" />
     <Compile Include="MonoDevelop.Ide.Editor\FoldSegmentFactory.cs" />
     <Compile Include="MonoDevelop.Ide.Editor\IReadonlyTextDocument.cs" />
-    <Compile Include="MonoDevelop.Ide.Editor.Extension\Usage.cs" />
     <Compile Include="MonoDevelop.Ide.Editor\TextEditorFactory.cs" />
-    <Compile Include="MonoDevelop.Ide.Editor\AutoSave.cs" />
-    <Compile Include="MonoDevelop.Ide.Templates\SolutionTemplate.cs" />
-    <Compile Include="MonoDevelop.Ide.Templates\TemplateCategory.cs" />
-    <Compile Include="MonoDevelop.Ide.Templates\TemplateWizard.cs" />
-    <Compile Include="MonoDevelop.Ide.Templates\WizardPage.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects\INewProjectController.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects\NewProjectController.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects\GtkNewProjectDialogBackend.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects\INewProjectDialogBackend.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects\GtkNewProjectDialogBackend.UI.cs">
-      <DependentUpon>GtkNewProjectDialogBackend.cs</DependentUpon>
-    </Compile>
-    <Compile Include="MonoDevelop.Ide.Projects\GtkProjectFolderPreviewWidget.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.GtkProjectFolderPreviewWidget.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects\GtkProjectConfigurationWidget.cs" />
-    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.GtkProjectConfigurationWidget.cs" />
-    <Compile Include="MonoDevelop.Ide.Templates\TemplatingService.cs" />
-    <Compile Include="MonoDevelop.Ide.Codons\TemplateCategoryCodon.cs" />
-    <Compile Include="MonoDevelop.Ide.Templates\ProjectTemplateCategorizer.cs" />
-    <Compile Include="MonoDevelop.Ide.Templates\DefaultSolutionTemplate.cs" />
-    <Compile Include="MonoDevelop.Ide.Templates\IProjectTemplatingProvider.cs" />
-    <Compile Include="MonoDevelop.Ide.Templates\ProjectTemplatingProvider.cs" />
-    <Compile Include="MonoDevelop.Ide.Templates\TemplateCategoryPath.cs" />
-    <Compile Include="MonoDevelop.Ide.Templates\ProcessedTemplateResult.cs" />
-    <Compile Include="MonoDevelop.Ide.Templates\DefaultProcessedTemplateResult.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects\FinalProjectConfigurationPage.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects\GtkTemplateCategoryCellRenderer.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects\GtkTemplateCellRenderer.cs" />
-    <Compile Include="MonoDevelop.Ide.Templates\TemplateWizardProvider.cs" />
-    <Compile Include="MonoDevelop.Ide.Templates\TemplateCondition.cs" />
-    <Compile Include="MonoDevelop.Ide.Templates\TemplateParameter.cs" />
-    <Compile Include="MonoDevelop.Ide.Templates\IVersionControlProjectTemplateHandler.cs" />
-    <Compile Include="MonoDevelop.Ide.Templates\TemplateImageProvider.cs" />
-    <Compile Include="MonoDevelop.Ide.Codons\ImageCodon.cs" />
     <Compile Include="MonoDevelop.Components\Mac\MDLinkMenuItem.cs" />
     <Compile Include="MonoDevelop.Components\Mac\MDMenu.cs" />
     <Compile Include="MonoDevelop.Components\Mac\MDMenuItem.cs" />
@@ -8818,30 +8109,11 @@
     <Compile Include="MonoDevelop.Ide.Editor.Extension\KeyDescriptor.cs" />
     <Compile Include="MonoDevelop.Ide.Editor\MessageBubbles\MessageBubbleCommands.cs" />
     <Compile Include="MonoDevelop.Ide.Editor\LineEventArgs.cs" />
-    <Compile Include="MonoDevelop.Ide.TypeSystem\Error.cs" />
-    <Compile Include="MonoDevelop.Ide.TypeSystem\MetadataReferenceCache.cs" />
-    <Compile Include="MonoDevelop.Ide.TypeSystem\IFoldingParser.cs" />
-    <Compile Include="MonoDevelop.Ide.TypeSystem\TypeSystemService_WorkspaceHandling.cs" />
-    <Compile Include="MonoDevelop.Ide.Editor\Projection\ProjectedSegment.cs" />
-    <Compile Include="MonoDevelop.Ide.Editor\Projection\Projection.cs" />
-    <Compile Include="MonoDevelop.Ide.Editor\Projection\ProjectedSemanticHighlighting.cs" />
-    <Compile Include="MonoDevelop.Ide.Editor\Projection\ProjectedTooltipProvider.cs" />
-    <Compile Include="MonoDevelop.Ide.Editor\Projection\ProjectedCompletionExtension.cs" />
-    <Compile Include="MonoDevelop.Ide.Editor\Projection\ProjectedDocumentContext.cs" />
     <Compile Include="MonoDevelop.Ide.CodeCompletion\CompletionCategory.cs" />
     <Compile Include="MonoDevelop.Ide.CodeCompletion\DisplayFlags.cs" />
     <Compile Include="MonoDevelop.Ide.CodeCompletion\ParameterHintingResult.cs" />
-    <Compile Include="MonoDevelop.Ide.Tasks\TaskListEntry.cs" />
-    <Compile Include="MonoDevelop.Ide.TypeSystem\AmbienceTooltipProvider.cs" />
-    <Compile Include="MonoDevelop.Components.PropertyGrid.Editors\PropertyTextEditor.cs" />
-    <Compile Include="MonoDevelop.Ide.Tasks\ProjectCommentTags.cs" />
     <Compile Include="MonoDevelop.Ide.Editor\CustomEditorOptions.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects\NewProjectConfiguration.cs" />
     <Compile Include="MonoDevelop.Components\EventBoxTooltip.cs" />
-    <Compile Include="MonoDevelop.Ide.Templates\ProjectTemplateCreateInformation.cs" />
-    <Compile Include="MonoDevelop.Ide.Templates\SolutionTemplateVisibility.cs" />
-    <Compile Include="MonoDevelop.Ide.Templates\FileTemplateParser.cs" />
-    <Compile Include="MonoDevelop.Ide.Execution\TargetedExecutionHandler.cs" />
     <Compile Include="MonoDevelop.Components.MainToolbar\IMainToolbarView.cs" />
     <Compile Include="MonoDevelop.Components.MainToolbar\MainToolbarController.cs" />
     <Compile Include="MonoDevelop.Components.MainToolbar\MainToolbarModels.cs" />
@@ -8849,113 +8121,98 @@
     <Compile Include="MonoDevelop.Components.MainToolbar\StatusBarContextHandler.cs" />
     <Compile Include="MonoDevelop.Components.MainToolbar\IButtonBarButton.cs" />
     <Compile Include="MonoDevelop.Ide.CodeCompletion\MruCache.cs" />
-    <Compile Include="MonoDevelop.Ide.Editor\TooltipExtensionNode.cs" />
-    <Compile Include="MonoDevelop.Ide.Editor\Projection\IProjectionExtension.cs" />
-    <Compile Include="MonoDevelop.Ide.Editor\Projection\ProjectedFilterCompletionTextEditorExtension.cs" />
-    <Compile Include="MonoDevelop.Components.AutoTest\AppQuery.cs" />
-    <Compile Include="MonoDevelop.Components.AutoTest\AppResult.cs" />
-    <Compile Include="MonoDevelop.Components.AutoTest\IAutoTestSessionDebug.cs" />
-    <Compile Include="MonoDevelop.Components.AutoTest\AutoTestSessionDebug.cs" />
-    <Compile Include="MonoDevelop.Components.AutoTest\SemanticModelAttribute.cs" />
-    <Compile Include="MonoDevelop.Components.AutoTest.Operations\IndexOperation.cs" />
-    <Compile Include="MonoDevelop.Components.AutoTest.Operations\MarkedOperation.cs" />
-    <Compile Include="MonoDevelop.Components.AutoTest.Operations\ModelOperation.cs" />
-    <Compile Include="MonoDevelop.Components.AutoTest.Operations\NextSiblingsOperation.cs" />
-    <Compile Include="MonoDevelop.Components.AutoTest.Operations\Operation.cs" />
-    <Compile Include="MonoDevelop.Components.AutoTest.Operations\PropertyOperation.cs" />
-    <Compile Include="MonoDevelop.Components.AutoTest.Operations\TextOperation.cs" />
-    <Compile Include="MonoDevelop.Components.AutoTest.Operations\TypeOperation.cs" />
-    <Compile Include="MonoDevelop.Components.AutoTest.Results\GtkTreeModelResult.cs" />
-    <Compile Include="MonoDevelop.Components.AutoTest.Results\GtkWidgetResult.cs" />
-    <Compile Include="MonoDevelop.Ide.CodeFormatting\AbstractCodeFormatter.cs" />
-    <Compile Include="MonoDevelop.Ide.CodeFormatting\CodeFormatter.cs" />
-    <Compile Include="MonoDevelop.Ide.TypeSystem\TypeSystemOutputTrackingNode.cs" />
     <Compile Include="MonoDevelop.Ide.Editor\TextEditorType.cs" />
     <Compile Include="MonoDevelop.Ide.Editor.Extension\AbstractBraceMatcher.cs" />
     <Compile Include="MonoDevelop.Ide.Editor.Extension\BraceMatcherTextEditorExtension.cs" />
     <Compile Include="MonoDevelop.Ide.Editor.Extension\BraceMatchingResult.cs" />
-    <Compile Include="MonoDevelop.Components.AutoTest.Operations\ChildrenOperation.cs" />
-    <Compile Include="MonoDevelop.Components.AutoTest.Results\NSObjectResult.cs" />
-    <Compile Include="MonoDevelop.Ide.TypeSystem\MonoDevelopTemporaryStorageServiceFactory.cs" />
-    <Compile Include="MonoDevelop.Ide.TypeSystem\WorkspaceId.cs" />
-    <Compile Include="MonoDevelop.Ide.TypeSystem\MonoDevelopPersistentStorageServiceFactory.cs" />
-    <Compile Include="MonoDevelop.Ide.TypeSystem\SolutionSizeTracker.cs" />
-    <Compile Include="MonoDevelop.Components.AutoTest.Results\GtkNotebookResult.cs" />
     <Compile Include="MonoDevelop.Ide\TaskUtil.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects.OptionPanels\CodeAnalysisPanel.cs" />
     <Compile Include="MonoDevelop.Ide.CodeCompletion\ICompletionKeyHandler.cs" />
-    <Compile Include="MonoDevelop.Ide.TypeSystem\NR5CompatibiltyExtensions.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects\ProjectConfigurationControl.cs" />
-    <Compile Include="MonoDevelop.Ide.TypeSystem\MonoDevelopProjectCacheHostServiceFactory.cs" />
-    <Compile Include="MonoDevelop.Ide.TypeSystem\ProjectCacheService.cs">
-      <DependentUpon>MonoDevelopProjectCacheHostServiceFactory.cs</DependentUpon>
-    </Compile>
-    <Compile Include="MonoDevelop.Ide.TypeSystem\DocumentTrackingService.cs">
-      <DependentUpon>MonoDevelopProjectCacheHostServiceFactory.cs</DependentUpon>
-    </Compile>
-    <Compile Include="MonoDevelop.Components.AutoTest.Results\ObjectResult.cs" />
-    <Compile Include="MonoDevelop.Components.AutoTest\PropertyMetadata.cs" />
-    <Compile Include="MonoDevelop.Components.AutoTest\ObjectProperties.cs" />
-    <Compile Include="MonoDevelop.Components.MainToolbar\ISearchResultCallback.cs" />
-    <Compile Include="MonoDevelop.Ide.Templates\TemplateConditionEvaluator.cs" />
-    <Compile Include="MonoDevelop.Components.AutoTest.Operations\SelectedOperation.cs" />
-    <Compile Include="MonoDevelop.Components\Windows\GtkWPFWidget.cs" />
-    <Compile Include="MonoDevelop.Components\Windows\GtkWin32Interop.cs" />
     <Compile Include="MonoDevelop.Ide.Editor.Extension\AbstractNavigationExtension.cs" />
     <Compile Include="MonoDevelop.Components\FileChooserAction.cs" />
     <Compile Include="MonoDevelop.Components\IdeDialog.cs" />
     <Compile Include="MonoDevelop.Components\IdeWindow.cs" />
     <Compile Include="MonoDevelop.Components\IdeTheme.cs" />
-    <Compile Include="MonoDevelop.Ide.Templates\PropertyDescriptionTemplate.cs" />
-    <Compile Include="MonoDevelop.Ide.Templates\FileTemplateTagsModifier.cs" />
-    <Compile Include="MonoDevelop.Ide.Templates\CombinedTagModel.cs" />
     <Compile Include="MonoDevelop.Components.Docking\DockPositionType.cs" />
     <Compile Include="MonoDevelop.Components\ButtonEvent.cs" />
     <Compile Include="MonoDevelop.Components\Window.cs" />
     <Compile Include="MonoDevelop.Components\Dialog.cs" />
-    <Compile Include="MonoDevelop.Ide.TypeSystem\MonoDevelopSourceText.cs" />
-    <Compile Include="MonoDevelop.Components.AutoTest\DataTransferObjects.cs" />
-    <Compile Include="MonoDevelop.Ide.Templates\ProjectCreateInformationExtensions.cs" />
     <Compile Include="MonoDevelop.Ide.Editor.Extension\FoldingTextEditorExtension.cs" />
     <Compile Include="MonoDevelop.Ide.Editor.Extension\ErrorHandlerTextEditorExtension.cs" />
     <Compile Include="MonoDevelop.Ide.Editor.Extension\DefaultCommandTextEditorExtension.cs" />
     <Compile Include="MonoDevelop.Ide.Editor\EditSession.cs" />
     <Compile Include="MonoDevelop.Ide.Editor.Extension\AutoInsertBracketTextEditorExtension.cs" />
-    <Compile Include="MonoDevelop.Ide.Execution\RunConfigurationEditor.cs" />
-    <Compile Include="MonoDevelop.Ide.Extensions\RunConfigurationEditorExtensionNode.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects.OptionPanels\RunConfigurationsPanel.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects.OptionPanels\RunConfigurationPanel.cs" />
     <Compile Include="MonoDevelop.Components\XwtControl.cs" />
-    <Compile Include="MonoDevelop.Ide.Execution\RunConfigurationService.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects.OptionPanels\AssemblyRunConfigurationEditor.cs" />
     <Compile Include="MonoDevelop.Components\EnvironmentVariableCollectionEditor.cs" />
-    <Compile Include="MonoDevelop.Ide.Execution\ExecutionModeSelectorDialog.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects.OptionPanels\RunConfigurationsList.cs" />
-    <Compile Include="MonoDevelop.Ide.Projects.OptionPanels\ProcessRunConfigurationEditor.cs" />
-    <Compile Include="MonoDevelop.Ide.Extensions\ErrorDocumentationProvider.cs" />
-    <Compile Include="MonoDevelop.Ide\LocalizationService.cs" />
-    <Compile Include="MonoDevelop.Ide.CustomTools\SingleProjectFileCustomTool.cs" />
-    <Compile Include="MonoDevelop.Ide.Execution\RunWithCustomParametersDialog.cs" />
     <Compile Include="MonoDevelop.Components\InformationPopoverWidget.cs" />
     <Compile Include="MonoDevelop.Ide.Editor\MarkupOptions.cs" />
-    <Compile Include="MonoDevelop.Ide.GettingStarted\GettingStarted.cs" />
-    <Compile Include="MonoDevelop.Ide.GettingStarted\GettingStartedNode.cs" />
-    <Compile Include="MonoDevelop.Ide.GettingStarted\GettingStartedNodeBuilder.cs" />
-    <Compile Include="MonoDevelop.Ide.GettingStarted\GettingStartedNodeBuilderExtension.cs" />
-    <Compile Include="MonoDevelop.Ide.GettingStarted\GettingStartedNodeCommandHandler.cs" />
-    <Compile Include="MonoDevelop.Ide.GettingStarted\GettingStartedProjectExtension.cs" />
-    <Compile Include="MonoDevelop.Ide.GettingStarted\GettingStartedViewContent.cs" />
-    <Compile Include="MonoDevelop.Ide.GettingStarted\IGettingStartedProvider.cs" />
-    <Compile Include="MonoDevelop.Ide.GettingStarted\GettingStartedProviderBase.cs" />
     <Compile Include="MonoDevelop.Components\ExtendedHeaderBox.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Wizard\WizardDialog.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Wizard\WizardDialogController.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Wizard\IWizardDialogController.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Wizard\IWizardDialogPage.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui.Wizard\WizardDialogPageBase.cs" />
     <Compile Include="MonoDevelop.Components\XwtBoxTooltip.cs" />
     <Compile Include="MonoDevelop.Components\MDSpinner.cs" />
     <Compile Include="MonoDevelop.Components\RoundedFrameBox.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.ExportSolutionDialog.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.Gui.OptionPanels.KeyBindingsPanel.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.Gui.OptionPanels.LoadSavePanelWidget.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.Gui.Dialogs.TipOfTheDayWindow.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.Gui.OptionPanels.BuildPanelWidget.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.ExternalTools.ExternalToolPanelWidget.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.Gui.Dialogs.NewLayoutDialog.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.Gui.OptionPanels.AddInsPanelWidget.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.Gui.OptionPanels.TasksPanelWidget.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.SelectEncodingsDialog.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.Gui.Dialogs.AddinLoadErrorDialog.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.NewFileDialog.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.Gui.OptionPanels.IDEStyleOptionsPanelWidget.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.Gui.OptionPanels.AuthorInformationPanelWidget.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.Gui.OptionPanels.GlobalAuthorInformationPanelWidget.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.StandardHeader.StandardHeaderPolicyPanelWidget.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.Gui.OptionPanels.TextStylePolicyPanelWidget.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.CodeTemplates.CodeTemplatePanelWidget.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.CodeTemplates.EditTemplateDialog.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.Gui.OptionPanels.MonoRuntimePanelWidget.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.FindInFiles.FindInFilesDialog.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.Execution.CustomExecutionModeWidget.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.Execution.CustomExecutionModeDialog.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.Gui.Components.ExecutionModeComboBox.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.Execution.CustomExecutionModeManagerDialog.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.ConfirmProjectDeleteDialog.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.Gui.Dialogs.SelectFileFormatDialog.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.Gui.OptionPanels.MaintenanceOptionsPanelWidget.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.Gui.OptionPanels.AssemblyFoldersPanelWidget.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.Gui.OptionPanels.BuildMessagePanelWidget.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.OptionPanels.CustomCommandWidget.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.OptionPanels.CustomCommandPanelWidget.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.OptionPanels.CommonAssemblySigningPreferences.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.OptionPanels.CombineBuildOptionsWidget.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.OptionPanels.OutputOptionsPanelWidget.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.OptionPanels.CombineConfigurationPanelWidget.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.OptionPanels.CombineEntryConfigurationsPanelWidget.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.NewConfigurationDialog.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.DeleteConfigDialog.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.OptionPanels.RuntimeOptionsPanelWidget.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.OptionPanels.CombineInformationWidget.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.OptionPanels.GeneralProjectOptionsWidget.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.OptionPanels.BaseDirectoryPanelWidget.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.OptionPanels.StartupOptionsPanelWidget.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.OptionPanels.RunOptionsPanelWidget.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.OptionPanels.NamespaceSynchronisationPanelWidget.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.OptionPanels.CodeFormattingPanelWidget.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.ProjectFileSelectorDialog.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.AddMimeTypeDialog.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.RenameConfigDialog.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.IncludeNewFilesDialog.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.Execution.MonoExecutionParametersPreview.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.Execution.MonoExecutionParametersWidget.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.SelectReferenceDialog.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.Fonts.FontChooserPanelWidget.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.NewPolicySetDialog.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.ExportProjectPolicyDialog.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.ApplyPolicyDialog.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.Gui.Components.ProjectSelectorWidget.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.ProjectSelectorDialog.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.ImportProjectPolicyDialog.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.AddExternalFileDialog.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.GtkProjectFolderPreviewWidget.cs" />
+    <Compile Include="gtk-gui\MonoDevelop.Ide.Projects.GtkProjectConfigurationWidget.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Makefile.am" />
@@ -8967,46 +8224,14 @@
     <None Include="MonoDevelop.Ide.dll.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="packages.config" />
+    <None Include="project.json" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild">
     <Copy SourceFiles="@(Data)" DestinationFolder="..\..\..\build\data\%(Data.RelativeDir)" />
   </Target>
   <ItemGroup>
-    <Folder Include="MonoDevelop.Ide.CodeFormatting\" />
-    <Folder Include="MonoDevelop.Ide.Execution\" />
-    <Folder Include="MonoDevelop.Ide.Extensions\" />
-    <Folder Include="MonoDevelop.Ide.CustomTools\" />
-    <Folder Include="MonoDevelop.Components.Extensions\" />
-    <Folder Include="MonoDevelop.Components.Theming\" />
-    <Folder Include="MonoDevelop.Components.Docking\" />
-    <Folder Include="MonoDevelop.Ide.Gui\" />
-    <Folder Include="MonoDevelop.Ide.Desktop\" />
-    <Folder Include="MonoDevelop.Ide.Projects\" />
-    <Folder Include="MonoDevelop.Ide\" />
-    <Folder Include="MonoDevelop.Ide.Gui.Dialogs\" />
-    <Folder Include="MonoDevelop.Ide.Projects.OptionPanels\" />
-    <Folder Include="MonoDevelop.Ide.Navigation\" />
-    <Folder Include="MonoDevelop.Components.AutoTest\" />
-    <Folder Include="MonoDevelop.Ide.Fonts\" />
-    <Folder Include="MonoDevelop.Ide.Codons\" />
-    <Folder Include="ExtensionModel\" />
-    <Folder Include="icons\" />
-    <Folder Include="MonoDevelop.Ide.WelcomePage\" />
-    <Folder Include="branding\" />
-    <Folder Include="MonoDevelop.Components.MainToolbar\" />
-    <Folder Include="MonoDevelop.Components.MainToolbar\Theme\" />
-    <Folder Include="MonoDevelop.Ide.WelcomePage\icons\" />
-    <Folder Include="MonoDevelop.Ide.TextEditing\" />
-    <Folder Include="MonoDevelop.Components.DockNotebook\" />
-    <Folder Include="MonoDevelop.Ide.Editor.Util\" />
-    <Folder Include="MonoDevelop.Ide.Editor\Commands\" />
-    <Folder Include="MonoDevelop.Ide.Editor\MessageBubbles\" />
-    <Folder Include="MonoDevelop.Ide.Editor\Projection\" />
-    <Folder Include="MonoDevelop.Components\Windows\" />
-    <Folder Include="MonoDevelop.Ide.GettingStarted\" />
-    <Folder Include="MonoDevelop.Ide.Gui.Wizard\" />
+    <Folder Include="MonoDevelop.Ide.TypeSystem\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="gtkrc">
@@ -9024,5 +8249,6 @@
     <Content Include="gtkrc.mac-dark">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <EmbeddedResource Include="icons\StockIcons.xml" />
   </ItemGroup>
 </Project>

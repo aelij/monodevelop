@@ -26,37 +26,9 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-
-using MonoDevelop.Projects;
-using MonoDevelop.Ide.Gui.Components;
-
 namespace MonoDevelop.Ide.Gui.Pads
 {
 	public class SolutionPad : TreeViewPad
 	{
-		public SolutionPad ()
-		{
-			IdeApp.Workspace.WorkspaceItemOpened += OnOpenWorkspace;
-			IdeApp.Workspace.WorkspaceItemClosed += OnCloseWorkspace;
-		}
-		
-		public override void Initialize (NodeBuilder[] builders, TreePadOption[] options, string contextMenuPath)
-		{
-			base.Initialize (builders, options, contextMenuPath);
-			foreach (WorkspaceItem it in IdeApp.Workspace.Items)
-				treeView.AddChild (it);
-			base.TreeView.Tree.Name = "solutionBrowserTree";
-		}
-		
-		protected virtual void OnOpenWorkspace (object sender, WorkspaceItemEventArgs e)
-		{
-			treeView.AddChild (e.Item);
-		}
-
-		protected virtual void OnCloseWorkspace (object sender, WorkspaceItemEventArgs e)
-		{
-			treeView.RemoveChild (e.Item);
-		}
 	}
 }

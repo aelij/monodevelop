@@ -29,17 +29,10 @@
 using System;
 using System.Threading;
 using System.IO;
-using System.Xml;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
-using System.Collections.Specialized;
 using MonoDevelop.Core.Execution;
-using MonoDevelop.Core.AddIns;
-using MonoDevelop.Core.Serialization;
-using Mono.Addins;
-using Mono.PkgConfig;
 using MonoDevelop.Core.Instrumentation;
 using System.Linq;
 
@@ -54,7 +47,6 @@ namespace MonoDevelop.Core.Assemblies
 		bool initialized;
 		bool initializing;
 		bool backgroundInitialize;
-		bool extensionInitialized;
 		
 		Dictionary<TargetFrameworkMoniker,TargetFrameworkBackend> frameworkBackends
 			= new Dictionary<TargetFrameworkMoniker, TargetFrameworkBackend> ();
@@ -70,7 +62,6 @@ namespace MonoDevelop.Core.Assemblies
 		{
 			assemblyContext = new RuntimeAssemblyContext (this);
 			composedAssemblyContext = new ComposedAssemblyContext ();
-			composedAssemblyContext.Add (Runtime.SystemAssemblyService.UserAssemblyContext);
 			composedAssemblyContext.Add (assemblyContext);
 			
 			Runtime.ShuttingDown += delegate {
@@ -372,12 +363,6 @@ namespace MonoDevelop.Core.Assemblies
 						// If we are here, that's because 1) the runtime has been initialized, or 2) the runtime is being initialized by *this* thread
 						throw new InvalidOperationException ("Runtime intialization not started");
 				}
-				if (!extensionInitialized && !initializing) {
-					// Get assemblies registered using the extension point.
-					// This is not done in BackgroundInitialize because the add-in manager is not thread safe
-					extensionInitialized = true;
-					AddinManager.AddExtensionNodeHandler ("/MonoDevelop/Core/SupportPackages", OnPackagesChanged);
-				}
 			}
 		}
 		
@@ -433,23 +418,6 @@ namespace MonoDevelop.Core.Assemblies
 			OnInitialize ();
 		}
 		
-		void OnPackagesChanged (object s, ExtensionNodeEventArgs args)
-		{
-			PackageExtensionNode node = (PackageExtensionNode) args.ExtensionNode;
-			SystemPackageInfo pi = node.GetPackageInfo ();
-			
-			if (args.Change == ExtensionChange.Add) {
-				var existing = assemblyContext.GetPackageInternal (pi.Name);
-				if (existing == null || (!existing.IsFrameworkPackage || pi.IsFrameworkPackage))
-					RegisterPackage (pi, node.Assemblies);
-			}
-			else {
-				SystemPackage p = assemblyContext.GetPackage (pi.Name, pi.Version);
-				if (p.IsInternalPackage)
-					assemblyContext.UnregisterPackage (pi.Name, pi.Version);
-			}
-		}
-
 		/// <summary>
 		/// Registers a package. It can be used by add-ins to register a package for a set of assemblies
 		/// they provide.
@@ -507,7 +475,7 @@ namespace MonoDevelop.Core.Assemblies
 		{
 			var frameworks = new HashSet<TargetFrameworkMoniker> ();
 			
-			foreach (TargetFramework fx in Runtime.SystemAssemblyService.GetKnownFrameworks ()) {
+			foreach (TargetFramework fx in SystemAssemblyService.Instance.GetKnownFrameworks ()) {
 				// A framework is installed if the assemblies directory exists and the first
 				// assembly of the list exists.
 				if (frameworks.Add (fx.Id) && IsInstalled (fx)) {
@@ -589,7 +557,7 @@ namespace MonoDevelop.Core.Assemblies
 				foreach (FilePath versionDir in Directory.EnumerateDirectories (idDir)) {
 					var version = versionDir.FileName;
 					var moniker = new TargetFrameworkMoniker (id, version);
-					if (rescanKnownFrameworks || !Runtime.SystemAssemblyService.IsKnownFramework (moniker)) {
+					if (rescanKnownFrameworks || !SystemAssemblyService.Instance.IsKnownFramework (moniker)) {
 						var fx = ReadTargetFramework (moniker, versionDir);
 						if (fx != null)
 							yield return (fx);
@@ -600,7 +568,7 @@ namespace MonoDevelop.Core.Assemblies
 					foreach (FilePath profileDir in Directory.EnumerateDirectories (profileListDir)) {
 						var profile = profileDir.FileName;
 						moniker = new TargetFrameworkMoniker (id, version, profile);
-						if (rescanKnownFrameworks || !Runtime.SystemAssemblyService.IsKnownFramework (moniker)) {
+						if (rescanKnownFrameworks || !SystemAssemblyService.Instance.IsKnownFramework (moniker)) {
 							var fx = ReadTargetFramework (moniker, profileDir);
 							if (fx != null)
 								yield return (fx);

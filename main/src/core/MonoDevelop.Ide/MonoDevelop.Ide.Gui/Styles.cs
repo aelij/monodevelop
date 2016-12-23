@@ -26,8 +26,6 @@
 using System;
 using MonoDevelop.Components;
 using Xwt.Drawing;
-using System.Security.Policy;
-using MonoDevelop.Core.StringParsing;
 
 #if MAC
 using AppKit;
@@ -665,15 +663,6 @@ namespace MonoDevelop.Ide.Gui
 			Wizard.PageSeparatorColor = ThinSplitterColor;
 			Wizard.ContentSeparatorColor = Color.FromName ("#6e6e6e");
 			Wizard.ContentShadowColor = ThinSplitterColor;
-		}
-
-		static StylesStringTagModel tagModel;
-
-		public static IStringTagModel GetStringTagModel ()
-		{
-			if (tagModel == null)
-				tagModel = new StylesStringTagModel ();
-			return tagModel;
 		}
 	}
 }

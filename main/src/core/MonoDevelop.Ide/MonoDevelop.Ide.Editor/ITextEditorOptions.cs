@@ -111,7 +111,7 @@ namespace MonoDevelop.Ide.Editor
 		public static ColorScheme GetColorStyle (this ITextEditorOptions options)
 		{
 			if (options == null)
-				throw new ArgumentNullException ("options");
+				throw new ArgumentNullException (nameof (options));
 			return SyntaxModeService.GetColorStyle (options.ColorScheme);
 		}
 
@@ -121,7 +121,7 @@ namespace MonoDevelop.Ide.Editor
 		public static string GetIndentationString (this ITextEditorOptions options)
 		{
 			if (options == null)
-				throw new ArgumentNullException ("options");
+				throw new ArgumentNullException (nameof (options));
 			return options.TabsToSpaces ? new string (' ', options.IndentationSize) : "\t";
 		}
 	}

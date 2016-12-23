@@ -28,9 +28,7 @@ using System.IO;
 
 
 using MonoDevelop.Core;
-using Services = MonoDevelop.Projects.Services;
 using MonoDevelop.Ide;
-using MonoDevelop.Ide.TypeSystem;
 using MonoDevelop.Ide.Editor;
 
 namespace MonoDevelop.SourceEditor

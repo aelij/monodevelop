@@ -97,7 +97,7 @@ namespace MonoDevelop.CSharp.CodeFixes
 
 		protected override string GetDescription(Diagnostic diagnostic, SyntaxNode node, SemanticModel semanticModel, CancellationToken cancellationToken)
 		{
-			return GettextCatalog.GetString ("Insert 'await'");
+			return "Insert 'await'";
 		}
 
 		protected override Task<SyntaxNode> GetNewRoot(SyntaxNode root, SyntaxNode oldNode, SemanticModel semanticModel, Diagnostic diagnostic, Document document, CancellationToken cancellationToken)

@@ -1,23 +1,12 @@
 ﻿using MonoDevelop.Ide;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using MonoDevelop.Core;
 using MonoDevelop.Ide.Gui;
-using Xwt.Drawing;
 using MonoDevelop.Components.MainToolbar;
-using MonoDevelop.Ide.Tasks;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Media.Animation;
@@ -40,7 +29,6 @@ namespace WindowsPlatform.MainToolbar
 	public partial class StatusBarControl : UserControl, StatusBar, INotifyPropertyChanged
 	{
 		StatusBarContextHandler ctxHandler;
-		TaskEventHandler updateHandler;
 		public StatusBarControl ()
 		{
 			InitializeComponent ();
@@ -50,31 +38,6 @@ namespace WindowsPlatform.MainToolbar
 
 			ShowReady ();
 
-			updateHandler = delegate {
-				int ec = 0, wc = 0;
-
-				foreach (MonoDevelop.Ide.Tasks.TaskListEntry t in TaskService.Errors) {
-					if (t.Severity == TaskSeverity.Error)
-						ec++;
-					else if (t.Severity == TaskSeverity.Warning)
-						wc++;
-				}
-
-				Runtime.RunInMainThread (delegate {
-					if (ec > 0) {
-						BuildResultPanelVisibility = Visibility.Visible;
-						BuildResultCount = ec;
-						BuildResultIcon = Stock.Error.GetStockIcon ().WithSize (Xwt.IconSize.Small);
-					} else if (wc > 0) {
-						BuildResultPanelVisibility = Visibility.Visible;
-						BuildResultCount = wc;
-						BuildResultIcon = Stock.Warning.GetStockIcon ().WithSize (Xwt.IconSize.Small);
-					} else
-						BuildResultPanelVisibility = Visibility.Collapsed;
-				});
-			};
-			TaskService.Errors.TasksAdded += updateHandler;
-			TaskService.Errors.TasksRemoved += updateHandler;
 			BrandingService.ApplicationNameChanged += ApplicationNameChanged;
 
 			StatusText.ToolTipOpening += (o, e) => {
@@ -119,8 +82,6 @@ namespace WindowsPlatform.MainToolbar
 
 		public void Dispose ()
 		{
-			TaskService.Errors.TasksAdded -= updateHandler;
-			TaskService.Errors.TasksRemoved -= updateHandler;
 			BrandingService.ApplicationNameChanged -= ApplicationNameChanged;
 		}
 
@@ -143,7 +104,6 @@ namespace WindowsPlatform.MainToolbar
 
 		void OnShowError(object sender, MouseButtonEventArgs e)
 		{
-			IdeApp.Workbench.GetPad<MonoDevelop.Ide.Gui.Pads.ErrorListPad>().BringToFront();
 		}
 
 		void OnShowPad(object sender, MouseButtonEventArgs e)

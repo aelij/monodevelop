@@ -47,7 +47,7 @@ namespace MonoDevelop.MacIntegration
 				
 				var popup = new NSPopUpButton (new CGRect (0, 0, 200, 28), false);
 				var dropdownBox = new MDBox (LayoutDirection.Horizontal, 2, 0) {
-					{ new MDLabel (GettextCatalog.GetString ("Override build action:")), true },
+					{ new MDLabel ("Override build action:"), true },
 					{ new MDAlignment (popup, true) { MinWidth = 200 }  }
 				};
 				
@@ -67,7 +67,7 @@ namespace MonoDevelop.MacIntegration
 					panel.AccessoryView = dropdownBox.View;
 				}
 				
-				popup.AddItem (GettextCatalog.GetString ("(Default)"));
+				popup.AddItem ("(Default)");
 				popup.Menu.AddItem (NSMenuItem.SeparatorItem);
 				
 				foreach (var b in data.BuildActions) {

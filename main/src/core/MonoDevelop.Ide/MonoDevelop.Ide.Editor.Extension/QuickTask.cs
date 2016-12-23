@@ -25,13 +25,6 @@
 // THE SOFTWARE.
 
 using System;
-using Gtk;
-using System.Collections.Generic;
-using Gdk;
-using MonoDevelop.Core;
-using MonoDevelop.Ide;
-using MonoDevelop.Components.Commands;
-using Microsoft.CodeAnalysis;
 
 namespace MonoDevelop.Ide.Editor.Extension
 {

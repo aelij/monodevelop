@@ -28,7 +28,6 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Reflection;
-using Mono.Addins;
 using System.Collections.Generic;
 
 namespace MonoDevelop.Core
@@ -69,10 +68,6 @@ namespace MonoDevelop.Core
 		
 		IEnumerable<ISystemInformationProvider> InternalGetDescription ()
 		{
-			foreach (var info in AddinManager.GetExtensionObjects<ISystemInformationProvider> ("/MonoDevelop/Core/SystemInformation", false)) {
-				yield return info;
-			}
-
 			var sb = new StringBuilder ();
 			// First append the MonoDevelop build information
 			var biFile = ((FilePath)Assembly.GetEntryAssembly ().Location).ParentDirectory.Combine ("buildinfo");
@@ -120,17 +115,6 @@ namespace MonoDevelop.Core
 				Title = "Operating System",
 				Description = sb.ToString ()
 			};
-
-			string userAddins = string.Join (Environment.NewLine,
-				AddinManager.Registry.GetModules (AddinSearchFlags.IncludeAddins | AddinSearchFlags.LatestVersionsOnly)
-				.Where (addin => addin.IsUserAddin && addin.Enabled)
-				.Select (addin => string.Format ("{0} {1}", addin.Name, addin.Version))
-			);
-			if (!string.IsNullOrEmpty (userAddins))
-				yield return new SystemInformationSection () {
-					Title = "Enabled user installed addins",
-					Description = userAddins,
-				};
 		}
 
 		internal static string GetReleaseId ()

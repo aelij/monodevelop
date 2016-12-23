@@ -161,11 +161,11 @@ namespace MonoDevelop.Ide.Gui.Dialogs
 			btnClose.Show ();
 
 			if (errors)
-				label.Text = GettextCatalog.GetString ("Operation completed with errors.");
+				label.Text = string.Format ("Operation completed with errors.");
 			else if (warnings)
-				label.Text = GettextCatalog.GetString ("Operation completed with warnings.");
+				label.Text = string.Format ("Operation completed with warnings.");
 			else
-				label.Text = GettextCatalog.GetString ("Operation successfully completed.");
+				label.Text = string.Format ("Operation successfully completed.");
 		}
 		
 		protected void OnBtnCancelClicked (object sender, EventArgs e)

@@ -168,7 +168,7 @@ namespace MonoDevelop.CSharp.ClassOutline
 			
 			var groupToggleButton = new ToggleButton {
 				Image = new ImageView (Ide.Gui.Stock.GroupByCategory, IconSize.Menu),
-				TooltipText = GettextCatalog.GetString ("Group entries by type"),
+				TooltipText = "Group entries by type",
 				Active = settings.IsGrouped,
 			};	
 			groupToggleButton.Toggled += delegate {
@@ -180,7 +180,7 @@ namespace MonoDevelop.CSharp.ClassOutline
 
 			var sortAlphabeticallyToggleButton = new ToggleButton {
 				Image = new ImageView (Ide.Gui.Stock.SortAlphabetically, IconSize.Menu),
-				TooltipText = GettextCatalog.GetString ("Sort entries alphabetically"),
+				TooltipText = "Sort entries alphabetically",
 				Active = settings.IsSorted,
 			};	
 			sortAlphabeticallyToggleButton.Toggled += delegate {
@@ -191,7 +191,7 @@ namespace MonoDevelop.CSharp.ClassOutline
 			};
 
 			var preferencesButton = new DockToolButton (Ide.Gui.Stock.Options) {
-				TooltipText = GettextCatalog.GetString ("Open preferences dialog"),
+				TooltipText = "Open preferences dialog",
 			};
 			preferencesButton.Clicked += delegate {
 				using (var dialog = new OutlineSortingPreferencesDialog (settings)) {

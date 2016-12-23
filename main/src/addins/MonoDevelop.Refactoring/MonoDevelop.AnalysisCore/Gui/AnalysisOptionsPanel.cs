@@ -59,9 +59,9 @@ namespace MonoDevelop.AnalysisCore.Gui
 
 		public AnalysisOptionsWidget ()
 		{
-			enabledCheck = new CheckButton (GettextCatalog.GetString ("Enable source analysis of open files"));
+			enabledCheck = new CheckButton ("Enable source analysis of open files");
 			PackStart (enabledCheck, false, false, 0);
-			enabledTest = new CheckButton (GettextCatalog.GetString ("Enable text editor unit test integration"));
+			enabledTest = new CheckButton ("Enable text editor unit test integration");
 			PackStart (enabledTest, false, false, 0);
 
 			ShowAll ();

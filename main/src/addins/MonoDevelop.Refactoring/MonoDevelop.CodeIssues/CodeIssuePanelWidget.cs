@@ -128,13 +128,13 @@ namespace MonoDevelop.CodeIssues
 		{
 			switch (severity) {
 			case DiagnosticSeverity.Hidden:
-				return GettextCatalog.GetString ("Do not show");
+				return "Do not show";
 			case DiagnosticSeverity.Error:
-				return GettextCatalog.GetString ("Error");
+				return "Error";
 			case DiagnosticSeverity.Warning:
-				return GettextCatalog.GetString ("Warning");
+				return "Warning";
 			case DiagnosticSeverity.Info:
-				return GettextCatalog.GetString ("Info");
+				return "Info";
 			default:
 				throw new ArgumentOutOfRangeException ();
 			}

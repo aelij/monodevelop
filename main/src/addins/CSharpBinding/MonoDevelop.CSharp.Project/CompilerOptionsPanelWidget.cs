@@ -57,10 +57,10 @@ namespace MonoDevelop.CSharp.Project
 			var csproject = (CSharpProject)project;
 			
 			ListStore store = new ListStore (typeof (string));
-			store.AppendValues (GettextCatalog.GetString ("Executable"));
-			store.AppendValues (GettextCatalog.GetString ("Library"));
-			store.AppendValues (GettextCatalog.GetString ("Executable with GUI"));
-			store.AppendValues (GettextCatalog.GetString ("Module"));
+			store.AppendValues ("Executable");
+			store.AppendValues ("Library");
+			store.AppendValues ("Executable with GUI");
+			store.AppendValues ("Module");
 			compileTargetCombo.Model = store;
 			CellRendererText cr = new CellRendererText ();
 			compileTargetCombo.PackStart (cr, true);
@@ -101,7 +101,7 @@ namespace MonoDevelop.CSharp.Project
 			noStdLibCheckButton.Active = compilerParameters.NoStdLib;
 
 			ListStore langVerStore = new ListStore (typeof (string));
-			langVerStore.AppendValues (GettextCatalog.GetString ("Default"));
+			langVerStore.AppendValues ("Default");
 			langVerStore.AppendValues ("ISO-1");
 			langVerStore.AppendValues ("ISO-2");
 			langVerStore.AppendValues ("Version 3");
@@ -126,7 +126,7 @@ namespace MonoDevelop.CSharp.Project
 			
 				if (trialCodePage == -1) {
 					if (!int.TryParse (codepageEntry.Entry.Text, out trialCodePage)) {
-						MessageService.ShowError (GettextCatalog.GetString ("Invalid code page number."));
+						MessageService.ShowError ("Invalid code page number.");
 						return false;
 					}
 				}

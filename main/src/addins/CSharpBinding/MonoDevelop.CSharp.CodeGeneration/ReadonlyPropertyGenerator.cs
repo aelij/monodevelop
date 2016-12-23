@@ -45,13 +45,13 @@ namespace MonoDevelop.CodeGeneration
 		
 		public string Text {
 			get {
-				return GettextCatalog.GetString ("Read-only properties");
+				return "Read-only properties";
 			}
 		}
 		
 		public string GenerateDescription {
 			get {
-				return GettextCatalog.GetString ("Select members which should be exposed.");
+				return "Select members which should be exposed.";
 			}
 		}
 		

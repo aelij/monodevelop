@@ -26,7 +26,6 @@
 using System;
 using Mono.TextEditor;
 using MonoDevelop.Ide.Editor;
-using MonoDevelop.Ide.TypeSystem;
 
 namespace MonoDevelop.SourceEditor
 {

@@ -27,7 +27,6 @@
 //
 
 using System;
-using MonoDevelop.Ide.TypeSystem;
 
 namespace MonoDevelop.Ide.CodeCompletion
 {

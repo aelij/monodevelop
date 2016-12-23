@@ -45,13 +45,13 @@ namespace MonoDevelop.CodeGeneration
 		
 		public string Text {
 			get {
-				return GettextCatalog.GetString ("WriteLine call");
+				return "WriteLine call";
 			}
 		}
 		
 		public string GenerateDescription {
 			get {
-				return GettextCatalog.GetString ("Select members to be outputted.");
+				return "Select members to be outputted.";
 			}
 		}
 		

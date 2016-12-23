@@ -66,8 +66,6 @@ namespace MonoDevelop.SourceEditor
 
 		void IChunkMarker.ChangeForeColor (MonoTextEditor editor, Chunk chunk, ref Cairo.Color color)
 		{
-			if (Debugger.DebuggingService.IsDebugging)
-				return;
 			int markerStart = Segment.Offset;
 			int markerEnd = Segment.EndOffset;
 			if (chunk.EndOffset <= markerStart || markerEnd <= chunk.Offset) 

@@ -28,124 +28,129 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
-
-using Mono.Addins;
-
-using MonoDevelop.Ide.Codons;
 using MonoDevelop.Core;
+using MonoDevelop.Ide.Editor;
 using MonoDevelop.Projects;
 
 namespace MonoDevelop.Ide.Gui
 {
-	public static class DisplayBindingService
-	{
-		private static List<IDisplayBinding> runtimeBindings = new List<IDisplayBinding>();
+    public static class DisplayBindingService
+    {
+        private static readonly List<IDisplayBinding> RuntimeBindings = new List<IDisplayBinding> {
+            new DefaultDisplayBinding (),
+            new TextEditorDisplayBinding ()
+        };
 
-		public static IEnumerable<T> GetBindings<T> ()
-		{
-			return runtimeBindings.OfType<T>().Concat(AddinManager.GetExtensionObjects ("/MonoDevelop/Ide/DisplayBindings")
-				.OfType<T> ());
-		}
+        public static IEnumerable<T> GetBindings<T>()
+        {
+            return RuntimeBindings.OfType<T>();
+        }
 
-		public static void RegisterRuntimeDisplayBinding(IDisplayBinding binding)
-		{
-			runtimeBindings.Add(binding);
-		}
+        public static void RegisterRuntimeDisplayBinding(IDisplayBinding binding)
+        {
+            RuntimeBindings.Add(binding);
+        }
 
-		public static void DeregisterRuntimeDisplayBinding(IDisplayBinding binding)
-		{
-			runtimeBindings.Remove(binding);
-		}
+        public static void DeregisterRuntimeDisplayBinding(IDisplayBinding binding)
+        {
+            RuntimeBindings.Remove(binding);
+        }
 
-		internal static IEnumerable<IDisplayBinding> GetDisplayBindings (FilePath filePath, string mimeType, Project ownerProject)
-		{
-			if (mimeType == null && !filePath.IsNullOrEmpty)
-				mimeType = DesktopService.GetMimeTypeForUri (filePath);
-			
-			foreach (var b in GetBindings<IDisplayBinding> ()) {
-				bool canHandle = false;
-				try {
-					canHandle = b.CanHandle (filePath, mimeType, ownerProject);
-				} catch (Exception ex) {
-					LoggingService.LogError ("Error while getting display bindings", ex);
-				}
-				if (canHandle)
-					yield return b;
-			}
-		}
-		
-		public static IViewDisplayBinding GetDefaultViewBinding (FilePath filePath, string mimeType, Project ownerProject)
-		{
-			return GetDisplayBindings (filePath, mimeType, ownerProject).OfType<IViewDisplayBinding> ()
-				.FirstOrDefault (d => d.CanUseAsDefault);
-		}
-		
-		public static IDisplayBinding GetDefaultBinding (FilePath filePath, string mimeType, Project ownerProject)
-		{
-			return GetDisplayBindings (filePath, mimeType, ownerProject).FirstOrDefault (d => d.CanUseAsDefault);
-		}
-		
-		internal static void AttachSubWindows (IWorkbenchWindow workbenchWindow, IViewDisplayBinding binding)
-		{
-			int index = 0;
+        internal static IEnumerable<IDisplayBinding> GetDisplayBindings(FilePath filePath, string mimeType, Project ownerProject)
+        {
+            if (mimeType == null && !filePath.IsNullOrEmpty)
+                mimeType = DesktopService.GetMimeTypeForUri(filePath);
 
-			foreach (var o in GetBindings<object> ()) {
-				if (o == binding) {
-					index++;
-					continue;
-				}
+            foreach (var b in GetBindings<IDisplayBinding>())
+            {
+                bool canHandle = false;
+                try
+                {
+                    canHandle = b.CanHandle(filePath, mimeType, ownerProject);
+                }
+                catch (Exception ex)
+                {
+                    LoggingService.LogError("Error while getting display bindings", ex);
+                }
+                if (canHandle)
+                    yield return b;
+            }
+        }
 
-				var attachable = o as IAttachableDisplayBinding;
-				if (attachable == null)
-					continue;
+        public static IViewDisplayBinding GetDefaultViewBinding(FilePath filePath, string mimeType, Project ownerProject)
+        {
+            return GetDisplayBindings(filePath, mimeType, ownerProject).OfType<IViewDisplayBinding>()
+                .FirstOrDefault(d => d.CanUseAsDefault);
+        }
 
-				if (attachable.CanAttachTo (workbenchWindow.ViewContent))
-					workbenchWindow.InsertViewContent (index++, attachable.CreateViewContent (workbenchWindow.ViewContent));
-			}
-		}
+        public static IDisplayBinding GetDefaultBinding(FilePath filePath, string mimeType, Project ownerProject)
+        {
+            return GetDisplayBindings(filePath, mimeType, ownerProject).FirstOrDefault(d => d.CanUseAsDefault);
+        }
 
-		public static IEnumerable<FileViewer> GetFileViewers (FilePath filePath, Project ownerProject)
-		{
-			string mimeType = DesktopService.GetMimeTypeForUri (filePath);
-			var viewerIds = new HashSet<string> ();
-			
-			foreach (var b in GetDisplayBindings (filePath, mimeType, ownerProject)) {
-				var vb = b as IViewDisplayBinding;
-				if (vb != null) {
-					yield return new FileViewer (vb);
-				} else {
-					var eb = (IExternalDisplayBinding) b;
-					var app = eb.GetApplication (filePath, mimeType, ownerProject);
-					if (viewerIds.Add (app.Id))
-						yield return new FileViewer (app);
-				}
-			}
+        internal static void AttachSubWindows(IWorkbenchWindow workbenchWindow, IViewDisplayBinding binding)
+        {
+            int index = 0;
 
-			foreach (var app in DesktopService.GetApplications (filePath))
-				if (viewerIds.Add (app.Id))
-					yield return new FileViewer (app);
-		}
-	}
-	
-	//dummy binding, anchor point for extension tree
-	class DefaultDisplayBinding : IViewDisplayBinding
-	{
-		public ViewContent CreateContent (FilePath fileName, string mimeType, Project ownerProject)
-		{
-			throw new InvalidOperationException ();
-		}
+            foreach (var o in GetBindings<object>())
+            {
+                if (o == binding)
+                {
+                    index++;
+                    continue;
+                }
 
-		public string Name {
-			get { return null; }
-		}
+                var attachable = o as IAttachableDisplayBinding;
+                if (attachable == null)
+                    continue;
 
-		public bool CanHandle (FilePath fileName, string mimeType, Project ownerProject)
-		{
-			return false;
-		}
+                if (attachable.CanAttachTo(workbenchWindow.ViewContent))
+                    workbenchWindow.InsertViewContent(index++, attachable.CreateViewContent(workbenchWindow.ViewContent));
+            }
+        }
 
-		public bool CanUseAsDefault {
-			get { return false; }
-		}
-	}
+        public static IEnumerable<FileViewer> GetFileViewers(FilePath filePath, Project ownerProject)
+        {
+            string mimeType = DesktopService.GetMimeTypeForUri(filePath);
+            var viewerIds = new HashSet<string>();
+
+            foreach (var b in GetDisplayBindings(filePath, mimeType, ownerProject))
+            {
+                var vb = b as IViewDisplayBinding;
+                if (vb != null)
+                {
+                    yield return new FileViewer(vb);
+                }
+                else
+                {
+                    var eb = (IExternalDisplayBinding)b;
+                    var app = eb.GetApplication(filePath, mimeType, ownerProject);
+                    if (viewerIds.Add(app.Id))
+                        yield return new FileViewer(app);
+                }
+            }
+
+            foreach (var app in DesktopService.GetApplications(filePath))
+                if (viewerIds.Add(app.Id))
+                    yield return new FileViewer(app);
+        }
+    }
+
+    //dummy binding, anchor point for extension tree
+    class DefaultDisplayBinding : IViewDisplayBinding
+    {
+        public ViewContent CreateContent(FilePath fileName, string mimeType, Project ownerProject)
+        {
+            throw new InvalidOperationException();
+        }
+
+        public string Name => null;
+
+        public bool CanHandle(FilePath fileName, string mimeType, Project ownerProject)
+        {
+            return false;
+        }
+
+        public bool CanUseAsDefault => false;
+    }
 }

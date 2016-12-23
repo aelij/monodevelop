@@ -185,7 +185,7 @@ namespace MonoDevelop.CSharp.CodeFixes.FullyQualify
 						var codeAction = new DocumentChangeAction(
 							node.Span,
 							DiagnosticSeverity.Info,
-							string.Format(GettextCatalog.GetString ("Change '{0}' to '{1}.{2}'"), name, containerName, memberName),
+							string.Format("Change '{0}' to '{1}.{2}'", name, containerName, memberName),
 							(c) =>
 							{
 								var newRoot = this.ReplaceNode(node, containerName, c);
