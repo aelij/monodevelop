@@ -25,9 +25,8 @@
 // THE SOFTWARE.
 using System;
 using System.Linq;
-using ICSharpCode.NRefactory;
 using System.Collections.Generic;
-using ICSharpCode.NRefactory.Editor;
+using Mono.TextEditor.NRefactory;
 
 namespace Mono.TextEditor
 {

@@ -32,19 +32,6 @@ using Microsoft.CodeAnalysis;
 
 namespace MonoDevelop.AnalysisCore
 {
-//	public class FixableResult : Result
-//	{
-//		public FixableResult (TextSpan region, string message, DiagnosticSeverity level,
-//			IssueMarker mark, params IAnalysisFix[] fixes)
-//			: base (region, message, level, mark)
-//		{
-//			this.Fixes = fixes;
-//		}
-//		
-//		public IAnalysisFix[] Fixes { get; protected set; }
-//	}
-	
-	//FIXME: should this really use MonoDevelop.Ide.Gui.Document? Fixes could be more generic.
 	public interface IAnalysisFix
 	{
 		string FixType { get; }

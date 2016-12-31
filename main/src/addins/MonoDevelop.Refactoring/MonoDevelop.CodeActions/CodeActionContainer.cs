@@ -25,95 +25,88 @@
 // THE SOFTWARE.
 
 using System.Collections.Generic;
-using Microsoft.CodeAnalysis.CodeActions;
 using System;
-using MonoDevelop.CodeIssues;
 using System.Linq;
 using Microsoft.CodeAnalysis;
-using System.Collections;
 
 namespace MonoDevelop.CodeActions
 {
-	class CodeActionContainer
-	{
-		public static readonly CodeActionContainer Empty = new CodeActionContainer();
+    class CodeActionContainer
+    {
+        public static readonly CodeActionContainer Empty = new CodeActionContainer();
 
-		public bool IsEmpty {
-			get {
-				return CodeFixActions.Count + DiagnosticsAtCaret.Count + CodeRefactoringActions.Count == 0;
-			}
-		}
+        public bool IsEmpty => CodeFixActions.Count + DiagnosticsAtCaret.Count + CodeRefactoringActions.Count == 0;
 
-		IReadOnlyList<ValidCodeDiagnosticAction> codeFixActions;
-		public IReadOnlyList<ValidCodeDiagnosticAction> CodeFixActions {
-			get {
-				return codeFixActions ?? new ValidCodeDiagnosticAction[0];
-			}
-			private set {
-				codeFixActions = value;
-			}
-		}
+        IReadOnlyList<ValidCodeDiagnosticAction> codeFixActions;
 
-		IReadOnlyList<ValidCodeAction> codeRefactoringActions;
+        public IReadOnlyList<ValidCodeDiagnosticAction> CodeFixActions
+        {
+            get { return codeFixActions ?? new ValidCodeDiagnosticAction[0]; }
+            private set { codeFixActions = value; }
+        }
 
-		public IReadOnlyList<ValidCodeAction> CodeRefactoringActions {
-			get {
-				return codeRefactoringActions ?? new ValidCodeAction[0];
-			}
-			private set {
-				codeRefactoringActions = value;
-			}
-		}
+        IReadOnlyList<ValidCodeAction> codeRefactoringActions;
 
-		public IEnumerable<ValidCodeAction> AllValidCodeActions {
-			get {
-				return CodeRefactoringActions.Concat (CodeFixActions);
-			}
-		}
+        public IReadOnlyList<ValidCodeAction> CodeRefactoringActions
+        {
+            get
+            {
+                return codeRefactoringActions ?? new ValidCodeAction[0];
+            }
+            private set
+            {
+                codeRefactoringActions = value;
+            }
+        }
 
-		IReadOnlyList<Diagnostic> diagnosticsAtCaret;
-		public IReadOnlyList<Diagnostic> DiagnosticsAtCaret {
-			get {
-				return diagnosticsAtCaret ?? new Diagnostic[0];
-			}
-			private set {
-				diagnosticsAtCaret = value.Distinct (new DiagnosticComparer()).ToList ();
-			}
-		}
+        public IEnumerable<ValidCodeAction> AllValidCodeActions => CodeRefactoringActions.Concat(CodeFixActions);
 
-		class DiagnosticComparer : IEqualityComparer<Diagnostic>
-		{
-			bool IEqualityComparer<Diagnostic>.Equals (Diagnostic x, Diagnostic y)
-			{
-				if (x.Id != null && y.Id != null)
-					return x.Id == y.Id;
-				return x.Equals (y);
-			}
+        IReadOnlyList<Diagnostic> diagnosticsAtCaret;
+        public IReadOnlyList<Diagnostic> DiagnosticsAtCaret
+        {
+            get
+            {
+                return diagnosticsAtCaret ?? new Diagnostic[0];
+            }
+            private set
+            {
+                diagnosticsAtCaret = value.Distinct(new DiagnosticComparer()).ToList();
+            }
+        }
 
-			int IEqualityComparer<Diagnostic>.GetHashCode (Diagnostic obj)
-			{
-				return obj.Id != null ? obj.Id.GetHashCode () : obj.GetHashCode ();
-			}
-		}
+        class DiagnosticComparer : IEqualityComparer<Diagnostic>
+        {
+            bool IEqualityComparer<Diagnostic>.Equals(Diagnostic x, Diagnostic y)
+            {
+                if (x.Id != null && y.Id != null)
+                    return x.Id == y.Id;
+                return x.Equals(y);
+            }
 
-		CodeActionContainer ()
-		{
-			CodeFixActions = new List<ValidCodeDiagnosticAction> ();
-			CodeRefactoringActions = new List<ValidCodeAction> ();
-			DiagnosticsAtCaret = new List<Diagnostic> ();
-		}
+            int IEqualityComparer<Diagnostic>.GetHashCode(Diagnostic obj)
+            {
+                return obj.Id?.GetHashCode() ?? obj.GetHashCode();
+            }
+        }
 
-		internal CodeActionContainer (List<ValidCodeDiagnosticAction> codeDiagnosticActions, List<ValidCodeAction> codeRefactoringActions, List<Diagnostic> diagnosticsAtCaret)
-		{
-			if (codeDiagnosticActions == null)
-				throw new ArgumentNullException ("codeDiagnosticActions");
-			if (codeRefactoringActions == null)
-				throw new ArgumentNullException ("codeRefactoringActions");
-			if (diagnosticsAtCaret == null)
-				throw new ArgumentNullException ("diagnosticsAtCaret");
-			CodeFixActions = codeDiagnosticActions;
-			CodeRefactoringActions = codeRefactoringActions;
-			DiagnosticsAtCaret = diagnosticsAtCaret;
-		}
-	}
+        CodeActionContainer()
+        {
+            CodeFixActions = new List<ValidCodeDiagnosticAction>();
+            CodeRefactoringActions = new List<ValidCodeAction>();
+            DiagnosticsAtCaret = new List<Diagnostic>();
+        }
+
+        internal CodeActionContainer(List<ValidCodeDiagnosticAction> codeDiagnosticActions, List<ValidCodeAction> codeRefactoringActions, List<Diagnostic> diagnosticsAtCaret)
+        {
+            if (codeDiagnosticActions == null)
+                throw new ArgumentNullException(nameof(codeDiagnosticActions));
+            if (codeRefactoringActions == null)
+                throw new ArgumentNullException(nameof(codeRefactoringActions));
+            if (diagnosticsAtCaret == null)
+                throw new ArgumentNullException(nameof(diagnosticsAtCaret));
+            CodeFixActions = codeDiagnosticActions;
+            CodeRefactoringActions = codeRefactoringActions;
+            DiagnosticsAtCaret = diagnosticsAtCaret;
+        }
+    }
 }

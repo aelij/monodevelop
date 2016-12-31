@@ -302,7 +302,7 @@ namespace MonoDevelop.Ide.Editor.Extension
 			autoHideCompletionWindow = autoHideParameterWindow = true;
 		}
 
-		public virtual Task<int> GetCurrentParameterIndex (int startOffset, CancellationToken token = default(CancellationToken))
+		public virtual Task<int> GetCurrentParameterIndex (ParameterHintingResult provider, int startOffset, CancellationToken token = default(CancellationToken))
 		{
 			return Task.FromResult (-1);
 		}
@@ -577,7 +577,7 @@ namespace MonoDevelop.Ide.Editor.Extension
 		public virtual async Task<int> GuessBestMethodOverload (ParameterHintingResult provider, int currentOverload, System.Threading.CancellationToken token)
 		{
 			var currentHintingData = provider [currentOverload];
-			int cparam = await GetCurrentParameterIndex (provider.StartOffset, token).ConfigureAwait (false);
+			int cparam = await GetCurrentParameterIndex (provider, provider.StartOffset, token).ConfigureAwait (false);
 			if (cparam > currentHintingData.ParameterCount && !currentHintingData.IsParameterListAllowed) {
 				// Look for an overload which has more parameters
 				int bestOverload = -1;

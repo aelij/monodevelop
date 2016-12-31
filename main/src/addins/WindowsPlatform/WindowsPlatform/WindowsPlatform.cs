@@ -84,7 +84,8 @@ namespace MonoDevelop.Platform
 		}
 
 		const int WM_SYSCHAR = 0x0106;
-        internal override void AttachMainToolbar (Gtk.VBox parent, Components.MainToolbar.IMainToolbarView toolbar)
+
+	    public override void AttachMainToolbar (Gtk.VBox parent, Components.MainToolbar.IMainToolbarView toolbar)
 		{
 			titleBar = new TitleBar ();
 			var topMenu = new WPFTitlebar (titleBar);
@@ -124,7 +125,8 @@ namespace MonoDevelop.Platform
 		}
 
 		TitleBar titleBar;
-		internal override Components.MainToolbar.IMainToolbarView CreateMainToolbar (Gtk.Window window)
+
+	    public override Components.MainToolbar.IMainToolbarView CreateMainToolbar (Gtk.Window window)
 		{
 			return new WPFToolbar {
 				HeightRequest = 40,
@@ -179,7 +181,7 @@ namespace MonoDevelop.Platform
 			return WPFToolkit;
 		}
 
-		internal override void SetMainWindowDecorations (Gtk.Window window)
+	    public override void SetMainWindowDecorations (Gtk.Window window)
 		{
 			Uri uri = new Uri ("pack://application:,,,/WindowsPlatform;component/Styles.xaml");
 			Application.Current.Resources.MergedDictionaries.Add(new ResourceDictionary() { Source = uri });

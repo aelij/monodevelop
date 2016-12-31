@@ -58,7 +58,7 @@ namespace MonoDevelop.Ide.Editor.Highlighting
         /// <param name="segment">The area to run the colorizer in.</param>
         public abstract IEnumerable<ColoredSegment> GetColoredSegments(ISegment segment);
 
-        void HandleDocumentParsed(object sender, EventArgs e)
+        private void HandleDocumentParsed(object sender, EventArgs e)
         {
             if (DefaultSourceEditorOptions.Instance.EnableSemanticHighlighting)
                 DocumentParsed();

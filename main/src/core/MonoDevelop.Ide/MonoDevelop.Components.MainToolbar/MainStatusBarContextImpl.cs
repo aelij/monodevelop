@@ -47,9 +47,9 @@ namespace MonoDevelop.Components.MainToolbar
 	/// The MonoDevelop status bar.
 	/// </summary>
 	
-	class MainStatusBarContextImpl: StatusBarContextImpl, StatusBar
+	class MainStatusBarContextImpl: StatusBarContextImpl, IStatusBar
 	{
-		public StatusBar MainContext {
+		public IStatusBar MainContext {
 			get {
 				return this;
 			}

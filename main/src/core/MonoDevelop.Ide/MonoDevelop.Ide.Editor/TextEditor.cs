@@ -1035,7 +1035,7 @@ namespace MonoDevelop.Ide.Editor
 			SetExtensionChain (context, Enumerable.Empty<TextEditorExtension> ());
 		}
 
-		internal void SetExtensionChain (DocumentContext context, IEnumerable<TextEditorExtension> extensions)
+	    public void SetExtensionChain (DocumentContext context, IEnumerable<TextEditorExtension> extensions)
 		{
 			if (context == null)
 				throw new ArgumentNullException (nameof (context));

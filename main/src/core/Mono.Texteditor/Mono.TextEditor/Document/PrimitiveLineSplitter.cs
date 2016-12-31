@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using ICSharpCode.NRefactory;
+using Mono.TextEditor.NRefactory;
 
 
 namespace Mono.TextEditor

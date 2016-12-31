@@ -225,6 +225,21 @@
     <Compile Include="Mono.TextEditor.Utils\ImmutableText.cs" />
     <Compile Include="Mono.TextEditor.Utils\ImmutableTextTextReader.cs" />
     <Compile Include="Mono.TextEditor\Styles.cs" />
+    <Compile Include="Mono.TextEditor.NRefactory\CallbackOnDispose.cs" />
+    <Compile Include="Mono.TextEditor.NRefactory\IAnnotatable.cs" />
+    <Compile Include="Mono.TextEditor.NRefactory\IDocument.cs" />
+    <Compile Include="Mono.TextEditor.NRefactory\IDocumentLine.cs" />
+    <Compile Include="Mono.TextEditor.NRefactory\ISegment.cs" />
+    <Compile Include="Mono.TextEditor.NRefactory\ITextAnchor.cs" />
+    <Compile Include="Mono.TextEditor.NRefactory\ITextPasteHandler.cs" />
+    <Compile Include="Mono.TextEditor.NRefactory\ITextSource.cs" />
+    <Compile Include="Mono.TextEditor.NRefactory\ReadOnlyDocument.cs" />
+    <Compile Include="Mono.TextEditor.NRefactory\StringBuilderDocument.cs" />
+    <Compile Include="Mono.TextEditor.NRefactory\StringTextSource.cs" />
+    <Compile Include="Mono.TextEditor.NRefactory\TextChangeEventArgs.cs" />
+    <Compile Include="Mono.TextEditor.NRefactory\TextLocation.cs" />
+    <Compile Include="Mono.TextEditor.NRefactory\TextSourceVersionProvider.cs" />
+    <Compile Include="Mono.TextEditor.NRefactory\UnicodeNewline.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Mono.TextEditor.dll.config">

@@ -25,18 +25,15 @@
 //
 //
 
-using System;
+using System.Composition;
 
 namespace MonoDevelop.Ide.Desktop
 {
-	public class DefaultPlatformService: PlatformService
-	{
-		public override string DefaultMonospaceFont {
-			get { return string.Empty; }
-		}
+    [Export(typeof(IPlatformService)), Shared]
+    public class DefaultPlatformService : PlatformService
+    {
+        public override string DefaultMonospaceFont => string.Empty;
 
-		public override string Name {
-			get { return "Default"; }
-		}
-	}
+        public override string Name => "Default";
+    }
 }

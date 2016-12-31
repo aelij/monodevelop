@@ -55,7 +55,7 @@ namespace MonoDevelop.Components.DockNotebook
 				if (rootWindow == null)
 					return;
 				
-				rootWindow.Title = DefaultWorkbench.GetTitle (doc.Window);
+				rootWindow.Title = DefaultWorkbenchWindow.GetTitle (doc.Window);
 			};
 		}
 
@@ -316,7 +316,7 @@ namespace MonoDevelop.Components.DockNotebook
 
 			var workspaceWindow = (SdiWorkspaceWindow)tab.Content;
 			newTab.Content = workspaceWindow;
-			newWindow.Title = DefaultWorkbench.GetTitle (workspaceWindow);
+			newWindow.Title = DefaultWorkbenchWindow.GetTitle (workspaceWindow);
 
 			workspaceWindow.SetDockNotebook (newNotebook, newTab);
 			newWindow.Move (ox - w / 2, oy - h / 2);

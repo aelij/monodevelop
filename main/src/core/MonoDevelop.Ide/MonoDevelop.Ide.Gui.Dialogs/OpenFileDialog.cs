@@ -80,18 +80,12 @@ namespace MonoDevelop.Ide.Gui.Dialogs
         /// <summary>
         /// Set to true if the workspace has to be closed before opening a solution.
         /// </summary>
-        public bool CloseCurrentWorkspace
-        {
-            get { return data.CloseCurrentWorkspace; }
-        }
+        public bool CloseCurrentWorkspace => data.CloseCurrentWorkspace;
 
         /// <summary>
         /// Selected viewer.
         /// </summary>
-        public FileViewer SelectedViewer
-        {
-            get { return data.SelectedViewer; }
-        }
+        public FileViewer SelectedViewer => data.SelectedViewer;
 
         protected override bool RunDefault()
         {

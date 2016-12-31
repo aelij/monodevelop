@@ -24,39 +24,27 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
-using Microsoft.CodeAnalysis.CodeActions;
-using MonoDevelop.Core.Text;
-using MonoDevelop.CodeActions;
-using Microsoft.CodeAnalysis;
-using MonoDevelop.CodeIssues;
-using Microsoft.CodeAnalysis.Text;
 using System.Collections.Immutable;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CodeActions;
+using Microsoft.CodeAnalysis.Text;
+using MonoDevelop.CodeIssues;
 
 namespace MonoDevelop.CodeActions
 {
-	/// <summary>
-	/// Represents a code action that's valid at a specific segment that was created as a action for a specific code diagnostic.
-	/// </summary>
-	class ValidCodeDiagnosticAction : ValidCodeAction
-	{
-		ImmutableArray<Diagnostic> validDiagnostics;
+    /// <summary>
+    /// Represents a code action that's valid at a specific segment that was created as a action for a specific code diagnostic.
+    /// </summary>
+    internal class ValidCodeDiagnosticAction : ValidCodeAction
+    {
+        public CodeDiagnosticFixDescriptor Diagnostic { get; }
 
-		public CodeDiagnosticFixDescriptor Diagnostic {
-			get;
-			private set;
-		}
+        public ImmutableArray<Diagnostic> ValidDiagnostics { get; }
 
-		public ImmutableArray<Diagnostic> ValidDiagnostics {
-			get {
-				return validDiagnostics;
-			}
-		}
-
-		public ValidCodeDiagnosticAction (CodeDiagnosticFixDescriptor diagnostic, CodeAction codeAction, ImmutableArray<Diagnostic> validDiagnostics, TextSpan validSegment) : base (codeAction, validSegment)
-		{
-			this.Diagnostic = diagnostic;
-			this.validDiagnostics = validDiagnostics;
-		}
-	}
+        public ValidCodeDiagnosticAction(CodeDiagnosticFixDescriptor diagnostic, CodeAction codeAction, ImmutableArray<Diagnostic> validDiagnostics, TextSpan validSegment) : base(codeAction, validSegment)
+        {
+            Diagnostic = diagnostic;
+            ValidDiagnostics = validDiagnostics;
+        }
+    }
 }

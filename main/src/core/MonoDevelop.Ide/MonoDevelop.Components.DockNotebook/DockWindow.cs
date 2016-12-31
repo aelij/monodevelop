@@ -47,7 +47,7 @@ namespace MonoDevelop.Components.DockNotebook
 
 			allWindows.Add (this);
 
-			var notebook = new SdiDragNotebook ((DefaultWorkbench)IdeApp.Workbench.RootWindow);
+			var notebook = new SdiDragNotebook ((DefaultWorkbenchWindow)IdeApp.Workbench.RootWindow);
 			notebook.NavigationButtonsVisible = false;
 			Child = new DockNotebookContainer (notebook);
 			notebook.InitSize ();
@@ -110,19 +110,19 @@ namespace MonoDevelop.Components.DockNotebook
 
 		protected override bool OnConfigureEvent (EventConfigure evnt)
 		{
-			((DefaultWorkbench)IdeApp.Workbench.RootWindow).SetActiveWidget (Focus);
+			((DefaultWorkbenchWindow)IdeApp.Workbench.RootWindow).SetActiveWidget (Focus);
 			return base.OnConfigureEvent (evnt);
 		}
 
 		protected override bool OnFocusInEvent (EventFocus evnt)
 		{
-			((DefaultWorkbench)IdeApp.Workbench.RootWindow).SetActiveWidget (Focus);
+			((DefaultWorkbenchWindow)IdeApp.Workbench.RootWindow).SetActiveWidget (Focus);
 			return base.OnFocusInEvent (evnt);
 		}
 
 		protected override bool OnKeyPressEvent (EventKey evnt)
 		{
-			return ((DefaultWorkbench)IdeApp.Workbench.RootWindow).FilterWindowKeypress (evnt) || base.OnKeyPressEvent (evnt);
+			return ((DefaultWorkbenchWindow)IdeApp.Workbench.RootWindow).FilterWindowKeypress (evnt) || base.OnKeyPressEvent (evnt);
 		}
 
 		protected override void OnDestroyed ()

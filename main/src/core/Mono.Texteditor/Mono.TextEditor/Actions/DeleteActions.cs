@@ -28,7 +28,7 @@
 //
 
 using System;
-using ICSharpCode.NRefactory;
+using Mono.TextEditor.NRefactory;
 
 
 namespace Mono.TextEditor

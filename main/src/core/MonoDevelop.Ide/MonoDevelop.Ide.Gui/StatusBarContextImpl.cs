@@ -49,7 +49,7 @@ namespace MonoDevelop.Ide
 		bool showProgress;
 		Pad sourcePad;
 		bool autoPulse;
-		protected StatusBar statusBar;
+		protected IStatusBar statusBar;
 		protected StatusBarContextHandler statusHandler;
 
 		// The last time any status bar context changed the status area message

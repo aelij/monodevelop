@@ -6,6 +6,7 @@
     "win": {}
   },
   "dependencies": {
+    "Microsoft.Composition": "1.0.30",
     "System.Collections.Immutable": "1.3.0"
   }
 }

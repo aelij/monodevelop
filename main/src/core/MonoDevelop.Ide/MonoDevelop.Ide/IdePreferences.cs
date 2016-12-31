@@ -26,11 +26,15 @@
 //
 
 using System;
+using System.IO;
+using System.Linq;
+using MonoDevelop.Components;
 using MonoDevelop.Core;
 using MonoDevelop.Core.Assemblies;
-using MonoDevelop.Ide.Fonts;
 using MonoDevelop.Ide.Editor.Highlighting;
-using System.Linq;
+using MonoDevelop.Ide.Fonts;
+using MonoDevelop.Ide.Gui;
+using Pango;
 
 namespace MonoDevelop.Ide
 {
@@ -71,7 +75,7 @@ namespace MonoDevelop.Ide
 		public readonly ConfigurationProperty<bool> EnableInstrumentation = Runtime.Preferences.EnableInstrumentation;
 		public readonly ConfigurationProperty<bool> EnableAutomatedTesting = Runtime.Preferences.EnableAutomatedTesting;
 
-		public readonly ConfigurationProperty<string> ProjectsDefaultPath = ConfigurationProperty.Create ("MonoDevelop.Core.Gui.Dialogs.NewProjectDialog.DefaultPath", System.IO.Path.Combine (Environment.GetFolderPath (Environment.SpecialFolder.Personal), "Projects"));
+		public readonly ConfigurationProperty<string> ProjectsDefaultPath = ConfigurationProperty.Create ("MonoDevelop.Core.Gui.Dialogs.NewProjectDialog.DefaultPath", Path.Combine (Environment.GetFolderPath (Environment.SpecialFolder.Personal), "Projects"));
 
 		public readonly ConfigurationProperty<bool> BuildBeforeExecuting = ConfigurationProperty.Create ("MonoDevelop.Ide.BuildBeforeExecuting", true);
 		public readonly ConfigurationProperty<bool> BuildBeforeRunningTests = ConfigurationProperty.Create ("BuildBeforeRunningTests", true);
@@ -81,12 +85,13 @@ namespace MonoDevelop.Ide
 		public readonly ConfigurationProperty<BuildResultStates> ShowErrorPadAfterBuild = ConfigurationProperty.Create ("MonoDevelop.Ide.NewShowErrorPadAfterBuild", BuildResultStates.Never);
 		public readonly ConfigurationProperty<JumpToFirst> JumpToFirstErrorOrWarning = ConfigurationProperty.Create ("MonoDevelop.Ide.NewJumpToFirstErrorOrWarning", JumpToFirst.Error);
 		public readonly ConfigurationProperty<bool> DefaultHideMessageBubbles = ConfigurationProperty.Create ("MonoDevelop.Ide.DefaultHideMessageBubbles", false);
-		public readonly ConfigurationProperty<ShowMessageBubbles> ShowMessageBubbles = ConfigurationProperty.Create ("MonoDevelop.Ide.NewShowMessageBubbles", MonoDevelop.Ide.ShowMessageBubbles.ForErrorsAndWarnings);
+		public readonly ConfigurationProperty<ShowMessageBubbles> ShowMessageBubbles = ConfigurationProperty.Create ("MonoDevelop.Ide.NewShowMessageBubbles", Ide.ShowMessageBubbles.ForErrorsAndWarnings);
 
 		public readonly ConfigurationProperty<TargetRuntime> DefaultTargetRuntime = new DefaultTargetRuntimeProperty ();
-		class DefaultTargetRuntimeProperty: ConfigurationProperty<TargetRuntime>
+
+	    private class DefaultTargetRuntimeProperty: ConfigurationProperty<TargetRuntime>
 		{
-			ConfigurationProperty<string> defaultTargetRuntimeText = ConfigurationProperty.Create ("MonoDevelop.Ide.DefaultTargetRuntime", "__current");
+		    private readonly ConfigurationProperty<string> defaultTargetRuntimeText = ConfigurationProperty.Create ("MonoDevelop.Ide.DefaultTargetRuntime", "__current");
 
 			public DefaultTargetRuntimeProperty ()
 			{
@@ -102,16 +107,16 @@ namespace MonoDevelop.Ide
 				return tr ?? SystemAssemblyService.Instance.CurrentRuntime;
 			}
 
-			protected override bool OnSetValue (TargetRuntime value)
+			protected override bool OnSetValue (TargetRuntime o)
 			{
-				defaultTargetRuntimeText.Value = value.IsRunning ? "__current" : value.Id;
+				defaultTargetRuntimeText.Value = o.IsRunning ? "__current" : o.Id;
 				return true;
 			}
 		}
 
 		public readonly ConfigurationProperty<string> UserInterfaceLanguage = Runtime.Preferences.UserInterfaceLanguage;
 		public readonly ConfigurationProperty<string> UserInterfaceThemeName = ConfigurationProperty.Create ("MonoDevelop.Ide.UserInterfaceTheme", Platform.IsLinux ? "" : "Light");
-		public readonly ConfigurationProperty<WorkbenchCompactness> WorkbenchCompactness = ConfigurationProperty.Create ("MonoDevelop.Ide.WorkbenchCompactness", MonoDevelop.Ide.WorkbenchCompactness.Normal);
+		public readonly ConfigurationProperty<WorkbenchCompactness> WorkbenchCompactness = ConfigurationProperty.Create ("MonoDevelop.Ide.WorkbenchCompactness", Ide.WorkbenchCompactness.Normal);
 		public readonly ConfigurationProperty<bool> LoadPrevSolutionOnStartup = ConfigurationProperty.Create ("SharpDevelop.LoadPrevProjectOnStartup", false);
 		public readonly ConfigurationProperty<bool> CreateFileBackupCopies = ConfigurationProperty.Create ("SharpDevelop.CreateBackupCopy", false);
 		public readonly ConfigurationProperty<bool> LoadDocumentUserProperties = ConfigurationProperty.Create ("SharpDevelop.LoadDocumentProperties", true);
@@ -123,12 +128,12 @@ namespace MonoDevelop.Ide
 		/// <summary>
 		/// Font to use for treeview pads. Returns null if no custom font is set.
 		/// </summary>
-		public readonly ConfigurationProperty<Pango.FontDescription> CustomPadFont = FontService.GetFontProperty ("Pad");
+		public readonly ConfigurationProperty<FontDescription> CustomPadFont = FontService.GetFontProperty ("Pad");
 
 		/// <summary>
 		/// Font to use for output pads. Returns null if no custom font is set.
 		/// </summary>
-		public readonly ConfigurationProperty<Pango.FontDescription> CustomOutputPadFont = FontService.GetFontProperty ("OutputPad");
+		public readonly ConfigurationProperty<FontDescription> CustomOutputPadFont = FontService.GetFontProperty ("OutputPad");
 
 		public readonly ConfigurationProperty<bool> EnableCompletionCategoryMode = ConfigurationProperty.Create ("EnableCompletionCategoryMode", false);
 		public readonly ConfigurationProperty<bool> ForceSuggestionMode = ConfigurationProperty.Create ("ForceCompletionSuggestionMode", false);
@@ -141,11 +146,9 @@ namespace MonoDevelop.Ide
 		public readonly ConfigurationProperty<bool> FilterCompletionListByEditorBrowsable = ConfigurationProperty.Create ("FilterCompletionListByEditorBrowsable", true);
 		public readonly ConfigurationProperty<bool> IncludeEditorBrowsableAdvancedMembers = ConfigurationProperty.Create ("IncludeEditorBrowsableAdvancedMembers", true);
 
-		public Theme UserInterfaceTheme {
-			get { return MonoDevelop.Components.IdeTheme.UserInterfaceTheme; }
-		}
+		public Theme UserInterfaceTheme => IdeTheme.UserInterfaceTheme;
 
-		internal static readonly string DefaultLightColorScheme = "Light";
+	    internal static readonly string DefaultLightColorScheme = "Light";
 		internal static readonly string DefaultDarkColorScheme = "Dark";
 
 		public readonly ConfigurationProperty<bool> EnableSourceAnalysis = ConfigurationProperty.Create ("MonoDevelop.AnalysisCore.AnalysisEnabled_V2", true);
@@ -159,17 +162,17 @@ namespace MonoDevelop.Ide
 
 		public class ThemeConfigurationProperty<T>: ConfigurationProperty<T>
 		{
-			readonly ConfigurationProperty<T> lightConfiguration;
-			readonly ConfigurationProperty<T> darkConfiguration;
+		    private readonly ConfigurationProperty<T> lightConfiguration;
+		    private readonly ConfigurationProperty<T> darkConfiguration;
 
 			public ThemeConfigurationProperty (string propertyName, T defaultLightValue, T defaultDarkValue, string oldName = null)
 			{
-				lightConfiguration = ConfigurationProperty.Create<T> (propertyName, defaultLightValue, oldName);
-				darkConfiguration = ConfigurationProperty.Create<T> (propertyName + "-Dark", defaultDarkValue, oldName + "-Dark");
+				lightConfiguration = ConfigurationProperty.Create (propertyName, defaultLightValue, oldName);
+				darkConfiguration = ConfigurationProperty.Create (propertyName + "-Dark", defaultDarkValue, oldName + "-Dark");
 
 				lightConfiguration.Changed += (s,e) => OnChanged ();
 				darkConfiguration.Changed += (s,e) => OnChanged ();
-				MonoDevelop.Ide.Gui.Styles.Changed += (sender, e) => OnChanged ();
+				Styles.Changed += (sender, e) => OnChanged ();
 			}
 
 			public T ValueForTheme (Theme theme)
@@ -186,18 +189,16 @@ namespace MonoDevelop.Ide
 
 			protected override T OnGetValue ()
 			{
-				if (IdeApp.Preferences.UserInterfaceTheme == Theme.Light)
+			    if (IdeApp.Preferences.UserInterfaceTheme == Theme.Light)
 					return lightConfiguration;
-				else
-					return darkConfiguration;
+			    return darkConfiguration;
 			}
 
-			protected override bool OnSetValue (T value)
+			protected override bool OnSetValue (T o)
 			{
-				if (IdeApp.Preferences.UserInterfaceTheme == Theme.Light)
-					return lightConfiguration.Set (value);
-				else
-					return darkConfiguration.Set (value);
+			    if (IdeApp.Preferences.UserInterfaceTheme == Theme.Light)
+					return lightConfiguration.Set (o);
+			    return darkConfiguration.Set (o);
 			}
 		}
 
@@ -225,7 +226,7 @@ namespace MonoDevelop.Ide
 	public enum BeforeCompileAction {
 		Nothing,
 		SaveAllFiles,
-		PromptForSave,
+		PromptForSave
 	}
 
 	public enum Theme

@@ -28,7 +28,6 @@ using System;
 using System.Collections.Generic;
 using MonoDevelop.Core;
 using MonoDevelop.Refactoring;
-using MonoDevelop.Refactoring.Rename;
 using Microsoft.CodeAnalysis.Text;
 using MonoDevelop.Ide.Editor;
 
@@ -39,16 +38,8 @@ namespace MonoDevelop.AnalysisCore.Fixes
 		public string NewName { get; private set; }
 		public string OldName { get; private set; }
 		public string IdString { get; set; }
-//		public IEntity Item { get; private set; }
-//		
-//		public RenameMemberFix (IEntity item, string oldName, string newName)
-//		{
-//			this.OldName = oldName;
-//			this.NewName = newName;
-//			this.Item = item;
-//		}
 		
-		public string FixType { get { return "RenameMember"; } }
+		public string FixType => "RenameMember";
 	}
 	
 	class RenameMemberHandler : IFixHandler
@@ -60,17 +51,8 @@ namespace MonoDevelop.AnalysisCore.Fixes
 			var renameFix = (RenameMemberFix)fix;
 			var refactoring = new RenameRefactoring ();
 			var options = new RefactoringOptions (editor, doc) {
-			//	SelectedItem = renameFix.Item,
 			};
 			
-//			if (renameFix.Item == null) {
-//				ResolveResult resolveResult;
-//				options.SelectedItem = CurrentRefactoryOperationsHandler.GetItem (options.Editor, options.DocumentContext, out resolveResult);
-//			}
-//			
-//			if (!refactoring.IsValid (options))
-//				yield break;
-//			
 			var prop = new RenameRefactoring.RenameProperties () {
 				NewName = renameFix.NewName,
 			};
@@ -118,25 +100,11 @@ namespace MonoDevelop.AnalysisCore.Fixes
 					//Refactoring.RunInplace (Options);
 					return;
 				}
+			}
+			
+			public bool SupportsBatchFix => false;
 
-//				//FIXME: performchanges should probably use a monitor too, as it can be slow
-//				var changes = Refactoring.PerformChanges (Options, Properties);
-//				if (Preview) {
-//				using (var dlg = new RefactoringPreviewDialog (changes))
-//					MessageService.ShowCustomDialog (dlg);
-//				} else {
-//					var monitor = IdeApp.Workbench.ProgressMonitors.GetBackgroundProgressMonitor ("Rename", null);
-//					RefactoringService.AcceptChanges (monitor, changes);
-//				}
-			}
-			
-			public bool SupportsBatchFix {
-				get {
-					return false;
-				}
-			}
-			
-			public void BatchFix ()
+		    public void BatchFix ()
 			{
 				throw new InvalidOperationException ("Batch fixing is not supported");
 			}

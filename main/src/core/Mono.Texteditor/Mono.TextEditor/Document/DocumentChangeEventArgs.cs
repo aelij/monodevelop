@@ -27,11 +27,11 @@
 
 using System;
 using System.Text;
-using ICSharpCode.NRefactory.Editor;
+using Mono.TextEditor.NRefactory;
 
 namespace Mono.TextEditor
 {
-	public class DocumentChangeEventArgs : ICSharpCode.NRefactory.Editor.TextChangeEventArgs
+	public class DocumentChangeEventArgs : TextChangeEventArgs
 	{
 		public int ChangeDelta {
 			get {

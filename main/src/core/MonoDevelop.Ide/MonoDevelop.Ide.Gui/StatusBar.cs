@@ -25,56 +25,46 @@
 // THE SOFTWARE.
 
 
-using System;
-using MonoDevelop.Core;
-using Gtk;
-using MonoDevelop.Ide.CodeCompletion;
 using MonoDevelop.Ide.Gui;
-using System.Collections.Generic;
-using MonoDevelop.Components.Docking;
-using MonoDevelop.Ide.Gui.Dialogs;
-using MonoDevelop.Components;
-using MonoDevelop.Components.MainToolbar;
-
 using StockIcons = MonoDevelop.Ide.Gui.Stock;
 using System.Threading;
 
 namespace MonoDevelop.Ide
 {
-	
-	/// <summary>
-	/// The MonoDevelop status bar.
-	/// </summary>
-	public interface StatusBar: StatusBarContextBase
-	{
-		StatusBar MainContext { get; }
-		/// <summary>
-		/// Shows a status icon in the toolbar. The icon can be removed by disposing
-		/// the StatusBarIcon instance.
-		/// </summary>
-		StatusBarIcon ShowStatusIcon (Xwt.Drawing.Image pixbuf);
-		
-		/// <summary>
-		/// Creates a status bar context. The returned context can be used to show status information
-		/// which will be cleared when the context is disposed. When several contexts are created,
-		/// the status bar will show the status of the latest created context.
-		/// </summary>
-		StatusBarContext CreateContext ();
-		
-		// Clears the status bar information
-		void ShowReady ();
-		
-		/// <summary>
-		/// Sets a pad which has detailed information about the status message. When clicking on the
-		/// status bar, this pad will be activated. This source pad is reset at every ShowMessage call.
-		/// </summary>
-		void SetMessageSourcePad (Pad pad);
 
-		/// <summary>
-		/// When set, the status bar can be cancelled via this cancellation source.
-		/// </summary>
-		/// <value>The cancellation token.</value>
-		void SetCancellationTokenSource (CancellationTokenSource source);
-	}
-	
+    /// <summary>
+    /// The MonoDevelop status bar.
+    /// </summary>
+    public interface IStatusBar : IStatusBarContextBase
+    {
+        IStatusBar MainContext { get; }
+        /// <summary>
+        /// Shows a status icon in the toolbar. The icon can be removed by disposing
+        /// the StatusBarIcon instance.
+        /// </summary>
+        StatusBarIcon ShowStatusIcon(Xwt.Drawing.Image pixbuf);
+
+        /// <summary>
+        /// Creates a status bar context. The returned context can be used to show status information
+        /// which will be cleared when the context is disposed. When several contexts are created,
+        /// the status bar will show the status of the latest created context.
+        /// </summary>
+        StatusBarContext CreateContext();
+
+        // Clears the status bar information
+        void ShowReady();
+
+        /// <summary>
+        /// Sets a pad which has detailed information about the status message. When clicking on the
+        /// status bar, this pad will be activated. This source pad is reset at every ShowMessage call.
+        /// </summary>
+        void SetMessageSourcePad(Pad pad);
+
+        /// <summary>
+        /// When set, the status bar can be cancelled via this cancellation source.
+        /// </summary>
+        /// <value>The cancellation token.</value>
+        void SetCancellationTokenSource(CancellationTokenSource source);
+    }
+
 }

@@ -34,17 +34,12 @@ namespace MonoDevelop.Components.Commands
     [MeansImplicitUse]
 	public class CommandMethodAttribute: Attribute
 	{
-		object commandId;
-		
-		internal CommandMethodAttribute (object commandId)
+	    internal CommandMethodAttribute (object commandId)
 		{
-			this.commandId = commandId;
+			CommandId = commandId;
 		}
 		
-		public object CommandId {
-			get { return commandId; }
-			set { commandId = value; }
-		}
+		public object CommandId { get; set; }
 	}
 
 	[AttributeUsage (AttributeTargets.Method, AllowMultiple=true), MeansImplicitUse]

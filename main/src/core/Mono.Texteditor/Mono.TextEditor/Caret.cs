@@ -27,7 +27,7 @@
 
 using System;
 using System.Linq;
-using ICSharpCode.NRefactory.Editor;
+using Mono.TextEditor.NRefactory;
 
 namespace Mono.TextEditor
 {

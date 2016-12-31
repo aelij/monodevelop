@@ -25,83 +25,61 @@
 // THE SOFTWARE.
 using System;
 using System.Collections.Generic;
-using MonoDevelop.CodeIssues;
-using MonoDevelop.Ide;
 using Microsoft.CodeAnalysis.Text;
 using MonoDevelop.Ide.Editor;
-using Microsoft.CodeAnalysis;
 
 namespace MonoDevelop.AnalysisCore.Fixes
 {
-//	public class GenericResults : FixableResult
-//	{
-//		public GenericResults (TextSpan region, string message, DiagnosticSeverity level,
-//			IssueMarker mark, params GenericFix[] fixes)
-//			: base (region, message, level, mark)
-//		{
-//			this.Fixes = fixes;
-//		}
-//	}
-	
-	public class GenericFix : IAnalysisFix, IAnalysisFixAction
-	{
-		Action fix;
-		Action batchFix;
-		string label;
-		public TextSpan DocumentRegion { get; set; }
-		public string IdString { get; set; }
+    public class GenericFix : IAnalysisFix, IAnalysisFixAction
+    {
+        private readonly Action fix;
+        private readonly Action batchFix;
+        public TextSpan DocumentRegion { get; set; }
+        public string IdString { get; set; }
 
-		public GenericFix (string label, Action fix, Action batchFix = null)
-		{
-			this.batchFix = batchFix;
-			this.fix = fix;
-			this.label = label;
-		}
+        public GenericFix(string label, Action fix, Action batchFix = null)
+        {
+            this.batchFix = batchFix;
+            this.fix = fix;
+            Label = label;
+        }
 
-		
-		#region IAnalysisFix implementation
-		public string FixType {
-			get {
-				return "Generic";
-			}
-		}
-		#endregion
-		
-		#region IAnalysisFixAction implementation
-		public void Fix ()
-		{
-			fix ();
-		}
-		
-		public bool SupportsBatchFix {
-			get {
-				return batchFix != null;
-			}
-		}
-		
-		public void BatchFix () {
-			if (!SupportsBatchFix) {
-				throw new InvalidOperationException ("Batch fixing is not supported.");
-			}
-			batchFix ();
-		}
 
-		public string Label {
-			get {
-				return label;
-			}
-		}
-		#endregion
-	}
-	
-	public class GenericFixHandler : IFixHandler
-	{
-		#region IFixHandler implementation
-		public IEnumerable<IAnalysisFixAction> GetFixes (TextEditor editor, DocumentContext context, object fix)
-		{
-			yield return (GenericFix)fix;
-		}
-		#endregion
-	}
+        #region IAnalysisFix implementation
+        public string FixType => "Generic";
+
+        #endregion
+
+        #region IAnalysisFixAction implementation
+        public void Fix()
+        {
+            fix();
+        }
+
+        public bool SupportsBatchFix => batchFix != null;
+
+        public void BatchFix()
+        {
+            if (!SupportsBatchFix)
+            {
+                throw new InvalidOperationException("Batch fixing is not supported.");
+            }
+            batchFix();
+        }
+
+        public string Label { get; }
+
+        #endregion
+    }
+
+    public class GenericFixHandler : IFixHandler
+    {
+        #region IFixHandler implementation
+        public IEnumerable<IAnalysisFixAction> GetFixes(TextEditor editor, DocumentContext context, object fix)
+        {
+            yield return (GenericFix)fix;
+        }
+        #endregion
+    }
 }
 

@@ -40,7 +40,7 @@ namespace MonoDevelop.Ide.Gui
 {
     internal class SdiWorkspaceWindow : EventBox, IWorkbenchWindow, ICommandDelegatorRouter
     {
-        private readonly DefaultWorkbench workbench;
+        private readonly DefaultWorkbenchWindow workbenchWindow;
         private ViewContent content;
 
         private List<BaseViewContent> viewContents = new List<BaseViewContent>();
@@ -78,9 +78,9 @@ namespace MonoDevelop.Ide.Gui
             SetDockNotebookTabTitle();
         }
 
-        public SdiWorkspaceWindow(DefaultWorkbench workbench, ViewContent content, DockNotebook tabControl, DockNotebookTab tabLabel)
+        public SdiWorkspaceWindow(DefaultWorkbenchWindow workbenchWindow, ViewContent content, DockNotebook tabControl, DockNotebookTab tabLabel)
         {
-            this.workbench = workbench;
+            this.workbenchWindow = workbenchWindow;
             this.tabControl = tabControl;
             this.content = content;
             tab = tabLabel;
@@ -119,7 +119,6 @@ namespace MonoDevelop.Ide.Gui
                 if (tabPage == null)
                 {
                     var control = content.Control;
-                    var type = control.GetType().FullName;
                     tabPage = control;
                 }
 
@@ -401,7 +400,7 @@ namespace MonoDevelop.Ide.Gui
                     while (found)
                     {
                         found = false;
-                        foreach (ViewContent windowContent in workbench.InternalViewContentCollection)
+                        foreach (ViewContent windowContent in workbenchWindow.ViewContentCollection)
                         {
                             string title = windowContent.WorkbenchWindow.Title;
                             if (title.EndsWith("+"))
@@ -437,6 +436,7 @@ namespace MonoDevelop.Ide.Gui
             {
                 newTitle += "+";
             }
+            // ReSharper disable once RedundantCheckBeforeAssignment
             if (newTitle != Title)
             {
                 Title = newTitle;
@@ -450,14 +450,13 @@ namespace MonoDevelop.Ide.Gui
 
         public bool CloseWindow(bool force, bool animate)
         {
-            bool wasActive = workbench.ActiveWorkbenchWindow == this;
-            WorkbenchWindowEventArgs args = new WorkbenchWindowEventArgs(force, wasActive);
-            args.Cancel = false;
+            bool wasActive = workbenchWindow.ActiveWorkbenchWindow == this;
+            WorkbenchWindowEventArgs args = new WorkbenchWindowEventArgs(force, wasActive) { Cancel = false };
             OnClosing(args);
             if (args.Cancel)
                 return false;
 
-            workbench.RemoveTab(tabControl, tab.Index, animate);
+            workbenchWindow.RemoveTab(tabControl, tab.Index, animate);
 
             OnClosed(args);
 
@@ -569,10 +568,12 @@ namespace MonoDevelop.Ide.Gui
             if (viewWidget.Parent != null)
                 box.Remove(viewWidget);
 
-            subViewNotebook = new Notebook();
-            subViewNotebook.TabPos = PositionType.Bottom;
-            subViewNotebook.ShowTabs = false;
-            subViewNotebook.ShowBorder = false;
+            subViewNotebook = new Notebook
+            {
+                TabPos = PositionType.Bottom,
+                ShowTabs = false,
+                ShowBorder = false
+            };
             subViewNotebook.Show();
 
             //add existing ViewContent
@@ -616,7 +617,7 @@ namespace MonoDevelop.Ide.Gui
 
             var addedContent = (index == 0 || subViewToolbar.TabCount == 0) && IdeApp.Workbench.ActiveDocument == Document;
             var widgetBox = new VBox();
-            var tab = new Tab(subViewToolbar, label)
+            var t = new Tab(subViewToolbar, label)
             {
                 Tag = viewContent
             };
@@ -628,9 +629,9 @@ namespace MonoDevelop.Ide.Gui
                 widgetBox.Show();
             }
 
-            subViewToolbar.InsertTab(index, tab);
+            subViewToolbar.InsertTab(index, t);
             subViewNotebook.InsertPage(widgetBox, new Label(), index);
-            tab.Activated += (sender, e) =>
+            t.Activated += (sender, e) =>
             {
                 if (!addedContent)
                 {
@@ -639,7 +640,7 @@ namespace MonoDevelop.Ide.Gui
                     addedContent = true;
                 }
 
-                int page = viewContents.IndexOf((BaseViewContent)tab.Tag);
+                int page = viewContents.IndexOf((BaseViewContent)t.Tag);
                 SetCurrentView(page);
                 QueueDraw();
             };
@@ -650,19 +651,19 @@ namespace MonoDevelop.Ide.Gui
             if (index == 0)
                 ShowPage(0);
 
-            return tab;
+            return t;
         }
 
         #region Track and display document's "path"
 
-        internal void AttachToPathedDocument(IPathedDocument pathDoc)
+        internal void AttachToPathedDocument(IPathedDocument pathDocument)
         {
-            if (this.pathDoc != pathDoc)
+            if (pathDoc != pathDocument)
                 DetachFromPathedDocument();
-            if (pathDoc == null)
+            if (pathDocument == null)
                 return;
-            pathDoc.PathChanged += HandlePathChange;
-            this.pathDoc = pathDoc;
+            pathDocument.PathChanged += HandlePathChange;
+            pathDoc = pathDocument;
 
             // If a toolbar is already being shown, we don't show the pathbar yet
             DocumentToolbar toolbar;
@@ -670,7 +671,7 @@ namespace MonoDevelop.Ide.Gui
                 return;
 
             PathWidgetEnabled = true;
-            pathBar.SetPath(pathDoc.CurrentPath);
+            pathBar.SetPath(pathDocument.CurrentPath);
         }
 
         internal void DetachFromPathedDocument()
@@ -684,8 +685,8 @@ namespace MonoDevelop.Ide.Gui
 
         private void HandlePathChange(object sender, DocumentPathChangedEventArgs args)
         {
-            var pathDoc = (IPathedDocument)sender;
-            pathBar?.SetPath(pathDoc.CurrentPath);
+            var pathedDocument = (IPathedDocument)sender;
+            pathBar?.SetPath(pathedDocument.CurrentPath);
         }
 
         private bool PathWidgetEnabled

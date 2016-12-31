@@ -36,8 +36,8 @@ namespace MonoDevelop.Ide.Gui
 {
     public abstract class BaseViewContent : IDisposable
     {
-        IWorkbenchWindow workbenchWindow;
-        Project project;
+        private IWorkbenchWindow workbenchWindow;
+        private Project project;
 
         public abstract Control Control { get; }
 
@@ -54,13 +54,7 @@ namespace MonoDevelop.Ide.Gui
             }
         }
 
-        public virtual string TabPageLabel
-        {
-            get
-            {
-                return GettextCatalog.GetString("Content");
-            }
-        }
+        public virtual string TabPageLabel => GettextCatalog.GetString("Content");
 
         public virtual bool CanReuseView(string fileName)
         {
@@ -110,11 +104,11 @@ namespace MonoDevelop.Ide.Gui
         {
         }
 
-        internal protected virtual void OnSelected()
+        protected internal virtual void OnSelected()
         {
         }
 
-        internal protected virtual void OnDeselected()
+        protected internal virtual void OnDeselected()
         {
         }
 
@@ -136,25 +130,19 @@ namespace MonoDevelop.Ide.Gui
         /// <summary>
         /// Called to update the project bound to the view.
         /// </summary>
-        /// <param name="project">
+        /// <param name="p">
         /// New project assigned to the view. It can be null.
         /// </param>
-        protected virtual void OnSetProject(Project project)
+        protected virtual void OnSetProject(Project p)
         {
-            this.project = project;
+            project = p;
         }
 
         /// <summary>
         /// Gets the capability of this view for being reassigned a project
         /// </summary>
         /// <value>The project reload capability.</value>
-        public virtual ProjectReloadCapability ProjectReloadCapability
-        {
-            get
-            {
-                return ProjectReloadCapability.None;
-            }
-        }
+        public virtual ProjectReloadCapability ProjectReloadCapability => ProjectReloadCapability.None;
 
         /// <summary>
         /// Gets the display binding of this view.

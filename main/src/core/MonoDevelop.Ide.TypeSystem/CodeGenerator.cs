@@ -28,7 +28,7 @@ using System.Text;
 using System.Collections.Generic;
 using System.Linq;
 using ICSharpCode.NRefactory.TypeSystem;
-using ICSharpCode.NRefactory;
+using Mono.TextEditor.NRefactory;
 using MonoDevelop.Ide.Editor;
 
 namespace MonoDevelop.Ide.TypeSystem

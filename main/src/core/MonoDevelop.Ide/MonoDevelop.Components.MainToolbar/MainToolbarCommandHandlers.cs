@@ -28,19 +28,19 @@ using MonoDevelop.Components.Commands;
 
 namespace MonoDevelop.Components.MainToolbar
 {
-	class GotoTypeHandler : CommandHandler
-	{
-		protected override void Run ()
-		{
-			Ide.IdeApp.Workbench.Toolbar.SetSearchCategory ("type");
-		}
-	}
+	//class GotoTypeHandler : CommandHandler
+	//{
+	//	protected override void Run ()
+	//	{
+	//		Ide.IdeApp.Workbench.Toolbar.SetSearchCategory ("type");
+	//	}
+	//}
 
-	class GotoFileHandler : CommandHandler
-	{
-		protected override void Run ()
-		{
-			Ide.IdeApp.Workbench.Toolbar.SetSearchCategory ("file");
-		}
-	}
+	//class GotoFileHandler : CommandHandler
+	//{
+	//	protected override void Run ()
+	//	{
+	//		Ide.IdeApp.Workbench.Toolbar.SetSearchCategory ("file");
+	//	}
+	//}
 }

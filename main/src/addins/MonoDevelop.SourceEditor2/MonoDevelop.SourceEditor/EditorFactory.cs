@@ -31,57 +31,64 @@ using Mono.TextEditor.Highlighting;
 
 namespace MonoDevelop.SourceEditor
 {
-	sealed class EditorFactory : ITextEditorFactory
-	{
+    public sealed class EditorFactory : ITextEditorFactory
+    {
+        public static void Initialize()
+        {
 
-		#region ITextEditorFactory implementation
+            TextEditorFactory.CurrentFactory = new EditorFactory();
+        }
 
-		ITextDocument ITextEditorFactory.CreateNewDocument ()
-		{
-			return new TextDocumentWrapper (new TextDocument ());
-		}
+        #region ITextEditorFactory implementation
 
-		ITextDocument ITextEditorFactory.CreateNewDocument (MonoDevelop.Core.Text.ITextSource textSource, string fileName, string mimeType)
-		{
-			return new TextDocumentWrapper (new TextDocument (textSource.Text) {
-				Encoding = textSource.Encoding,
-				UseBom = textSource.UseBOM,
-				MimeType = mimeType,
-				FileName = fileName
-			});
-		}
+        ITextDocument ITextEditorFactory.CreateNewDocument()
+        {
+            return new TextDocumentWrapper(new TextDocument());
+        }
 
-		IReadonlyTextDocument ITextEditorFactory.CreateNewReadonlyDocument (MonoDevelop.Core.Text.ITextSource textSource, string fileName, string mimeType)
-		{
-			return new TextDocumentWrapper (new TextDocument (textSource.Text) {
-				Encoding = textSource.Encoding,
-				UseBom = textSource.UseBOM,
-				ReadOnly = true,
-				MimeType = mimeType,
-				FileName = fileName
-			});
-		}
+        ITextDocument ITextEditorFactory.CreateNewDocument(MonoDevelop.Core.Text.ITextSource textSource, string fileName, string mimeType)
+        {
+            return new TextDocumentWrapper(new TextDocument(textSource.Text)
+            {
+                Encoding = textSource.Encoding,
+                UseBom = textSource.UseBOM,
+                MimeType = mimeType,
+                FileName = fileName
+            });
+        }
 
-		ITextEditorImpl ITextEditorFactory.CreateNewEditor ()
-		{
-			return new SourceEditorView ();
-		}
+        IReadonlyTextDocument ITextEditorFactory.CreateNewReadonlyDocument(MonoDevelop.Core.Text.ITextSource textSource, string fileName, string mimeType)
+        {
+            return new TextDocumentWrapper(new TextDocument(textSource.Text)
+            {
+                Encoding = textSource.Encoding,
+                UseBom = textSource.UseBOM,
+                ReadOnly = true,
+                MimeType = mimeType,
+                FileName = fileName
+            });
+        }
 
-		ITextEditorImpl ITextEditorFactory.CreateNewEditor (IReadonlyTextDocument document)
-		{
-			return new SourceEditorView (document);
-		}
+        ITextEditorImpl ITextEditorFactory.CreateNewEditor()
+        {
+            return new SourceEditorView();
+        }
 
-		string[] ITextEditorFactory.GetSyntaxProperties (string mimeType, string name)
-		{
-			var mode = SyntaxModeService.GetSyntaxMode (null, mimeType);
-			if (mode == null)
-				return null;
-			System.Collections.Generic.List<string> value;
-			if (!mode.Properties.TryGetValue (name, out value))
-				return null;
-			return value.ToArray ();
-		}
-		#endregion
-	}
+        ITextEditorImpl ITextEditorFactory.CreateNewEditor(IReadonlyTextDocument document)
+        {
+            return new SourceEditorView(document);
+        }
+
+        string[] ITextEditorFactory.GetSyntaxProperties(string mimeType, string name)
+        {
+            var mode = SyntaxModeService.GetSyntaxMode(null, mimeType);
+            if (mode == null)
+                return null;
+            System.Collections.Generic.List<string> value;
+            if (!mode.Properties.TryGetValue(name, out value))
+                return null;
+            return value.ToArray();
+        }
+        #endregion
+    }
 }

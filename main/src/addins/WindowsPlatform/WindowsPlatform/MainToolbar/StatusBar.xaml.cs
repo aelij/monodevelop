@@ -26,9 +26,10 @@ namespace WindowsPlatform.MainToolbar
 	/// <summary>
 	/// Interaction logic for StatusBar.xaml
 	/// </summary>
-	public partial class StatusBarControl : UserControl, StatusBar, INotifyPropertyChanged
+	public partial class StatusBarControl : IStatusBar, INotifyPropertyChanged
 	{
-		StatusBarContextHandler ctxHandler;
+	    private readonly StatusBarContextHandler ctxHandler;
+
 		public StatusBarControl ()
 		{
 			InitializeComponent ();
@@ -45,7 +46,7 @@ namespace WindowsPlatform.MainToolbar
 			};
 		}
 
-		bool TextTrimmed ()
+	    private bool TextTrimmed ()
 		{
 			StatusText.Measure (new Size (double.PositiveInfinity, double.PositiveInfinity));
 			return StatusText.ActualWidth < StatusText.DesiredSize.Width;
@@ -56,12 +57,9 @@ namespace WindowsPlatform.MainToolbar
 			set { ProgressBar.IsIndeterminate = value; }
 		}
 
-		public StatusBar MainContext
-		{
-			get { return ctxHandler.MainContext; }
-		}
+		public IStatusBar MainContext => ctxHandler.MainContext;
 
-		public void BeginProgress (string name)
+	    public void BeginProgress (string name)
 		{
 			EndProgress();
 			Status = StatusBarStatus.Normal;
@@ -96,23 +94,23 @@ namespace WindowsPlatform.MainToolbar
 			// Nothing to do here.
 		}
 
-		static Pad sourcePad;
+	    private static Pad sourcePad;
 		public void SetMessageSourcePad (Pad pad)
 		{
 			sourcePad = pad;
 		}
 
-		void OnShowError(object sender, MouseButtonEventArgs e)
+	    private void OnShowError(object sender, MouseButtonEventArgs e)
 		{
 		}
 
-		void OnShowPad(object sender, MouseButtonEventArgs e)
-		{
-			if (sourcePad != null)
-				sourcePad.BringToFront(true);
-		}
+	    private void OnShowPad(object sender, MouseButtonEventArgs e)
+	    {
+	        sourcePad?.BringToFront(true);
+	    }
 
-		double oldWork = 0;
+	    private double oldWork;
+
 		public void SetProgressFraction (double work)
 		{
 			if (work == oldWork)
@@ -151,9 +149,9 @@ namespace WindowsPlatform.MainToolbar
 			ShowMessage (null, message, true);
 		}
 
-		IconId currentIcon;
-		AnimatedIcon animatedIcon;
-		IDisposable xwtAnimation;
+	    private IconId currentIcon;
+	    private AnimatedIcon animatedIcon;
+	    private IDisposable xwtAnimation;
 		public void ShowMessage (IconId iconId, string message, bool isMarkup)
 		{
 			Message = message;
@@ -190,7 +188,7 @@ namespace WindowsPlatform.MainToolbar
 			SetMessageSourcePad (null);
 		}
 
-		void ApplicationNameChanged (object sender, EventArgs e)
+	    private void ApplicationNameChanged (object sender, EventArgs e)
 		{
 			if (Status == StatusBarStatus.Ready)
 				ShowReady ();
@@ -216,7 +214,7 @@ namespace WindowsPlatform.MainToolbar
 			ShowMessage (warning);
 		}
 
-		string message;
+	    private string message;
 		public string Message
 		{
 			get { return message; }
@@ -240,28 +238,28 @@ namespace WindowsPlatform.MainToolbar
 			set { SetValue (StatusTextBrushProperty, value); }
 		}
 
-		Xwt.Drawing.Image statusImage;
+	    private Xwt.Drawing.Image statusImage;
 		public Xwt.Drawing.Image StatusImage
 		{
 			get { return statusImage; }
 			set { statusImage = value; RaisePropertyChanged (); }
 		}
 
-		int buildResultCount;
+	    private int buildResultCount;
 		public int BuildResultCount
 		{
 			get { return buildResultCount; }
 			set { buildResultCount = value; RaisePropertyChanged (); }
 		}
 
-		Xwt.Drawing.Image buildResultIcon;
+	    private Xwt.Drawing.Image buildResultIcon;
 		public Xwt.Drawing.Image BuildResultIcon
 		{
 			get { return buildResultIcon; }
 			set { buildResultIcon = value; RaisePropertyChanged (); }
 		}
 
-		Visibility buildResultPanelVisibility = Visibility.Collapsed;
+	    private Visibility buildResultPanelVisibility = Visibility.Collapsed;
 		public Visibility BuildResultPanelVisibility
 		{
             get { return buildResultPanelVisibility; }
@@ -272,7 +270,7 @@ namespace WindowsPlatform.MainToolbar
 		{
 		}
 
-		void RaisePropertyChanged ([CallerMemberName] string propName = null)
+	    private void RaisePropertyChanged ([CallerMemberName] string propName = null)
 		{
 			if (PropertyChanged != null)
 				PropertyChanged (this, new System.ComponentModel.PropertyChangedEventArgs (propName));
@@ -281,11 +279,11 @@ namespace WindowsPlatform.MainToolbar
 		public event PropertyChangedEventHandler PropertyChanged;
 	}
 
-	class StatusIcon : ImageBox, StatusBarIcon
+    internal class StatusIcon : ImageBox, StatusBarIcon
 	{
-		StatusBar bar;
+	    private IStatusBar bar;
 
-		public StatusIcon (StatusBar bar)
+		public StatusIcon (IStatusBar bar)
 		{
 			this.bar = bar;
 		}

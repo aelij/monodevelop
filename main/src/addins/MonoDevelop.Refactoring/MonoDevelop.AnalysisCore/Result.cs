@@ -25,9 +25,8 @@
 // THE SOFTWARE.
 
 using System;
-using MonoDevelop.AnalysisCore.Extensions;
-using Microsoft.CodeAnalysis.Text;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Text;
 
 namespace MonoDevelop.AnalysisCore
 {
@@ -35,29 +34,30 @@ namespace MonoDevelop.AnalysisCore
 	{
 		public Result (TextSpan region, string message, bool underLine = true)
 		{
-			this.Region = region;
-			this.Message = message;
-			this.Underline = underLine;
+			Region = region;
+			Message = message;
+			Underline = underLine;
 		}
 		
 		public Result (TextSpan region, string message, DiagnosticSeverity level, IssueMarker inspectionMark, bool underline = true)
 		{
-			this.Region = region;
-			this.Message = message;
-			this.Level = level;
-			this.InspectionMark = inspectionMark;
-			this.Underline = underline;
+			Region = region;
+			Message = message;
+			Level = level;
+			InspectionMark = inspectionMark;
+			Underline = underline;
 		}
 		 
 		public void SetSeverity (DiagnosticSeverity level, IssueMarker inspectionMark)
 		{
-			this.Level = level;
-			this.InspectionMark = inspectionMark;
+			Level = level;
+			InspectionMark = inspectionMark;
 		}
 
-		public virtual bool HasOptionsDialog { get { return false; } }
-		public virtual string OptionsTitle { get { return ""; } }
-		public virtual void ShowResultOptionsDialog ()
+		public virtual bool HasOptionsDialog => false;
+	    public virtual string OptionsTitle => "";
+
+	    public virtual void ShowResultOptionsDialog ()
 		{
 			throw new InvalidOperationException ();
 		}
@@ -68,7 +68,5 @@ namespace MonoDevelop.AnalysisCore
 		public TextSpan Region { get; private set; }
 		
 		public bool Underline { get; private set; }
-		
-		internal AnalysisRuleAddinNode Source { get; set; }
 	}
 }

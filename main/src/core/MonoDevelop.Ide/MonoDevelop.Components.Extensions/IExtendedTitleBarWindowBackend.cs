@@ -23,7 +23,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-using System;
+
 using Xwt.Backends;
 using Xwt.GtkBackend;
 
@@ -41,9 +41,8 @@ namespace MonoDevelop.Components.Extensions
 		public override void Initialize ()
 		{
 			base.Initialize ();
-			toolbar = new HeaderBox ();
-			toolbar.GradientBackground = true;
-			toolbar.SetMargins (0, 1, 0, 0);
+		    toolbar = new HeaderBox {GradientBackground = true};
+		    toolbar.SetMargins (0, 1, 0, 0);
 			MainBox.PackStart (toolbar, false, false, 0);
 			((Gtk.Box.BoxChild)MainBox [toolbar]).Position = 0;
 		}

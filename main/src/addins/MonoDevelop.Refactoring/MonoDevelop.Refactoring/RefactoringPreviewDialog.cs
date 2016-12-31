@@ -88,8 +88,9 @@ namespace MonoDevelop.Refactoring
 			};
 			
 			buttonOk.Clicked += delegate {
-				ProgressMonitor monitor = IdeApp.Workbench.ProgressMonitors.GetBackgroundProgressMonitor (this.Title, null);
-				RefactoringService.AcceptChanges (monitor, changes);
+
+                // TODO-AELIJ: apply refactoring
+				//RefactoringService.AcceptChanges (monitor, changes);
 				
 				Destroy ();
 			};

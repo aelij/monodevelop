@@ -23,10 +23,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 using System;
+using Mono.TextEditor.NRefactory;
 
 namespace MonoDevelop.SourceEditor.Wrappers
 {
-	class TextPasteHandlerWrapper : ICSharpCode.NRefactory.Editor.ITextPasteHandler, IDisposable
+	class TextPasteHandlerWrapper : ITextPasteHandler, IDisposable
 	{
 		readonly MonoDevelop.Ide.Editor.Extension.TextPasteHandler textPasteHandler;
 		readonly Mono.TextEditor.TextEditorData data;
@@ -54,12 +55,12 @@ namespace MonoDevelop.SourceEditor.Wrappers
 
 		#region ITextPasteHandler implementation
 
-		string ICSharpCode.NRefactory.Editor.ITextPasteHandler.FormatPlainText (int offset, string text, byte[] copyData)
+		string ITextPasteHandler.FormatPlainText (int offset, string text, byte[] copyData)
 		{
 			return textPasteHandler.FormatPlainText (offset, text, copyData);
 		}
 
-		byte[] ICSharpCode.NRefactory.Editor.ITextPasteHandler.GetCopyData (ICSharpCode.NRefactory.Editor.ISegment segment)
+		byte[] ITextPasteHandler.GetCopyData (ISegment segment)
 		{
 			return textPasteHandler.GetCopyData (segment.Offset, segment.Length);
 		}

@@ -26,17 +26,14 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-
 using System;
-
-
-using MonoDevelop.Core;
-using MonoDevelop.Core.Instrumentation;
-using MonoDevelop.Components.Commands;
-using System.Linq;
-using MonoDevelop.Ide.Gui;
 using System.Collections.Generic;
+using System.Linq;
+using MonoDevelop.Components.Commands;
+using MonoDevelop.Core;
 using MonoDevelop.Core.Assemblies;
+using MonoDevelop.Core.Instrumentation;
+using MonoDevelop.Ide.Gui;
 
 namespace MonoDevelop.Ide
 {
@@ -47,7 +44,8 @@ namespace MonoDevelop.Ide
         public static event ExitEventHandler Exiting;
         public static event EventHandler Exited;
 
-        static EventHandler initializedEvent;
+        private static event EventHandler InitializedEventInternal;
+
         public static event EventHandler Initialized
         {
             add
@@ -55,14 +53,14 @@ namespace MonoDevelop.Ide
                 Runtime.RunInMainThread(() =>
                 {
                     if (IsInitialized) value(null, EventArgs.Empty);
-                    else initializedEvent += value;
+                    else InitializedEventInternal += value;
                 });
             }
             remove
             {
                 Runtime.RunInMainThread(() =>
                 {
-                    initializedEvent -= value;
+                    InitializedEventInternal -= value;
                 });
             }
         }
@@ -88,10 +86,7 @@ namespace MonoDevelop.Ide
         /// <summary>
         /// Gets a value indicating whether the IDE has the input focus
         /// </summary>
-        public static bool HasInputFocus
-        {
-            get { return CommandService.ApplicationHasFocus; }
-        }
+        public static bool HasInputFocus => CommandService.ApplicationHasFocus;
 
         static IdeApp()
         {
@@ -115,13 +110,7 @@ namespace MonoDevelop.Ide
         // If IsInitialRunAfterUpgrade is true, returns the previous version
         public static int UpgradedFromRevision { get; private set; }
 
-        public static Version Version
-        {
-            get
-            {
-                return Runtime.Version;
-            }
-        }
+        public static Version Version => Runtime.Version;
 
         public static void Initialize(ProgressMonitor monitor)
         {
@@ -239,25 +228,26 @@ namespace MonoDevelop.Ide
                 }
             }
 
-            if (initializedEvent != null)
+            if (InitializedEventInternal != null)
             {
-                initializedEvent(null, EventArgs.Empty);
-                initializedEvent = null;
+                InitializedEventInternal(null, EventArgs.Empty);
+                InitializedEventInternal = null;
             }
 
-            IdeApp.Preferences.EnableInstrumentation.Changed += delegate { };
+            Preferences.EnableInstrumentation.Changed += delegate { };
             Gtk.LinkButton.SetUriHook((button, uri) => Xwt.Desktop.OpenUrl(uri));
         }
 
-        static void KeyBindingFailed(object sender, KeyBindingFailedEventArgs e)
+        private static void KeyBindingFailed(object sender, KeyBindingFailedEventArgs e)
         {
-            Ide.IdeApp.Workbench.StatusBar.ShowWarning(e.Message);
+            Workbench.StatusBar.ShowWarning(e.Message);
         }
 
         //this method is MIT/X11, 2009, Michael Hutchinson / (c) Novell
         public static void OpenFiles(IEnumerable<FileOpenInformation> files)
         {
-            if (!files.Any())
+            var f = files as FileOpenInformation[] ?? files.ToArray ();
+            if (!f.Any())
                 return;
 
             if (!IsInitialized)
@@ -266,34 +256,16 @@ namespace MonoDevelop.Ide
                 onInit = delegate
                 {
                     Initialized -= onInit;
-                    OpenFiles(files);
+                    OpenFiles(f);
                 };
                 Initialized += onInit;
                 return;
             }
 
-            var filteredFiles = new List<FileOpenInformation>();
-
-            //open the firsts sln/workspace file, and remove the others from the list
-            //FIXME: can we handle multiple slns?
-            bool foundSln = false;
-
-            foreach (var file in filteredFiles)
-            {
-                try
-                {
-                    Workbench.OpenDocument(file.FileName, null, file.Line, file.Column, file.Options);
-                }
-                catch (Exception ex)
-                {
-                    MessageService.ShowError(string.Format("Could not open file: {0}", file.FileName), ex);
-                }
-            }
-
             Workbench.Present();
         }
 
-        static bool FileServiceErrorHandler(string message, Exception ex)
+        private static bool FileServiceErrorHandler(string message, Exception ex)
         {
             MessageService.ShowError(message, ex);
             return true;
@@ -359,33 +331,32 @@ namespace MonoDevelop.Ide
 
         internal static void OnExited()
         {
-            if (Exited != null)
-                Exited(null, EventArgs.Empty);
+            Exited?.Invoke(null, EventArgs.Empty);
         }
 
-        static void OnInitialRun()
+        private static void OnInitialRun()
         {
             SetInitialLayout();
         }
 
-        static void OnUpgraded(int previousRevision)
+        private static void OnUpgraded(int previousRevision)
         {
             if (previousRevision <= 3)
             {
                 // Reset the current runtime when upgrading from <2.2, to ensure the default runtime is not stuck to an old mono install
-                IdeApp.Preferences.DefaultTargetRuntime.Value = SystemAssemblyService.Instance.CurrentRuntime;
+                Preferences.DefaultTargetRuntime.Value = SystemAssemblyService.Instance.CurrentRuntime;
             }
             if (previousRevision < 5)
                 SetInitialLayout();
         }
 
-        static void SetInitialLayout()
+        private static void SetInitialLayout()
         {
-            if (!IdeApp.Workbench.Layouts.Contains("Solution"))
+            if (!Workbench.Layouts.Contains("Solution"))
             {
                 // Create the Solution layout, based on Default
-                IdeApp.Workbench.CurrentLayout = "Solution";
-                foreach (Pad p in IdeApp.Workbench.Pads)
+                Workbench.CurrentLayout = "Solution";
+                foreach (Pad p in Workbench.Pads)
                 {
                     if (p.Visible)
                         p.AutoHide = true;
@@ -393,14 +364,14 @@ namespace MonoDevelop.Ide
             }
         }
 
-        static ITimeTracker commandTimeCounter;
+        private static ITimeTracker commandTimeCounter;
 
-        static void CommandServiceCommandTargetScanStarted(object sender, EventArgs e)
+        private static void CommandServiceCommandTargetScanStarted(object sender, EventArgs e)
         {
             commandTimeCounter = Counters.CommandTargetScanTime.BeginTiming();
         }
 
-        static void CommandServiceCommandTargetScanFinished(object sender, EventArgs e)
+        private static void CommandServiceCommandTargetScanFinished(object sender, EventArgs e)
         {
             commandTimeCounter.End();
         }

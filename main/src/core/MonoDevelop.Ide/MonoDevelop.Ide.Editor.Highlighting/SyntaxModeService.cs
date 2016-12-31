@@ -35,220 +35,256 @@ using MonoDevelop.Core.Text;
 
 namespace MonoDevelop.Ide.Editor.Highlighting
 {
-	public static class SyntaxModeService
-	{
-		static Dictionary<string, ColorScheme> styles      = new Dictionary<string, ColorScheme> ();
-		static Dictionary<string, IStreamProvider> styleLookup      = new Dictionary<string, IStreamProvider> ();
+    public static class SyntaxModeService
+    {
+        private static readonly Dictionary<string, ColorScheme> styles = new Dictionary<string, ColorScheme>();
+        private static readonly Dictionary<string, IStreamProvider> styleLookup = new Dictionary<string, IStreamProvider>();
 
-		public static string[] Styles {
-			get {
-				List<string> result = new List<string> ();
-				foreach (string style in styles.Keys) {
-					if (!result.Contains (style))
-						result.Add (style);
-				}
-				foreach (string style in styleLookup.Keys) {
-					if (!result.Contains (style))
-						result.Add (style);
-				}
-				return result.ToArray ();
-			}
-		}
+        public static string[] Styles
+        {
+            get
+            {
+                List<string> result = new List<string>();
+                foreach (string style in styles.Keys)
+                {
+                    if (!result.Contains(style))
+                        result.Add(style);
+                }
+                foreach (string style in styleLookup.Keys)
+                {
+                    if (!result.Contains(style))
+                        result.Add(style);
+                }
+                return result.ToArray();
+            }
+        }
 
-		public static ColorScheme DefaultColorStyle {
-			get {
-				return GetColorStyle (ColorScheme.DefaultColorStyle);
-			}
-		}
+        public static ColorScheme DefaultColorStyle => GetColorStyle(ColorScheme.DefaultColorStyle);
 
-		public static ColorScheme GetDefaultColorStyle (this Theme theme)
-		{
-			return GetColorStyle (GetDefaultColorStyleName (theme));
-		}
+        public static ColorScheme GetDefaultColorStyle(this Theme theme)
+        {
+            return GetColorStyle(GetDefaultColorStyleName(theme));
+        }
 
-		public static string GetDefaultColorStyleName ()
-		{
-			return GetDefaultColorStyleName (IdeApp.Preferences.UserInterfaceTheme);
-		}
+        public static string GetDefaultColorStyleName()
+        {
+            return GetDefaultColorStyleName(IdeApp.Preferences.UserInterfaceTheme);
+        }
 
-		public static string GetDefaultColorStyleName (this Theme theme)
-		{
-			switch (theme) {
-				case Theme.Light:
-					return IdePreferences.DefaultLightColorScheme;
-				case Theme.Dark:
-					return IdePreferences.DefaultDarkColorScheme;
-				default:
-					throw new InvalidOperationException ();
-			}
-		}
+        public static string GetDefaultColorStyleName(this Theme theme)
+        {
+            switch (theme)
+            {
+                case Theme.Light:
+                    return IdePreferences.DefaultLightColorScheme;
+                case Theme.Dark:
+                    return IdePreferences.DefaultDarkColorScheme;
+                default:
+                    throw new InvalidOperationException();
+            }
+        }
 
-		public static ColorScheme GetUserColorStyle (this Theme theme)
-		{
-			var schemeName = IdeApp.Preferences.ColorScheme.ValueForTheme (theme);
-			return GetColorStyle (schemeName);
-		}
+        public static ColorScheme GetUserColorStyle(this Theme theme)
+        {
+            var schemeName = IdeApp.Preferences.ColorScheme.ValueForTheme(theme);
+            return GetColorStyle(schemeName);
+        }
 
-		public static bool FitsIdeTheme (this ColorScheme scheme, Theme theme)
-		{
-			if (theme == Theme.Dark)
-				return (scheme.PlainText.Background.L <= 0.5);
-			return (scheme.PlainText.Background.L > 0.5);
-		}
+        public static bool FitsIdeTheme(this ColorScheme scheme, Theme theme)
+        {
+            if (theme == Theme.Dark)
+                return (scheme.PlainText.Background.L <= 0.5);
+            return (scheme.PlainText.Background.L > 0.5);
+        }
 
-		public static ColorScheme GetColorStyle (string name)
-		{
-			if (styleLookup.ContainsKey (name)) {
-				LoadStyle (name);
-			}
-			if (!styles.ContainsKey (name)) {
-				LoggingService.LogWarning ("Color style " + name + " not found, switching to default.");
-				name = GetDefaultColorStyleName ();
-			}
-			if (!styles.ContainsKey (name)) {
-				LoggingService.LogError ("Color style " + name + " not found.");
-				return null;
-			}
-			return styles [name];
-		}
+        public static ColorScheme GetColorStyle(string name)
+        {
+            if (styleLookup.ContainsKey(name))
+            {
+                LoadStyle(name);
+            }
+            if (!styles.ContainsKey(name))
+            {
+                LoggingService.LogWarning("Color style " + name + " not found, switching to default.");
+                name = GetDefaultColorStyleName();
+            }
+            if (!styles.ContainsKey(name))
+            {
+                LoggingService.LogError("Color style " + name + " not found.");
+                return null;
+            }
+            return styles[name];
+        }
 
-		static IStreamProvider GetProvider (ColorScheme style)
-		{
-			if (styleLookup.ContainsKey (style.Name)) 
-				return styleLookup[style.Name];
-			return null;
-		}
-		
-		static void LoadStyle (string name)
-		{
-			if (!styleLookup.ContainsKey (name))
-				throw new System.ArgumentException ("Style " + name + " not found", nameof (name));
-			var provider = styleLookup [name];
-			styleLookup.Remove (name); 
-			var stream = provider.Open ();
-			try {
-				if (provider is UrlStreamProvider) {
-					var usp = provider as UrlStreamProvider;
-					if (usp.Url.EndsWith (".vssettings", StringComparison.Ordinal)) {
-						styles [name] = ColorScheme.Import (usp.Url, stream);
-					} else {
-						styles [name] = ColorScheme.LoadFrom (stream);
-					}
-					styles [name].FileName = usp.Url;
-				} else {
-					styles [name] = ColorScheme.LoadFrom (stream);
-				}
-			} catch (Exception e) {
-				LoggingService.LogError ("Error while loading style :" + name, e);
-				throw new IOException ("Error while loading style :" + name, e);
-			} finally {
-				stream.Close ();
-			}
-		}
-		
+        private static IStreamProvider GetProvider(ColorScheme style)
+        {
+            if (styleLookup.ContainsKey(style.Name))
+                return styleLookup[style.Name];
+            return null;
+        }
 
-		static void Remove (ColorScheme style)
-		{
-			if (styleLookup.ContainsKey (style.Name))
-				styleLookup.Remove (style.Name);
-
-			foreach (var kv in styles) {
-				if (kv.Value == style) {
-					styles.Remove (kv.Key); 
-					return;
-				}
-			}
-		}
-		
-
-		static List<ValidationEventArgs> ValidateStyleFile (string fileName)
-		{
-			List<ValidationEventArgs> result = new List<ValidationEventArgs> ();
-			return result;
-		}
+        private static void LoadStyle(string name)
+        {
+            if (!styleLookup.ContainsKey(name))
+                throw new ArgumentException("Style " + name + " not found", nameof(name));
+            var provider = styleLookup[name];
+            styleLookup.Remove(name);
+            var stream = provider.Open();
+            try
+            {
+                if (provider is UrlStreamProvider)
+                {
+                    var usp = provider as UrlStreamProvider;
+                    if (usp.Url.EndsWith(".vssettings", StringComparison.Ordinal))
+                    {
+                        styles[name] = ColorScheme.Import(usp.Url, stream);
+                    }
+                    else
+                    {
+                        styles[name] = ColorScheme.LoadFrom(stream);
+                    }
+                    styles[name].FileName = usp.Url;
+                }
+                else
+                {
+                    styles[name] = ColorScheme.LoadFrom(stream);
+                }
+            }
+            catch (Exception e)
+            {
+                LoggingService.LogError("Error while loading style :" + name, e);
+                throw new IOException("Error while loading style :" + name, e);
+            }
+            finally
+            {
+                stream.Close();
+            }
+        }
 
 
-		internal static void LoadStylesAndModes (string path)
-		{
-			foreach (string file in Directory.GetFiles (path)) {
-				if (file.EndsWith (".json", StringComparison.Ordinal)) {
-					using (var stream = File.OpenRead (file)) {
-						string styleName = ScanStyle (stream);
-						if (!string.IsNullOrEmpty (styleName)) {
-							styleLookup [styleName] = new UrlStreamProvider (file);
-						} else {
-							Console.WriteLine ("Invalid .json syntax sheme file : " + file);
-						}
-					}
-				} else if (file.EndsWith (".vssettings", StringComparison.Ordinal)) {
-					using (var stream = File.OpenRead (file)) {
-						string styleName = Path.GetFileNameWithoutExtension (file);
-						styleLookup [styleName] = new UrlStreamProvider (file);
-					}
-				}
-			}
-		}
+        private static void Remove(ColorScheme style)
+        {
+            if (styleLookup.ContainsKey(style.Name))
+                styleLookup.Remove(style.Name);
 
-		static void LoadStylesAndModes (Assembly assembly)
-		{
-			foreach (string resource in assembly.GetManifestResourceNames ()) {
-				if (resource.EndsWith ("Style.json", StringComparison.Ordinal)) {
-					using (Stream stream = assembly.GetManifestResourceStream (resource)) {
-						string styleName = ScanStyle (stream);
-						styleLookup [styleName] = new ResourceStreamProvider (assembly, resource);
-					}
-				}
-			}
-		}
-		static System.Text.RegularExpressions.Regex nameRegex = new System.Text.RegularExpressions.Regex ("\\s*\"name\"\\s*:\\s*\"(.*)\"\\s*,");
+            foreach (var kv in styles)
+            {
+                if (kv.Value == style)
+                {
+                    styles.Remove(kv.Key);
+                    return;
+                }
+            }
+        }
 
-		static string ScanStyle (Stream stream)
-		{
-			try {
-				var file = TextFileUtility.OpenStream (stream);
-				file.ReadLine ();
-				var nameLine = file.ReadLine ();
-				file.Close ();
-				var match = nameRegex.Match (nameLine);
-				if (!match.Success)
-					return null;
-				return match.Groups[1].Value;
-			} catch (Exception e) {
-				Console.WriteLine ("Error while scanning json:");
-				Console.WriteLine (e);
-				return null;
-			}
-		}
+        private static List<ValidationEventArgs> ValidateStyleFile(string fileName)
+        {
+            List<ValidationEventArgs> result = new List<ValidationEventArgs>();
+            return result;
+        }
 
-		internal static void AddStyle (ColorScheme style)
-		{
-			styles [style.Name] = style;
-		}
+        internal static void LoadStylesAndModes(string path)
+        {
+            foreach (string file in Directory.GetFiles(path))
+            {
+                if (file.EndsWith(".json", StringComparison.Ordinal))
+                {
+                    using (var stream = File.OpenRead(file))
+                    {
+                        string styleName = ScanStyle(stream);
+                        if (!string.IsNullOrEmpty(styleName))
+                        {
+                            styleLookup[styleName] = new UrlStreamProvider(file);
+                        }
+                        else
+                        {
+                            Console.WriteLine("Invalid .json syntax sheme file : " + file);
+                        }
+                    }
+                }
+                else if (file.EndsWith(".vssettings", StringComparison.Ordinal))
+                {
+                    using (var stream = File.OpenRead(file))
+                    {
+                        string styleName = Path.GetFileNameWithoutExtension(file);
+                        styleLookup[styleName] = new UrlStreamProvider(file);
+                    }
+                }
+            }
+        }
 
-		internal static void AddStyle (IStreamProvider provider)
-		{
-			using (var stream = provider.Open ()) {
-				string styleName = ScanStyle (stream);
-				styleLookup [styleName] = provider;
-			}
-		}
+        private static void LoadStylesAndModes(Assembly assembly)
+        {
+            foreach (string resource in assembly.GetManifestResourceNames())
+            {
+                if (resource.EndsWith("Style.json", StringComparison.Ordinal))
+                {
+                    using (Stream stream = assembly.GetManifestResourceStream(resource))
+                    {
+                        string styleName = ScanStyle(stream);
+                        styleLookup[styleName] = new ResourceStreamProvider(assembly, resource);
+                    }
+                }
+            }
+        }
 
-		internal static void RemoveStyle (IStreamProvider provider)
-		{
-			using (var stream = provider.Open ()) {
-				string styleName = ScanStyle (stream);
-				styleLookup.Remove (styleName);
-			}
-		}
+        private static readonly System.Text.RegularExpressions.Regex NameRegex = new System.Text.RegularExpressions.Regex("\\s*\"name\"\\s*:\\s*\"(.*)\"\\s*,");
 
-		static SyntaxModeService ()
-		{
-			var textEditorAssembly = Assembly.Load ("Mono.TextEditor");
-			if (textEditorAssembly != null) {
-				LoadStylesAndModes (textEditorAssembly);
-			} else {
-				LoggingService.LogError ("Can't lookup Mono.TextEditor assembly. Default styles won't be loaded.");
-			}
-		}
-	}
+        private static string ScanStyle(Stream stream)
+        {
+            try
+            {
+                var file = TextFileUtility.OpenStream(stream);
+                file.ReadLine();
+                var nameLine = file.ReadLine();
+                file.Close();
+                var match = NameRegex.Match(nameLine);
+                if (!match.Success)
+                    return null;
+                return match.Groups[1].Value;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Error while scanning json:");
+                Console.WriteLine(e);
+                return null;
+            }
+        }
+
+        internal static void AddStyle(ColorScheme style)
+        {
+            styles[style.Name] = style;
+        }
+
+        internal static void AddStyle(IStreamProvider provider)
+        {
+            using (var stream = provider.Open())
+            {
+                string styleName = ScanStyle(stream);
+                styleLookup[styleName] = provider;
+            }
+        }
+
+        internal static void RemoveStyle(IStreamProvider provider)
+        {
+            using (var stream = provider.Open())
+            {
+                string styleName = ScanStyle(stream);
+                styleLookup.Remove(styleName);
+            }
+        }
+
+        static SyntaxModeService()
+        {
+            var textEditorAssembly = Assembly.Load("Mono.TextEditor");
+            if (textEditorAssembly != null)
+            {
+                LoadStylesAndModes(textEditorAssembly);
+            }
+            else
+            {
+                LoggingService.LogError("Can't lookup Mono.TextEditor assembly. Default styles won't be loaded.");
+            }
+        }
+    }
 }

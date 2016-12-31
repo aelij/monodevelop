@@ -25,13 +25,14 @@
 // THE SOFTWARE.
 
 using System;
+using Mono.TextEditor.NRefactory;
 
 namespace Mono.TextEditor
 {
 	/// <summary>
 	/// An (Offset, Length) pair representing a text span.
 	/// </summary>
-	public struct TextSegment : IEquatable<TextSegment>, ICSharpCode.NRefactory.Editor.ISegment
+	public struct TextSegment : IEquatable<TextSegment>, ISegment
 	{
 		public static readonly TextSegment Invalid = new TextSegment (-1, 0);
 
@@ -117,7 +118,7 @@ namespace Mono.TextEditor
 			this.length = length;
 		}
 
-		public TextSegment (ICSharpCode.NRefactory.Editor.ISegment nrefactorySegment) : this (nrefactorySegment.Offset, nrefactorySegment.Length)
+		public TextSegment (ISegment nrefactorySegment) : this (nrefactorySegment.Offset, nrefactorySegment.Length)
 		{
 		}
 

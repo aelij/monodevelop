@@ -31,17 +31,28 @@ using MonoDevelop.Components.Commands;
 
 namespace MonoDevelop.Components.MainToolbar
 {
-    class MainToolbarController : ICommandBar
+    public interface IMainToolbarController : ICommandBar
     {
-        internal IMainToolbarView ToolbarView
+        IMainToolbarView ToolbarView { get; }
+        IStatusBar StatusBar { get; }
+        void Initialize();
+        void SetSearchCategory(string category);
+        void ShowCommandBar(string barId);
+        void HideCommandBar(string barId);
+    }
+
+    internal class MainToolbarController : IMainToolbarController
+    {
+        public IMainToolbarView ToolbarView
         {
             get;
         }
 
-        internal StatusBar StatusBar => ToolbarView.StatusBar;
+        public IStatusBar StatusBar => ToolbarView.StatusBar;
 
-        int ignoreConfigurationChangedCount, ignoreRuntimeChangedCount;
-        bool settingGlobalConfig;
+        private int ignoreConfigurationChangedCount;
+        private int ignoreRuntimeChangedCount;
+        private bool settingGlobalConfig;
 
         public MainToolbarController(IMainToolbarView toolbarView)
         {
@@ -62,10 +73,11 @@ namespace MonoDevelop.Components.MainToolbar
 
         public void Initialize()
         {
-            var items = new[] {
-                new SearchMenuModel (("Search Files"), "file"),
-                new SearchMenuModel (("Search Types"), "type"),
-                new SearchMenuModel (("Search Members"), "member"),
+            var items = new[]
+            {
+                new SearchMenuModel ("Search Files", "file"),
+                new SearchMenuModel ("Search Types", "type"),
+                new SearchMenuModel ("Search Members", "member"),
             };
 
             // Attach menu category handlers.
@@ -82,7 +94,7 @@ namespace MonoDevelop.Components.MainToolbar
             IdeApp.CommandService.RegisterCommandBar(this);
         }
 
-        void UpdateCombos()
+        private void UpdateCombos()
         {
             if (settingGlobalConfig)
                 return;
@@ -107,7 +119,7 @@ namespace MonoDevelop.Components.MainToolbar
             FillRuntimes();
         }
 
-        void FillRuntimes()
+        private void FillRuntimes()
         {
             ignoreRuntimeChangedCount++;
             try
@@ -120,7 +132,7 @@ namespace MonoDevelop.Components.MainToolbar
             }
         }
 
-        void HandleRuntimeChanged(object sender, HandledEventArgs e)
+        private void HandleRuntimeChanged(object sender, HandledEventArgs e)
         {
             if (ignoreRuntimeChangedCount == 0)
             {
@@ -128,13 +140,13 @@ namespace MonoDevelop.Components.MainToolbar
             }
         }
 
-        void HandleConfigurationChanged(object sender, EventArgs e)
+        private void HandleConfigurationChanged(object sender, EventArgs e)
         {
             if (ignoreConfigurationChangedCount == 0)
                 NotifyConfigurationChange();
         }
 
-        void NotifyConfigurationChange()
+        private void NotifyConfigurationChange()
         {
             if (ToolbarView.ActiveConfiguration == null)
                 return;
@@ -142,13 +154,13 @@ namespace MonoDevelop.Components.MainToolbar
             FillRuntimes();
         }
 
-        void UpdateSearchEntryLabel()
+        private void UpdateSearchEntryLabel()
         {
             var info = IdeApp.CommandService.GetCommand(Commands.NavigateTo);
             ToolbarView.SearchPlaceholderMessage = !string.IsNullOrEmpty(info.AccelKey) ?
-                $"Press \u2018{KeyBindingManager.BindingToDisplayLabel (info.AccelKey, false)}\u2019 to search"
+                $"Press \u2018{KeyBindingManager.BindingToDisplayLabel(info.AccelKey, false)}\u2019 to search"
                 :
-                ("Search solution");
+                "Search solution";
         }
 
         public void SetSearchCategory(string category)
@@ -157,7 +169,7 @@ namespace MonoDevelop.Components.MainToolbar
             ToolbarView.SearchCategory = category + ":";
         }
 
-        readonly HashSet<string> visibleBars = new HashSet<string>();
+        private readonly HashSet<string> visibleBars = new HashSet<string>();
         public void ShowCommandBar(string barId)
         {
             visibleBars.Add(barId);
@@ -168,7 +180,7 @@ namespace MonoDevelop.Components.MainToolbar
             visibleBars.Remove(barId);
         }
 
-        static void HandleStartButtonClicked(object sender, EventArgs e)
+        private static void HandleStartButtonClicked(object sender, EventArgs e)
         {
             OperationIcon operation;
             var ci = GetStartButtonCommandInfo(out operation);
@@ -176,7 +188,7 @@ namespace MonoDevelop.Components.MainToolbar
                 IdeApp.CommandService.DispatchCommand(ci.Command.Id, CommandSource.MainToolbar);
         }
 
-        static CommandInfo GetStartButtonCommandInfo(out OperationIcon operation)
+        private static CommandInfo GetStartButtonCommandInfo(out OperationIcon operation)
         {
             operation = OperationIcon.Run;
             var ci = IdeApp.CommandService.GetCommandInfo("MonoDevelop.Debugger.DebugCommands.Debug");
@@ -184,7 +196,8 @@ namespace MonoDevelop.Components.MainToolbar
         }
 
         #region ICommandBar implementation
-        bool toolbarEnabled = true;
+
+        private bool toolbarEnabled = true;
 
         void ICommandBar.Update(object activeTarget)
         {
@@ -209,8 +222,8 @@ namespace MonoDevelop.Components.MainToolbar
             ToolbarView.ButtonBarSensitivity = enabled;
         }
         #endregion
-        
-        class SearchMenuModel : ISearchMenuModel
+
+        private class SearchMenuModel : ISearchMenuModel
         {
             public SearchMenuModel(string displayString, string category)
             {

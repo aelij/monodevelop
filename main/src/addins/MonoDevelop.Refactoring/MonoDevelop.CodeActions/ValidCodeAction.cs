@@ -29,19 +29,19 @@ using Microsoft.CodeAnalysis.Text;
 
 namespace MonoDevelop.CodeActions
 {
-	/// <summary>
-	/// Represents a code action that's valid at a specific segment.
-	/// </summary>
-	class ValidCodeAction
-	{
-		public CodeAction CodeAction { get; private set; }
+    /// <summary>
+    /// Represents a code action that's valid at a specific segment.
+    /// </summary>
+    internal class ValidCodeAction
+    {
+        public CodeAction CodeAction { get; }
 
-		public TextSpan ValidSegment { get; private set; }
+        public TextSpan ValidSegment { get; }
 
-		public ValidCodeAction (CodeAction codeAction, TextSpan validSegment)
-		{
-			this.CodeAction = codeAction;
-			this.ValidSegment = validSegment;
-		}
-	}
+        public ValidCodeAction(CodeAction codeAction, TextSpan validSegment)
+        {
+            CodeAction = codeAction;
+             ValidSegment = validSegment;
+        }
+    }
 }

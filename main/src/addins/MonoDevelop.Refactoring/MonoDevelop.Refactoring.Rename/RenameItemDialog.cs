@@ -25,177 +25,177 @@
 // THE SOFTWARE.
 
 using System;
-
-using Gtk;
-
-using MonoDevelop.Core;
-using System.Collections.Generic;
-using MonoDevelop.Ide;
-using MonoDevelop.Ide.ProgressMonitoring;
 using System.Linq;
-using Microsoft.CodeAnalysis.Text;
+using Gtk;
 using Microsoft.CodeAnalysis;
-using System.Threading.Tasks;
+using MonoDevelop.Core;
 
 namespace MonoDevelop.Refactoring.Rename
 {
-	public partial class RenameItemDialog : Gtk.Dialog
-	{
-		Func<RenameRefactoring.RenameProperties, Task<IList<Change>>> rename;
+    public partial class RenameItemDialog : Dialog
+    {
+        public RenameItemDialog(string title, string currentName)
+        {
+            // ReSharper disable once VirtualMemberCallInConstructor
+            Build();
+            Init(title, currentName);
+        }
 
-		public RenameItemDialog (string title, string currentName, Func<RenameRefactoring.RenameProperties, Task<IList<Change>>> renameOperation)
-		{
-			this.Build ();
-			Init (title, currentName, renameOperation);
-		}
+        public RenameItemDialog(ISymbol symbol)
+        {
+            // ReSharper disable once VirtualMemberCallInConstructor
+            Build();
 
-		public RenameItemDialog (ISymbol symbol, RenameRefactoring rename)
-		{
-			this.Build ();
+            string title;
+            var typeSymbol = symbol as ITypeSymbol;
+            if (typeSymbol != null)
+            {
 
-			string title;
-			if (symbol is ITypeSymbol) {
+                var t = typeSymbol;
+                if (t.TypeKind == TypeKind.TypeParameter)
+                {
+                    title = GettextCatalog.GetString("Rename Type Parameter");
+                    entry.Text = t.Name;
 
-				var t = (ITypeSymbol)symbol;
-				if (t.TypeKind == TypeKind.TypeParameter) {
-					title = GettextCatalog.GetString ("Rename Type Parameter");
-					entry.Text = t.Name;
-
-				} else {
-					var typeDefinition = t;
-					if (typeDefinition.ContainingType == null) {
-						// not supported for inner types
-						this.renameFileFlag.Visible = true;
-						this.renameFileFlag.Active = t.Locations.First ().SourceTree.FilePath.Contains (typeDefinition.Name);
-					} else {
-						this.renameFileFlag.Active = false;
-					}
-					if (typeDefinition.TypeKind == TypeKind.Interface)
-						title = GettextCatalog.GetString ("Rename Interface");
-					else if (typeDefinition.TypeKind == TypeKind.Delegate)
-						title = GettextCatalog.GetString ("Rename Delegate");
-					else if (typeDefinition.TypeKind == TypeKind.Enum)
-						title = GettextCatalog.GetString ("Rename Enum");
-					else if (typeDefinition.TypeKind == TypeKind.Struct)
-						title = GettextCatalog.GetString ("Rename Struct");
-					else
-						title = GettextCatalog.GetString ("Rename Class");
-				}
-				//				this.fileName = type.GetDefinition ().Region.FileName;
-			} else if (symbol.Kind == SymbolKind.Field) {
-				title = GettextCatalog.GetString ("Rename Field");
-			} else if (symbol.Kind == SymbolKind.Property) {
-				title = GettextCatalog.GetString ("Rename Property");
-			} else if (symbol.Kind == SymbolKind.Event) {
-				title = GettextCatalog.GetString ("Rename Event");
-			} else if (symbol.Kind == SymbolKind.Method) { 
-				var m = (IMethodSymbol)symbol;
-				if (m.MethodKind == MethodKind.Constructor ||
-					m.MethodKind == MethodKind.StaticConstructor ||
-					m.MethodKind == MethodKind.Destructor) {
-					title = GettextCatalog.GetString ("Rename Class");
-				} else {
-					title = GettextCatalog.GetString ("Rename Method");
-					includeOverloadsCheckbox.Visible = m.ContainingType.GetMembers (m.Name).Length > 1;
-				}
-			} else if (symbol.Kind == SymbolKind.Parameter) {
-				title = GettextCatalog.GetString ("Rename Parameter");
-			} else if (symbol.Kind == SymbolKind.Local) {
-				title = GettextCatalog.GetString ("Rename Variable");
-			} else if (symbol.Kind == SymbolKind.TypeParameter) {
-				title = GettextCatalog.GetString ("Rename Type Parameter");
-			} else if (symbol.Kind == SymbolKind.Namespace) {
-				title = GettextCatalog.GetString ("Rename Namespace");
-			} else if (symbol.Kind == SymbolKind.Label) {
-				title = GettextCatalog.GetString ("Rename Label");
-			} else {
-				title = GettextCatalog.GetString ("Rename Item");
-			}
-
-
-			Init (title, symbol.Name, async prop => { return await rename.PerformChangesAsync (symbol, prop); });
-
-		}
-
-		void Init (string title, string currenName, Func<RenameRefactoring.RenameProperties, Task<IList<Change>>> rename)
-		{
-			this.Title = title;
-			this.rename = rename;
-
-			includeOverloadsCheckbox.Active = true;
-			includeOverloadsCheckbox.Visible = false;
-			entry.Text = currenName;
-			entry.SelectRegion (0, -1);
-
-			buttonPreview.Sensitive = buttonOk.Sensitive = false;
-			entry.Changed += OnEntryChanged;
-			entry.Activated += OnEntryActivated;
-
-			buttonOk.Clicked += OnOKClicked;
-			buttonPreview.Clicked += OnPreviewClicked;
-			entry.Changed += delegate { buttonPreview.Sensitive = buttonOk.Sensitive = ValidateName (); };
-			ValidateName ();
-			this.hbox1.HideAll ();
-		}
+                }
+                else
+                {
+                    var typeDefinition = t;
+                    if (typeDefinition.ContainingType == null)
+                    {
+                        // not supported for inner types
+                        renameFileFlag.Visible = true;
+                        renameFileFlag.Active = t.Locations.First().SourceTree.FilePath.Contains(typeDefinition.Name);
+                    }
+                    else
+                    {
+                        renameFileFlag.Active = false;
+                    }
+                    if (typeDefinition.TypeKind == TypeKind.Interface)
+                        title = GettextCatalog.GetString("Rename Interface");
+                    else if (typeDefinition.TypeKind == TypeKind.Delegate)
+                        title = GettextCatalog.GetString("Rename Delegate");
+                    else if (typeDefinition.TypeKind == TypeKind.Enum)
+                        title = GettextCatalog.GetString("Rename Enum");
+                    else if (typeDefinition.TypeKind == TypeKind.Struct)
+                        title = GettextCatalog.GetString("Rename Struct");
+                    else
+                        title = GettextCatalog.GetString("Rename Class");
+                }
+                //				this.fileName = type.GetDefinition ().Region.FileName;
+            }
+            else if (symbol.Kind == SymbolKind.Field)
+            {
+                title = GettextCatalog.GetString("Rename Field");
+            }
+            else if (symbol.Kind == SymbolKind.Property)
+            {
+                title = GettextCatalog.GetString("Rename Property");
+            }
+            else if (symbol.Kind == SymbolKind.Event)
+            {
+                title = GettextCatalog.GetString("Rename Event");
+            }
+            else if (symbol.Kind == SymbolKind.Method)
+            {
+                var m = (IMethodSymbol)symbol;
+                if (m.MethodKind == MethodKind.Constructor ||
+                    m.MethodKind == MethodKind.StaticConstructor ||
+                    m.MethodKind == MethodKind.Destructor)
+                {
+                    title = GettextCatalog.GetString("Rename Class");
+                }
+                else
+                {
+                    title = GettextCatalog.GetString("Rename Method");
+                    includeOverloadsCheckbox.Visible = m.ContainingType.GetMembers(m.Name).Length > 1;
+                }
+            }
+            else if (symbol.Kind == SymbolKind.Parameter)
+            {
+                title = GettextCatalog.GetString("Rename Parameter");
+            }
+            else if (symbol.Kind == SymbolKind.Local)
+            {
+                title = GettextCatalog.GetString("Rename Variable");
+            }
+            else if (symbol.Kind == SymbolKind.TypeParameter)
+            {
+                title = GettextCatalog.GetString("Rename Type Parameter");
+            }
+            else if (symbol.Kind == SymbolKind.Namespace)
+            {
+                title = GettextCatalog.GetString("Rename Namespace");
+            }
+            else if (symbol.Kind == SymbolKind.Label)
+            {
+                title = GettextCatalog.GetString("Rename Label");
+            }
+            else
+            {
+                title = GettextCatalog.GetString("Rename Item");
+            }
 
 
-		bool ValidateName ()
-		{
-			return true; // TODO: Name validation.
-//			var nameValidator = MonoDevelop.Projects.LanguageBindingService.GetRefactorerForFile (fileName ?? "default.cs");
-//			if (nameValidator == null)
-//				return true;
-//			ValidationResult result = nameValidator.ValidateName (this.options.SelectedItem, entry.Text);
-//			if (!result.IsValid) {
-//				imageWarning.IconName = Gtk.Stock.DialogError;
-//			} else if (result.HasWarning) {
-//				imageWarning.IconName = Gtk.Stock.DialogWarning;
-//			} else {
-//				imageWarning.IconName = Gtk.Stock.Apply;
-//			}
-//			labelWarning.Text = result.Message;
-//			return result.IsValid;
-		}
+            Init(title, symbol.Name);
+        }
 
-		void OnEntryChanged (object sender, EventArgs e)
-		{
-			// Don't allow the user to click OK unless there is a new name
-			buttonPreview.Sensitive = buttonOk.Sensitive = entry.Text.Length > 0;
-		}
+        private void Init(string title, string currenName)
+        {
+            Title = title;
 
-		void OnEntryActivated (object sender, EventArgs e)
-		{
-			if (buttonOk.Sensitive)
-				buttonOk.Click ();
-		}
-		
-		RenameRefactoring.RenameProperties Properties {
-			get {
-				return new RenameRefactoring.RenameProperties () {
-					NewName = entry.Text,
-					RenameFile = renameFileFlag.Visible && renameFileFlag.Active,
-					IncludeOverloads = includeOverloadsCheckbox.Visible && includeOverloadsCheckbox.Active
-				};
-			}
-		}
-		
-		async void OnOKClicked (object sender, EventArgs e)
-		{
-			var properties = Properties;
-			((Widget)this).Destroy ();
-			var changes = await this.rename (properties);
-			ProgressMonitor monitor = IdeApp.Workbench.ProgressMonitors.GetBackgroundProgressMonitor (Title, null);
-			RefactoringService.AcceptChanges (monitor, changes);
-		}
-		
-		async void OnPreviewClicked (object sender, EventArgs e)
-		{
-			var properties = Properties;
-			((Widget)this).Destroy ();
-			var changes = await this.rename (properties);
-			using (var dlg = new RefactoringPreviewDialog (changes))
-				MessageService.ShowCustomDialog (dlg);
-		}
-	}
-		
+            includeOverloadsCheckbox.Active = true;
+            includeOverloadsCheckbox.Visible = false;
+            entry.Text = currenName;
+            entry.SelectRegion(0, -1);
+
+            buttonPreview.Sensitive = buttonOk.Sensitive = false;
+            entry.Changed += OnEntryChanged;
+            entry.Activated += OnEntryActivated;
+
+            buttonOk.Clicked += OnOkClicked;
+            buttonPreview.Clicked += OnPreviewClicked;
+            entry.Changed += delegate { buttonPreview.Sensitive = buttonOk.Sensitive = ValidateName(); };
+            ValidateName();
+            hbox1.HideAll();
+        }
+
+
+        private bool ValidateName()
+        {
+            return true; // TODO: Name validation.
+        }
+
+        private void OnEntryChanged(object sender, EventArgs e)
+        {
+            // Don't allow the user to click OK unless there is a new name
+            buttonPreview.Sensitive = buttonOk.Sensitive = entry.Text.Length > 0;
+        }
+
+        private void OnEntryActivated(object sender, EventArgs e)
+        {
+            if (buttonOk.Sensitive)
+                buttonOk.Click();
+        }
+
+        public string NewName => entry.Text;
+        public bool RenameFile => renameFileFlag.Visible && renameFileFlag.Active;
+        public bool IncludeOverloads => includeOverloadsCheckbox.Visible && includeOverloadsCheckbox.Active;
+
+        public bool Result { get; set; }
+
+        private void OnOkClicked(object sender, EventArgs e)
+        {
+            Destroy();
+            Result = true;
+        }
+
+        private void OnPreviewClicked(object sender, EventArgs e)
+        {
+            Destroy();
+            // TODO: preview refactoring
+            //using (var dlg = new RefactoringPreviewDialog(changes))
+            //    MessageService.ShowCustomDialog(dlg);
+        }
+    }
 }

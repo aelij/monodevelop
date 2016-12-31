@@ -28,8 +28,8 @@
 
 
 using System;
-using MonoDevelop.Core;
 using MonoDevelop.Components.Docking;
+using MonoDevelop.Core;
 
 namespace MonoDevelop.Ide.Gui
 {
@@ -128,9 +128,9 @@ namespace MonoDevelop.Ide.Gui
         event EventHandler PadDestroyed;
     }
 
-    internal class PadCodon
+    public sealed class PadDefinition
     {
-        public PadCodon(PadContent padContent, string id, string label, string defaultPlacement, DockItemStatus defaultStatus, string icon)
+        public PadDefinition(PadContent padContent, string id, string label, string defaultPlacement, DockItemStatus defaultStatus, string icon)
         {
             PadContent = padContent;
             Id = id;
@@ -151,7 +151,7 @@ namespace MonoDevelop.Ide.Gui
         public string Icon { get; set; }
         public string Group { get; set; }
 
-        public PadContent InitializePadContent(PadWindow window)
+        internal PadContent InitializePadContent(IPadWindow window)
         {
             throw new NotImplementedException();
         }
@@ -159,23 +159,23 @@ namespace MonoDevelop.Ide.Gui
 
     internal class PadWindow : IPadWindow
     {
-        string title;
-        IconId icon;
-        bool isWorking;
-        bool hasErrors;
-        bool hasNewData;
-        PadContent content;
-        PadCodon codon;
-        DefaultWorkbench workbench;
+        private string title;
+        private IconId icon;
+        private bool isWorking;
+        private bool hasErrors;
+        private bool hasNewData;
+        private PadContent content;
+        private readonly PadDefinition definition;
+        private readonly DefaultWorkbenchWindow workbenchWindow;
 
         internal DockItem Item { get; set; }
 
-        internal PadWindow(DefaultWorkbench workbench, PadCodon codon)
+        internal PadWindow(DefaultWorkbenchWindow workbenchWindow, PadDefinition definition)
         {
-            this.workbench = workbench;
-            this.codon = codon;
-            this.title = GettextCatalog.GetString(codon.Label);
-            this.icon = codon.Icon;
+            this.workbenchWindow = workbenchWindow;
+            this.definition = definition;
+            title = GettextCatalog.GetString(definition.Label);
+            icon = definition.Icon;
         }
 
         public PadContent Content
@@ -195,8 +195,7 @@ namespace MonoDevelop.Ide.Gui
                 if (title != value)
                 {
                     title = value;
-                    if (StatusChanged != null)
-                        StatusChanged(this, EventArgs.Empty);
+                    StatusChanged?.Invoke(this, EventArgs.Empty);
                 }
             }
         }
@@ -209,8 +208,7 @@ namespace MonoDevelop.Ide.Gui
                 if (icon != value)
                 {
                     icon = value;
-                    if (StatusChanged != null)
-                        StatusChanged(this, EventArgs.Empty);
+                    StatusChanged?.Invoke(this, EventArgs.Empty);
                 }
             }
         }
@@ -226,8 +224,7 @@ namespace MonoDevelop.Ide.Gui
                     hasErrors = false;
                     hasNewData = false;
                 }
-                if (StatusChanged != null)
-                    StatusChanged(this, EventArgs.Empty);
+                StatusChanged?.Invoke(this, EventArgs.Empty);
             }
         }
 
@@ -239,8 +236,7 @@ namespace MonoDevelop.Ide.Gui
                 hasErrors = value;
                 if (value)
                     isWorking = false;
-                if (StatusChanged != null)
-                    StatusChanged(this, EventArgs.Empty);
+                StatusChanged?.Invoke(this, EventArgs.Empty);
             }
         }
 
@@ -252,15 +248,11 @@ namespace MonoDevelop.Ide.Gui
                 hasNewData = value;
                 if (value)
                     isWorking = false;
-                if (StatusChanged != null)
-                    StatusChanged(this, EventArgs.Empty);
+                StatusChanged?.Invoke(this, EventArgs.Empty);
             }
         }
 
-        public string Id
-        {
-            get { return codon.PadId; }
-        }
+        public string Id => definition.PadId;
 
         public bool Visible
         {
@@ -274,40 +266,25 @@ namespace MonoDevelop.Ide.Gui
             }
         }
 
-        public bool HasFocus
-        {
-            get { return Item.HasFocus; }
-        }
+        public bool HasFocus => Item.HasFocus;
 
         public bool AutoHide
         {
-            get
-            {
-                return Item.Status == DockItemStatus.AutoHide;
-            }
-            set
-            {
-                if (value)
-                    Item.Status = DockItemStatus.AutoHide;
-                else
-                    Item.Status = DockItemStatus.Dockable;
-            }
+            get { return Item.Status == DockItemStatus.AutoHide; }
+            set { Item.Status = value ? DockItemStatus.AutoHide : DockItemStatus.Dockable; }
         }
 
-        public bool ContentVisible
-        {
-            get { return workbench.IsContentVisible(codon); }
-        }
+        public bool ContentVisible => workbenchWindow.IsContentVisible(definition);
 
         public bool Sticky
         {
             get
             {
-                return workbench.IsSticky(codon);
+                return workbenchWindow.IsSticky(definition);
             }
             set
             {
-                workbench.SetSticky(codon, value);
+                workbenchWindow.SetSticky(definition, value);
             }
         }
 
@@ -319,14 +296,14 @@ namespace MonoDevelop.Ide.Gui
         public void Activate(bool giveFocus)
         {
             CreateContent();
-            workbench.ActivatePad(codon, giveFocus);
+            workbenchWindow.ActivatePad(definition, giveFocus);
         }
 
-        void CreateContent()
+        private void CreateContent()
         {
-            if (this.content == null)
+            if (content == null)
             {
-                this.content = codon.InitializePadContent(this);
+                content = definition.InitializePadContent(this);
             }
         }
 

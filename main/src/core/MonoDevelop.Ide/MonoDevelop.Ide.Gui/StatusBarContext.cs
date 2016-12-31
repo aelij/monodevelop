@@ -45,7 +45,7 @@ namespace MonoDevelop.Ide
 	/// The MonoDevelop status bar.
 	/// </summary>
 	
-	public interface StatusBarContext: StatusBarContextBase
+	public interface StatusBarContext: IStatusBarContextBase
 	{
 		Pad StatusSourcePad { get; set; }
 

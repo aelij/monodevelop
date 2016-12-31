@@ -30,14 +30,14 @@ using System.Text;
 using System.Collections.Generic;
 using Mono.TextEditor.Highlighting;
 using System.Linq;
-using ICSharpCode.NRefactory;
+using Mono.TextEditor.NRefactory;
 
 namespace Mono.TextEditor
 {
 	/// <summary>
 	/// A line inside a <see cref="T:Mono.TextEditor.TextDocument"/>.
 	/// </summary>
-	public abstract class DocumentLine : ICSharpCode.NRefactory.Editor.IDocumentLine
+	public abstract class DocumentLine : IDocumentLine
 	{
 		List<TextLineMarker> markers;
 
@@ -345,25 +345,25 @@ namespace Mono.TextEditor
 		}
 
 		#region IDocumentLine implementation
-		int ICSharpCode.NRefactory.Editor.IDocumentLine.TotalLength {
+		int IDocumentLine.TotalLength {
 			get {
 				return LengthIncludingDelimiter;
 			}
 		}
 
-		ICSharpCode.NRefactory.Editor.IDocumentLine ICSharpCode.NRefactory.Editor.IDocumentLine.PreviousLine {
+		IDocumentLine IDocumentLine.PreviousLine {
 			get {
 				return this.PreviousLine;
 			}
 		}
 
-		ICSharpCode.NRefactory.Editor.IDocumentLine ICSharpCode.NRefactory.Editor.IDocumentLine.NextLine {
+		IDocumentLine IDocumentLine.NextLine {
 			get {
 				return this.NextLine;
 			}
 		}
 
-		bool ICSharpCode.NRefactory.Editor.IDocumentLine.IsDeleted {
+		bool IDocumentLine.IsDeleted {
 			get {
 				return false;
 			}

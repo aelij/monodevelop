@@ -24,110 +24,122 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
 using System.Collections.Generic;
+using Gdk;
+using Gtk;
 using MonoDevelop.Components;
+using Window = Gtk.Window;
+using WindowType = Gtk.WindowType;
 
 namespace MonoDevelop.Ide.Gui
 {
-	class WorkbenchWindow: Gtk.Window
-	{
-		List<TopLevelChild> topLevels = new List<TopLevelChild> ();
-		
-		public WorkbenchWindow (): base (Gtk.WindowType.Toplevel)
-		{
-			GtkWorkarounds.FixContainerLeak (this);
-			this.Role = "workbench";
-		}
+    internal class WorkbenchWindow : Window
+    {
+        private readonly List<TopLevelChild> topLevels = new List<TopLevelChild>();
 
-		class TopLevelChild
-		{
-			public int X;
-			public int Y;
-			public Gtk.Widget Child;
-		}
-		
-		public void AddTopLevelWidget (Gtk.Widget w, int x, int y)
-		{
-			w.Parent = this;
-			TopLevelChild info = new TopLevelChild ();
-			info.X = x;
-			info.Y = y;
-			info.Child = w;
-			topLevels.Add (info);
-		}
-		
-		public void RemoveTopLevelWidget (Gtk.Widget w)
-		{
-			foreach (TopLevelChild info in topLevels) {
-				if (info.Child == w) {
-					w.Unparent ();
-					topLevels.Remove (info);
-					break;
-				}
-			}
-		}
-		
-		public void MoveTopLevelWidget (Gtk.Widget w, int x, int y)
-		{
-			foreach (TopLevelChild info in topLevels) {
-				if (info.Child == w) {
-					info.X = x;
-					info.Y = y;
-					QueueResize ();
-					break;
-				}
-			}
-		}
-		
-		public Gdk.Rectangle GetTopLevelPosition (Gtk.Widget w)
-		{
-			foreach (TopLevelChild info in topLevels) {
-				if (info.Child == w) {
-					Gtk.Requisition req = w.SizeRequest ();
-					return new Gdk.Rectangle (info.X, info.Y, req.Width, req.Height);
-				}
-			}
-			return new Gdk.Rectangle (0,0,0,0);
-		}
-		
-		public Gdk.Rectangle GetCoordinates (Gtk.Widget w)
-		{
-			int px, py;
-			if (!w.TranslateCoordinates (this, 0, 0, out px, out py))
-				return new Gdk.Rectangle (0,0,0,0);
+        public WorkbenchWindow() : base(WindowType.Toplevel)
+        {
+            GtkWorkarounds.FixContainerLeak(this);
+            Role = "workbench";
+        }
 
-			Gdk.Rectangle rect = w.Allocation;
-			rect.X = px - Allocation.X;
-			rect.Y = py - Allocation.Y;
-			return rect;
-		}
-		
-		protected override void OnSizeRequested (ref Gtk.Requisition requisition)
-		{
-			base.OnSizeRequested (ref requisition);
-			
-			// Ignore the size of top levels. They are supposed to fit the available space
-			foreach (TopLevelChild tchild in topLevels)
-				tchild.Child.SizeRequest ();
-		}
+        private class TopLevelChild
+        {
+            public int X;
+            public int Y;
+            public Widget Child;
+        }
 
-		protected override void OnSizeAllocated (Gdk.Rectangle allocation)
-		{
-			base.OnSizeAllocated (allocation);
-			
-			foreach (TopLevelChild child in topLevels) {
-				Gtk.Requisition req = child.Child.SizeRequest ();
-				child.Child.SizeAllocate (new Gdk.Rectangle (allocation.X + child.X, allocation.Y + child.Y, req.Width, req.Height));
-			}
-		}
-		
-		protected override void ForAll (bool include_internals, Gtk.Callback callback)
-		{
-			if (Child != null)
-				callback (Child);
-			foreach (TopLevelChild child in topLevels)
-				callback (child.Child);
-		}
-	}
+        public void AddTopLevelWidget(Widget w, int x, int y)
+        {
+            w.Parent = this;
+            TopLevelChild info = new TopLevelChild
+            {
+                X = x,
+                Y = y,
+                Child = w
+            };
+            topLevels.Add(info);
+        }
+
+        public void RemoveTopLevelWidget(Widget w)
+        {
+            foreach (TopLevelChild info in topLevels)
+            {
+                if (info.Child == w)
+                {
+                    w.Unparent();
+                    topLevels.Remove(info);
+                    break;
+                }
+            }
+        }
+
+        public void MoveTopLevelWidget(Widget w, int x, int y)
+        {
+            foreach (TopLevelChild info in topLevels)
+            {
+                if (info.Child == w)
+                {
+                    info.X = x;
+                    info.Y = y;
+                    QueueResize();
+                    break;
+                }
+            }
+        }
+
+        public Rectangle GetTopLevelPosition(Widget w)
+        {
+            foreach (TopLevelChild info in topLevels)
+            {
+                if (info.Child == w)
+                {
+                    Requisition req = w.SizeRequest();
+                    return new Rectangle(info.X, info.Y, req.Width, req.Height);
+                }
+            }
+            return new Rectangle(0, 0, 0, 0);
+        }
+
+        public Rectangle GetCoordinates(Widget w)
+        {
+            int px, py;
+            if (!w.TranslateCoordinates(this, 0, 0, out px, out py))
+                return new Rectangle(0, 0, 0, 0);
+
+            Rectangle rect = w.Allocation;
+            rect.X = px - Allocation.X;
+            rect.Y = py - Allocation.Y;
+            return rect;
+        }
+
+        protected override void OnSizeRequested(ref Requisition requisition)
+        {
+            base.OnSizeRequested(ref requisition);
+
+            // Ignore the size of top levels. They are supposed to fit the available space
+            foreach (TopLevelChild tchild in topLevels)
+                tchild.Child.SizeRequest();
+        }
+
+        protected override void OnSizeAllocated(Rectangle allocation)
+        {
+            base.OnSizeAllocated(allocation);
+
+            foreach (TopLevelChild child in topLevels)
+            {
+                Requisition req = child.Child.SizeRequest();
+                child.Child.SizeAllocate(new Rectangle(allocation.X + child.X, allocation.Y + child.Y, req.Width, req.Height));
+            }
+        }
+
+        protected override void ForAll(bool includeInternals, Callback callback)
+        {
+            if (Child != null)
+                callback(Child);
+            foreach (TopLevelChild child in topLevels)
+                callback(child.Child);
+        }
+    }
 }

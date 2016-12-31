@@ -31,59 +31,68 @@ using MonoDevelop.Core;
 
 namespace MonoDevelop.CodeIssues
 {
-	class CodeDiagnosticFixDescriptor
-	{
-		readonly Type codeFixProviderType;
-		readonly ExportCodeFixProviderAttribute attribute;
-		CodeFixProvider instance;
+    class CodeDiagnosticFixDescriptor
+    {
+        readonly Type codeFixProviderType;
+        readonly ExportCodeFixProviderAttribute attribute;
+        CodeFixProvider instance;
 
-		public string Name {
-			get {
-				return attribute.Name;
-			}
-		}
+        public string Name
+        {
+            get
+            {
+                return attribute.Name;
+            }
+        }
 
-		public string[] Languages {
-			get {
-				return attribute.Languages;
-			}
-		}
+        public string[] Languages
+        {
+            get
+            {
+                return attribute.Languages;
+            }
+        }
 
-		internal CodeDiagnosticFixDescriptor (Type codeFixProviderType, ExportCodeFixProviderAttribute attribute)
-		{
-			if (codeFixProviderType == null)
-				throw new ArgumentNullException ("codeFixProviderType");
-			if (attribute == null)
-				throw new ArgumentNullException ("attribute");
-			this.codeFixProviderType = codeFixProviderType;
-			this.attribute = attribute;
-		}
-		
-		public CodeFixProvider GetCodeFixProvider ()
-		{
-			if (instance == null) {
-				try {
-					instance = (CodeFixProvider)Activator.CreateInstance (codeFixProviderType);
-				} catch (InvalidCastException) {
-					LoggingService.LogError (codeFixProviderType + " can't be cast to CodeFixProvider.");
-					throw;
-				}
-			}
+        internal CodeDiagnosticFixDescriptor(Type codeFixProviderType, ExportCodeFixProviderAttribute attribute)
+        {
+            if (codeFixProviderType == null)
+                throw new ArgumentNullException("codeFixProviderType");
+            if (attribute == null)
+                throw new ArgumentNullException("attribute");
+            this.codeFixProviderType = codeFixProviderType;
+            this.attribute = attribute;
+        }
 
-			return instance;
-		}
+        public CodeFixProvider GetCodeFixProvider()
+        {
+            if (instance == null)
+            {
+                try
+                {
+                    instance = (CodeFixProvider)Activator.CreateInstance(codeFixProviderType);
+                }
+                catch (InvalidCastException)
+                {
+                    LoggingService.LogError(codeFixProviderType + " can't be cast to CodeFixProvider.");
+                    throw;
+                }
+            }
 
-		public CodeDiagnosticDescriptor GetCodeDiagnosticDescriptor (string language)
-		{
-			var fixableIds = GetCodeFixProvider ().FixableDiagnosticIds.ToList ();
+            return instance;
+        }
 
-			foreach (var descriptor in BuiltInCodeDiagnosticProvider.GetBuiltInCodeDiagnosticDecsriptorsAsync (language).Result) {
-				if (descriptor.GetProvider ().SupportedDiagnostics.Any (diagnostic => fixableIds.Contains (diagnostic.Id)))
-					return descriptor;
+        public CodeDiagnosticDescriptor GetCodeDiagnosticDescriptor(string language)
+        {
+            var fixableIds = GetCodeFixProvider().FixableDiagnosticIds.ToList();
 
-			}
-			return null;
+            foreach (var descriptor in BuiltInCodeDiagnosticProvider.GetBuiltInCodeDiagnosticDecsriptorsAsync(language).Result)
+            {
+                if (descriptor.GetProvider().SupportedDiagnostics.Any(diagnostic => fixableIds.Contains(diagnostic.Id)))
+                    return descriptor;
 
-		}
-	}
+            }
+            return null;
+
+        }
+    }
 }

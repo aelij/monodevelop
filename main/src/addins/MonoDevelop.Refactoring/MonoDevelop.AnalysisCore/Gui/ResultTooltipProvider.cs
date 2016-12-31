@@ -28,10 +28,8 @@
 using System;
 using System.Text;
 using System.Collections.Generic;
-using MonoDevelop.Ide.TypeSystem;
 using MonoDevelop.Ide.Editor;
 using MonoDevelop.SourceEditor;
-using System.Linq;
 using MonoDevelop.Components;
 using System.Threading.Tasks;
 using System.Threading;

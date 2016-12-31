@@ -24,7 +24,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
 using MonoDevelop.Core;
 using MonoDevelop.Ide;
 
@@ -32,14 +31,10 @@ namespace MonoDevelop.AnalysisCore
 {
 	public static class AnalysisOptions
 	{
-		public readonly static ConfigurationProperty<bool> EnableFancyFeatures = IdeApp.Preferences.EnableSourceAnalysis;
+		public static readonly ConfigurationProperty<bool> EnableFancyFeatures = IdeApp.Preferences.EnableSourceAnalysis;
 
-		public static ConfigurationProperty<bool> AnalysisEnabled {
-			get { return EnableFancyFeatures; }
-		}
+		public static ConfigurationProperty<bool> AnalysisEnabled => EnableFancyFeatures;
 
-		public readonly static ConfigurationProperty<bool> EnableUnitTestEditorIntegration = IdeApp.Preferences.EnableUnitTestEditorIntegration;
-
+	    public static readonly ConfigurationProperty<bool> EnableUnitTestEditorIntegration = IdeApp.Preferences.EnableUnitTestEditorIntegration;
 	}
 }
-

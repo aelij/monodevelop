@@ -26,76 +26,68 @@
 //
 
 using System;
-using System.ComponentModel;
 using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace MonoDevelop.Ide.Gui
 {
-	public interface IWorkbenchWindow
-	{
-		ViewContent ViewContent { get; }
-		BaseViewContent ActiveViewContent { get; set; }
+    public interface IWorkbenchWindow
+    {
+        ViewContent ViewContent { get; }
+        BaseViewContent ActiveViewContent { get; set; }
 
-		IEnumerable<BaseViewContent> SubViewContents { get; }
+        IEnumerable<BaseViewContent> SubViewContents { get; }
 
-		Document Document { get; set; }
-		string DocumentType { get; set; }
-		string Title { get; set; }
-		bool ShowNotification { get; set; }
+        Document Document { get; set; }
+        string DocumentType { get; set; }
+        string Title { get; set; }
+        bool ShowNotification { get; set; }
 
-		void AttachViewContent (BaseViewContent subViewContent);
-		void InsertViewContent (int index, BaseViewContent subViewContent);
+        void AttachViewContent(BaseViewContent subViewContent);
+        void InsertViewContent(int index, BaseViewContent subViewContent);
 
-		void SwitchView (int index);
-		void SwitchView (BaseViewContent subViewContent);
-		int FindView <T>();
-		
-		bool CloseWindow (bool force);
-		void SelectWindow ();
+        void SwitchView(int index);
+        void SwitchView(BaseViewContent subViewContent);
+        int FindView<T>();
 
-		/// <summary>
-		/// Returns a toolbar for the pad.
-		/// </summary>
-		DocumentToolbar GetToolbar (BaseViewContent targetView);
+        bool CloseWindow(bool force);
+        void SelectWindow();
 
-		event EventHandler DocumentChanged;
-		event WorkbenchWindowEventHandler Closed;
-		event WorkbenchWindowEventHandler Closing;
-		event ActiveViewContentEventHandler ActiveViewContentChanged;
-		event EventHandler ViewsChanged;
-	}
+        /// <summary>
+        /// Returns a toolbar for the pad.
+        /// </summary>
+        DocumentToolbar GetToolbar(BaseViewContent targetView);
 
-	public delegate void WorkbenchWindowEventHandler (object o, WorkbenchWindowEventArgs e);
-	public class WorkbenchWindowEventArgs : CancelEventArgs
-	{
-		private bool forced;
-		public bool Forced {
-			get { return forced; }
-		}
+        event EventHandler DocumentChanged;
+        event WorkbenchWindowEventHandler Closed;
+        event WorkbenchWindowEventHandler Closing;
+        event ActiveViewContentEventHandler ActiveViewContentChanged;
+        event EventHandler ViewsChanged;
+    }
 
-		private bool wasActive;
-		public bool WasActive {
-			get { return wasActive; }
-		}
+    public delegate void WorkbenchWindowEventHandler(object o, WorkbenchWindowEventArgs e);
 
-		public WorkbenchWindowEventArgs (bool forced, bool wasActive)
-		{
-			this.forced = forced;
-			this.wasActive = wasActive;
-		}
-	}
+    public class WorkbenchWindowEventArgs : CancelEventArgs
+    {
+        public bool Forced { get; }
 
-	public delegate void ActiveViewContentEventHandler (object o, ActiveViewContentEventArgs e);
-	public class ActiveViewContentEventArgs : EventArgs
-	{
-		private BaseViewContent content = null;
-		public BaseViewContent Content {
-			get { return content; }
-		}
+        public bool WasActive { get; }
 
-		public ActiveViewContentEventArgs (BaseViewContent content)
-		{
-			this.content = content;
-		}
-	}
+        public WorkbenchWindowEventArgs(bool forced, bool wasActive)
+        {
+            Forced = forced;
+            WasActive = wasActive;
+        }
+    }
+
+    public delegate void ActiveViewContentEventHandler(object o, ActiveViewContentEventArgs e);
+    public class ActiveViewContentEventArgs : EventArgs
+    {
+        public BaseViewContent Content { get; }
+
+        public ActiveViewContentEventArgs(BaseViewContent content)
+        {
+            Content = content;
+        }
+    }
 }

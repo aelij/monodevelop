@@ -30,7 +30,7 @@ namespace MonoDevelop.SourceEditor.Wrappers
 {
 	class TextChangeEventArgsWrapper : TextChangeEventArgs
 	{
-		public TextChangeEventArgsWrapper (ICSharpCode.NRefactory.Editor.TextChangeEventArgs change) : base (change.Offset, change.RemovedText.Text, change.InsertedText.Text)
+		public TextChangeEventArgsWrapper (Mono.TextEditor.NRefactory.TextChangeEventArgs change) : base (change.Offset, change.RemovedText.Text, change.InsertedText.Text)
 		{
 		}
 	}

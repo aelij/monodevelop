@@ -33,161 +33,156 @@ using MonoDevelop.Core;
 
 namespace MonoDevelop.Components.Commands
 {
-	public class KeyBindingService
-	{
-		const string configFileName = "KeyBindings.xml";
-		const string configFileNameMac = "KeyBindingsMac.xml";
-		
-		static KeyBindingSet current;
-		static SortedDictionary<string, KeyBindingScheme> schemes;
-		static KeyBindingSet defaultSchemeBindings;
-		static DefaultScheme defaultScheme;
+    public class KeyBindingService
+    {
+        private static KeyBindingSet current;
+        private static readonly SortedDictionary<string, KeyBindingScheme> SchemesMap;
+        private static readonly KeyBindingSet DefaultSchemeBindings;
 
-		static KeyBindingService ()
-		{
-			schemes = new SortedDictionary<string,KeyBindingScheme> ();
+        static KeyBindingService()
+        {
+            SchemesMap = new SortedDictionary<string, KeyBindingScheme>();
 
-			// Initialize the default scheme
-			defaultSchemeBindings = new KeyBindingSet ();
-			defaultScheme = new DefaultScheme (defaultSchemeBindings);
-			schemes.Add (defaultScheme.Id, defaultScheme);
+            // Initialize the default scheme
+            DefaultSchemeBindings = new KeyBindingSet();
+            var defaultScheme = new DefaultScheme(DefaultSchemeBindings);
+            SchemesMap.Add(defaultScheme.Id, defaultScheme);
 
-			// Initialize the current bindings
-			current = new KeyBindingSet (defaultSchemeBindings);
-		}
-		
-		static string ConfigFileName {
-			get {
-				string file = Platform.IsMac? "Custom.mac-kb.xml" : "Custom.kb.xml";
-				return UserProfile.Current.UserDataRoot.Combine ("KeyBindings", file);
-			}
-		}
+            // Initialize the current bindings
+            current = new KeyBindingSet(DefaultSchemeBindings);
+        }
 
-		internal static KeyBindingSet DefaultKeyBindingSet {
-			get { return defaultSchemeBindings; }
-		}
+        private static string ConfigFileName
+        {
+            get
+            {
+                string file = Platform.IsMac ? "Custom.mac-kb.xml" : "Custom.kb.xml";
+                return UserProfile.Current.UserDataRoot.Combine("KeyBindings", file);
+            }
+        }
 
-		public static KeyBindingSet CurrentKeyBindingSet {
-			get { return current; }
-		}
+        internal static KeyBindingSet DefaultKeyBindingSet => DefaultSchemeBindings;
 
-		public static KeyBindingScheme GetScheme (string id)
-		{
-			KeyBindingScheme scheme;
-			if (schemes.TryGetValue (id, out scheme))
-				return scheme;
-			else
-				return null;
-		}
+        public static KeyBindingSet CurrentKeyBindingSet => current;
 
-		public static KeyBindingScheme GetSchemeByName (string name)
-		{
-			foreach (KeyBindingScheme scheme in schemes.Values)
-				if (scheme.Name == name)
-					return scheme;
-			return null;
-		}
-		
-		public static IEnumerable<KeyBindingScheme> Schemes {
-			get {
-				foreach (KeyBindingScheme s in schemes.Values)
-					yield return s;
-			}
-		}
-		
-		public static void LoadBindingsFromExtensionPath (string path)
-		{
+        public static KeyBindingScheme GetScheme(string id)
+        {
+            KeyBindingScheme scheme;
+            if (SchemesMap.TryGetValue(id, out scheme))
+                return scheme;
+            else
+                return null;
+        }
+
+        public static KeyBindingScheme GetSchemeByName(string name)
+        {
+            foreach (KeyBindingScheme scheme in SchemesMap.Values)
+                if (scheme.Name == name)
+                    return scheme;
+            return null;
+        }
+
+        public static IEnumerable<KeyBindingScheme> Schemes => SchemesMap.Values;
+
+        public static void LoadBindingsFromExtensionPath(string path)
+        {
             // TODO-AELIJ
-		}
-		
-		public static void LoadBinding (Command cmd)
-		{
-			current.LoadBinding (cmd);
-		}
-		
-		public static void StoreDefaultBinding (Command cmd)
-		{
-			defaultSchemeBindings.StoreBinding (cmd);
-		}
+        }
 
-		public static void ResetCurrent (KeyBindingSet kbset)
-		{
-			current = kbset.Clone ();
-		}
-		
-		public static void ResetCurrent ()
-		{
-			ResetCurrent ((string)null);
-		}
-		
-		public static void ResetCurrent (string schemeId)
-		{
-			if (schemeId != null) {
-				KeyBindingScheme scheme = GetScheme (schemeId);
-				if (scheme != null) {
-					current = scheme.GetKeyBindingSet ().Clone ();
-					return;
-				}
-			}
+        public static void LoadBinding(Command cmd)
+        {
+            current.LoadBinding(cmd);
+        }
 
-			current.ClearBindings ();
-		}
-		
-		public static void StoreBinding (Command cmd)
-		{
-			current.StoreBinding (cmd);
-		}
-		
-		internal static string GetCommandKey (Command cmd)
-		{
-			if (cmd.Id is Enum)
-				return cmd.Id.GetType () + "." + cmd.Id;
-			else
-				return cmd.Id.ToString ();
-		}
-		
-		public static void LoadCurrentBindings (string defaultSchemaId)
-		{
-			XmlTextReader reader = null;
-			
-			try {
-				reader = new XmlTextReader (ConfigFileName);
-				current.LoadScheme (reader, "current");
-			} catch {
-				ResetCurrent (defaultSchemaId);
-			} finally {
-				if (reader != null)
-					reader.Close ();
-			}
-		}
-				
-		public static void SaveCurrentBindings ()
-		{
-			string dir = Path.GetDirectoryName (ConfigFileName);
-			if (!Directory.Exists (dir))
-				Directory.CreateDirectory (dir);
-			current.Save (ConfigFileName, "current");
-		}
-	}
+        public static void StoreDefaultBinding(Command cmd)
+        {
+            DefaultSchemeBindings.StoreBinding(cmd);
+        }
 
-	class DefaultScheme: KeyBindingScheme
-	{
-		KeyBindingSet bindings;
+        public static void ResetCurrent(KeyBindingSet kbset)
+        {
+            current = kbset.Clone();
+        }
 
-		public DefaultScheme (KeyBindingSet bindings)
-		{
-			this.bindings = bindings;
-		}
-		
-		public string Id {
-			get { return "Default"; }
-		}
-		
-		public string Name => BrandingService.ApplicationName;
+        public static void ResetCurrent()
+        {
+            ResetCurrent((string)null);
+        }
 
-	    public KeyBindingSet GetKeyBindingSet ()
-		{
-			return bindings;
-		}
-	}
+        public static void ResetCurrent(string schemeId)
+        {
+            if (schemeId != null)
+            {
+                KeyBindingScheme scheme = GetScheme(schemeId);
+                if (scheme != null)
+                {
+                    current = scheme.GetKeyBindingSet().Clone();
+                    return;
+                }
+            }
+
+            current.ClearBindings();
+        }
+
+        public static void StoreBinding(Command cmd)
+        {
+            current.StoreBinding(cmd);
+        }
+
+        internal static string GetCommandKey(Command cmd)
+        {
+            if (cmd.Id is Enum)
+                return cmd.Id.GetType() + "." + cmd.Id;
+            return cmd.Id.ToString();
+        }
+
+        public static void LoadCurrentBindings(string defaultSchemaId)
+        {
+            XmlTextReader reader = null;
+
+            try
+            {
+                reader = new XmlTextReader(ConfigFileName);
+                current.LoadScheme(reader, "current");
+            }
+            catch
+            {
+                ResetCurrent(defaultSchemaId);
+            }
+            finally
+            {
+                reader?.Close();
+            }
+        }
+
+        public static void SaveCurrentBindings()
+        {
+            string dir = Path.GetDirectoryName(ConfigFileName);
+            if (!Directory.Exists(dir))
+            {
+                // ReSharper disable once AssignNullToNotNullAttribute
+                Directory.CreateDirectory(dir);
+            }
+            current.Save(ConfigFileName, "current");
+        }
+    }
+
+    internal class DefaultScheme : KeyBindingScheme
+    {
+        private readonly KeyBindingSet bindings;
+
+        public DefaultScheme(KeyBindingSet bindings)
+        {
+            this.bindings = bindings;
+        }
+
+        public string Id => "Default";
+
+        public string Name => BrandingService.ApplicationName;
+
+        public KeyBindingSet GetKeyBindingSet()
+        {
+            return bindings;
+        }
+    }
 }

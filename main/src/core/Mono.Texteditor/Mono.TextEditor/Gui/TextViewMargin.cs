@@ -36,8 +36,8 @@ using Mono.TextEditor.Highlighting;
 using Gdk; 
 using Gtk;
 using System.Timers;
-using ICSharpCode.NRefactory;
 using System.Diagnostics;
+using Mono.TextEditor.NRefactory;
 
 namespace Mono.TextEditor
 {

@@ -24,29 +24,28 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
 using MonoDevelop.Components.Extensions;
 
 
 namespace MonoDevelop.Components
 {
-	/// <summary>
-	/// Dialog which can be used to select a file for opening or saving
-	/// </summary>
-	public class SelectFileDialog: SelectFileDialog<SelectFileDialogData>
-	{
-		public SelectFileDialog ()
-		{
-		}
-		
-		public SelectFileDialog (string title): this (title, FileChooserAction.Open)
-		{
-		}
-		
-		public SelectFileDialog (string title, FileChooserAction action)
-		{
-			Title = title;
-			Action = action;
-		}
-	}
+    /// <summary>
+    /// Dialog which can be used to select a file for opening or saving
+    /// </summary>
+    public class SelectFileDialog : SelectFileDialog<SelectFileDialogData>
+    {
+        public SelectFileDialog()
+        {
+        }
+
+        public SelectFileDialog(string title) : this(title, FileChooserAction.Open)
+        {
+        }
+
+        public SelectFileDialog(string title, FileChooserAction action)
+        {
+            Title = title;
+            Action = action;
+        }
+    }
 }

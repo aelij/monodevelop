@@ -27,247 +27,258 @@
 //
 
 using System;
-using System.Xml;
-using System.Diagnostics;
 using System.Collections.Generic;
 using System.IO;
-
-using MonoDevelop.Core;
 using System.Linq;
-using MonoDevelop.Ide.Editor;
+using MonoDevelop.Core;
 using MonoDevelop.Projects;
 
 namespace MonoDevelop.Ide.Desktop
 {
-	public class FdoRecentFiles : RecentFiles, IDisposable
-	{
-		RecentFileStorage recentFiles;
-		
-		const string projGroup = "MonoDevelop Projects";
-		const string fileGroup = "MonoDevelop Files";
-		
-		const int ItemLimit = 25;
-		
-		public FdoRecentFiles () : this (RecentFileStorage.DefaultPath)
-		{
-		}
-		
-		public FdoRecentFiles (string storageFile)
-		{
-			recentFiles = new RecentFileStorage (storageFile);
-			recentFiles.RemoveMissingFiles (fileGroup);
-		}
-		
-		public override event EventHandler Changed {
-			add { recentFiles.RecentFilesChanged += value; }
-			remove { recentFiles.RecentFilesChanged -= value; }
-		}
-		
-		protected override IList<RecentFile> OnGetProjects ()
-		{
-			try {
-				return Get (projGroup);
-			} catch (Exception e) {
-				LoggingService.LogError ("Can't get recent projects list.", e);
-				return new List <RecentFile> ();
-			}
-		}
-		
-		protected override IList<RecentFile> OnGetFiles ()
-		{
-			try {
-				return Get (fileGroup);
-			} catch (Exception e) {
-				LoggingService.LogError ("Can't get recent files list.", e);
-				return new List <RecentFile> ();
-			}
-		}
-		
-		IList<RecentFile> Get (string grp)
-		{
-			var gp = recentFiles.GetItemsInGroup (grp);
-			return gp.Select (i => new RecentFile (i.LocalPath, i.Private, i.Timestamp)).ToList ();
-		}
-		
-		public override void ClearProjects ()
-		{
-			try {
-				recentFiles.ClearGroup (projGroup);
-			} catch (Exception e) {
-				LoggingService.LogError ("Can't clear recent projects list.", e);
-			}
-		}
-		
-		public override void ClearFiles ()
-		{
-			try {
-				recentFiles.ClearGroup (fileGroup);
-			} catch (Exception e) {
-				LoggingService.LogError ("Can't get recent files list.", e);
-			}
-		}
-		
-		public override void AddFile (string fileName, string displayName)
-		{
-			Add (fileGroup, fileName, displayName);
-		}
-		
-		public override void AddProject (string fileName, string displayName)
-		{
-			Add (projGroup, fileName, displayName);
-		}
-		
-		void Add (string grp, string fileName, string displayName)
-		{
-			var mime = DesktopService.GetMimeTypeForUri (fileName);
-			try {
-				var uri = RecentFileStorage.ToUri (fileName);
-				var recentItem = new RecentItem (uri, mime, grp) { Private = displayName };
-				recentFiles.AddWithLimit (recentItem, grp, ItemLimit);
-			} catch (Exception e) {
-				LoggingService.LogError ("Failed to add item to recent files list.", e);
-			}
-		}
-		
-		public override void NotifyFileRemoved (string fileName)
-		{
-			try {
-				recentFiles.RemoveItem (RecentFileStorage.ToUri (fileName));
-			} catch (Exception e) {
-				LoggingService.LogError ("Can't remove from recent files list.", e);
-			}
-		}
-		
-		public override void NotifyFileRenamed (string oldName, string newName)
-		{
-			try {
-				recentFiles.RenameItem (RecentFileStorage.ToUri (oldName), RecentFileStorage.ToUri (newName));
-			} catch (Exception e) {
-				LoggingService.LogError ("Can't rename file in recent files list.", e);
-			}
-		}
-		
-		public void Dispose ()
-		{
-			recentFiles.Dispose ();
-			recentFiles = null;
-		}
-	}
-		
-	public abstract class RecentFiles
-	{
-		List<string> favoriteFiles;
-		const string FavoritesConfigKey = "FavoriteRecentFiles";
+    public class FdoRecentFiles : RecentFiles, IDisposable
+    {
+        private RecentFileStorage recentFiles;
 
-		public RecentFiles ()
-		{
-			favoriteFiles = PropertyService.Get (FavoritesConfigKey, new List<string> ());
-		}
+        private const string ProjGroup = "MonoDevelop Projects";
+        private const string FileGroup = "MonoDevelop Files";
 
-		public IList<RecentFile> GetProjects ()
-		{
-			var projects = OnGetProjects ();
-			List<RecentFile> result = new List<RecentFile> ();
-			List<string> toRemove = null;
-			foreach (var f in favoriteFiles) {
-				if (!File.Exists (f)) {
-					if (toRemove == null)
-						toRemove = new List<string> ();
-					toRemove.Add (f);
-					continue;
-				}
-				var entry = projects.FirstOrDefault (p => f == p.FileName);
-				if (entry != null)
-					result.Add (entry);
-				else
-					result.Add (new RecentFile (f, Path.GetFileNameWithoutExtension (f), DateTime.Now));
-			}
-			if (toRemove != null) {
-				foreach (var f in toRemove)
-					favoriteFiles.Remove (f);
-			}
-			foreach (var e in projects)
-				if (!result.Contains (e))
-					result.Add (e);
-			return result;
-		}
+        private const int ItemLimit = 25;
 
-		public IList<RecentFile> GetFiles ()
-		{
-			return OnGetFiles ();
-		}
+        public FdoRecentFiles() : this(RecentFileStorage.DefaultPath)
+        {
+        }
 
-		public abstract event EventHandler Changed;
-		public abstract void ClearProjects ();
-		public abstract void ClearFiles ();
-		public abstract void AddFile (string fileName, string displayName);
-		public abstract void AddProject (string fileName, string displayName);
-		public abstract void NotifyFileRemoved (string filename);
-		public abstract void NotifyFileRenamed (string oldName, string newName);
-		
-		protected abstract IList<RecentFile> OnGetProjects ();
-		protected abstract IList<RecentFile> OnGetFiles ();
+        public FdoRecentFiles(string storageFile)
+        {
+            recentFiles = new RecentFileStorage(storageFile);
+            recentFiles.RemoveMissingFiles(FileGroup);
+        }
 
-		public void AddFile (string fileName, Project project)
-		{
-			var projectName = project != null? project.Name : null;
-			var displayName = projectName != null?
-				string.Format ("{0} [{1}]", Path.GetFileName (fileName), projectName) 
-				: Path.GetFileName (fileName);
-			AddFile (fileName, displayName);
-		}
+        public override event EventHandler Changed
+        {
+            add { recentFiles.RecentFilesChanged += value; }
+            remove { recentFiles.RecentFilesChanged -= value; }
+        }
 
-		internal void SetFavoriteFile (FilePath file, bool favorite)
-		{
-			if (favorite)
-				favoriteFiles.Add (file);
-			else
-				favoriteFiles.Remove (file);
+        protected override IList<RecentFile> OnGetProjects()
+        {
+            try
+            {
+                return Get(ProjGroup);
+            }
+            catch (Exception e)
+            {
+                LoggingService.LogError("Can't get recent projects list.", e);
+                return new List<RecentFile>();
+            }
+        }
 
-			PropertyService.Set (FavoritesConfigKey, favoriteFiles);
-			PropertyService.SaveProperties ();
-		}
+        protected override IList<RecentFile> OnGetFiles()
+        {
+            try
+            {
+                return Get(FileGroup);
+            }
+            catch (Exception e)
+            {
+                LoggingService.LogError("Can't get recent files list.", e);
+                return new List<RecentFile>();
+            }
+        }
 
-		internal bool IsFavoriteFile (FilePath file)
-		{
-			return favoriteFiles.Contains (file);
-		}
-	}
-	
-	public class RecentFile
-	{
-		string displayName, fileName;
-		DateTime timestamp;
+        private IList<RecentFile> Get(string grp)
+        {
+            var gp = recentFiles.GetItemsInGroup(grp);
+            return gp.Select(i => new RecentFile(i.LocalPath, i.Private, i.Timestamp)).ToList();
+        }
 
-		public RecentFile (string fileName, string displayName, DateTime timestamp)
-		{
-			this.fileName = fileName;
-			this.displayName = displayName;
-			this.timestamp = timestamp;
-		}
+        public override void ClearProjects()
+        {
+            try
+            {
+                recentFiles.ClearGroup(ProjGroup);
+            }
+            catch (Exception e)
+            {
+                LoggingService.LogError("Can't clear recent projects list.", e);
+            }
+        }
 
-		public bool IsFavorite {
-			get {
-				return DesktopService.RecentFiles.IsFavoriteFile (fileName);
-			}
-			set {
-				DesktopService.RecentFiles.SetFavoriteFile (fileName, value);
-			}
-		}
+        public override void ClearFiles()
+        {
+            try
+            {
+                recentFiles.ClearGroup(FileGroup);
+            }
+            catch (Exception e)
+            {
+                LoggingService.LogError("Can't get recent files list.", e);
+            }
+        }
 
-		public string FileName { get { return fileName; } }
-		public string DisplayName {
-			get {
-				return string.IsNullOrEmpty (displayName)? Path.GetFileName (fileName) : displayName;
-			}
-		}
-		
-		public DateTime TimeStamp { get { return timestamp; } }
-		
-		public override string ToString ()
-		{
-			return FileName;
-		}
-	}
+        public override void AddFile(string fileName, string displayName)
+        {
+            Add(FileGroup, fileName, displayName);
+        }
+
+        public override void AddProject(string fileName, string displayName)
+        {
+            Add(ProjGroup, fileName, displayName);
+        }
+
+        private void Add(string grp, string fileName, string displayName)
+        {
+            var mime = DesktopService.GetMimeTypeForUri(fileName);
+            try
+            {
+                var uri = RecentFileStorage.ToUri(fileName);
+                var recentItem = new RecentItem(uri, mime, grp) { Private = displayName };
+                recentFiles.AddWithLimit(recentItem, grp, ItemLimit);
+            }
+            catch (Exception e)
+            {
+                LoggingService.LogError("Failed to add item to recent files list.", e);
+            }
+        }
+
+        public override void NotifyFileRemoved(string fileName)
+        {
+            try
+            {
+                recentFiles.RemoveItem(RecentFileStorage.ToUri(fileName));
+            }
+            catch (Exception e)
+            {
+                LoggingService.LogError("Can't remove from recent files list.", e);
+            }
+        }
+
+        public override void NotifyFileRenamed(string oldName, string newName)
+        {
+            try
+            {
+                recentFiles.RenameItem(RecentFileStorage.ToUri(oldName), RecentFileStorage.ToUri(newName));
+            }
+            catch (Exception e)
+            {
+                LoggingService.LogError("Can't rename file in recent files list.", e);
+            }
+        }
+
+        public void Dispose()
+        {
+            recentFiles.Dispose();
+            recentFiles = null;
+        }
+    }
+
+    public abstract class RecentFiles
+    {
+        private readonly List<string> favoriteFiles;
+        private const string FavoritesConfigKey = "FavoriteRecentFiles";
+
+        protected RecentFiles()
+        {
+            favoriteFiles = PropertyService.Get(FavoritesConfigKey, new List<string>());
+        }
+
+        public IList<RecentFile> GetProjects()
+        {
+            var projects = OnGetProjects();
+            var result = new List<RecentFile>();
+            List<string> toRemove = null;
+            foreach (var f in favoriteFiles)
+            {
+                if (!File.Exists(f))
+                {
+                    if (toRemove == null)
+                        toRemove = new List<string>();
+                    toRemove.Add(f);
+                    continue;
+                }
+                var entry = projects.FirstOrDefault(p => f == p.FileName);
+                result.Add (entry ?? new RecentFile(f, Path.GetFileNameWithoutExtension(f), DateTime.Now));
+            }
+            if (toRemove != null)
+            {
+                foreach (var f in toRemove)
+                    favoriteFiles.Remove(f);
+            }
+            foreach (var e in projects)
+                if (!result.Contains(e))
+                    result.Add(e);
+            return result;
+        }
+
+        public IList<RecentFile> GetFiles()
+        {
+            return OnGetFiles();
+        }
+
+        public abstract event EventHandler Changed;
+        public abstract void ClearProjects();
+        public abstract void ClearFiles();
+        public abstract void AddFile(string fileName, string displayName);
+        public abstract void AddProject(string fileName, string displayName);
+        public abstract void NotifyFileRemoved(string filename);
+        public abstract void NotifyFileRenamed(string oldName, string newName);
+
+        protected abstract IList<RecentFile> OnGetProjects();
+        protected abstract IList<RecentFile> OnGetFiles();
+
+        public void AddFile(string fileName, Project project)
+        {
+            var projectName = project?.Name;
+            var displayName = projectName != null ?
+                $"{Path.GetFileName(fileName)} [{projectName}]"
+                : Path.GetFileName(fileName);
+            AddFile(fileName, displayName);
+        }
+
+        internal void SetFavoriteFile(FilePath file, bool favorite)
+        {
+            if (favorite)
+                favoriteFiles.Add(file);
+            else
+                favoriteFiles.Remove(file);
+
+            PropertyService.Set(FavoritesConfigKey, favoriteFiles);
+            PropertyService.SaveProperties();
+        }
+
+        internal bool IsFavoriteFile(FilePath file)
+        {
+            return favoriteFiles.Contains(file);
+        }
+    }
+
+    public class RecentFile
+    {
+        private readonly string displayName;
+
+        public RecentFile(string fileName, string displayName, DateTime timestamp)
+        {
+            FileName = fileName;
+            this.displayName = displayName;
+            TimeStamp = timestamp;
+        }
+
+        public bool IsFavorite
+        {
+            get { return DesktopService.RecentFiles.IsFavoriteFile (FileName); }
+            set { DesktopService.RecentFiles.SetFavoriteFile (FileName, value); }
+        }
+
+        public string FileName { get; }
+
+        public string DisplayName => string.IsNullOrEmpty(displayName) ? Path.GetFileName(FileName) : displayName;
+
+        public DateTime TimeStamp { get; }
+
+        public override string ToString()
+        {
+            return FileName;
+        }
+    }
 }
 

@@ -28,7 +28,8 @@ using System;
 using MonoDevelop.AnalysisCore;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.CodeAnalysis;
-using RefactoringEssentials;
+using MonoDevelop.CodeActions;
+using MonoDevelop.Ide.Editor;
 
 namespace MonoDevelop.CodeIssues
 {
@@ -45,7 +46,7 @@ namespace MonoDevelop.CodeIssues
 		public DiagnosticResult (Diagnostic diagnostic) : base (GetSpan (diagnostic), diagnostic.GetMessage ())
 		{
 			if (diagnostic == null)
-				throw new ArgumentNullException ("diagnostic");
+				throw new ArgumentNullException (nameof (diagnostic));
 			this.diagnostic = diagnostic;
 
 			SetSeverity (diagnostic.Severity, GetIssueMarker ()); 
@@ -73,5 +74,19 @@ namespace MonoDevelop.CodeIssues
 			return IssueMarker.WavedLine;
 		}
 	}
+
+    public class DiagnosticAnalyzerCategories
+    {
+        public const string CodeQualityIssues = "Potential Code Quality Issues";
+        public const string ConstraintViolations = "Constraint Violations";
+        public const string PracticesAndImprovements = "Common Practices and Code Improvements";
+        public const string RedundanciesInCode = "Redundancies in Code";
+        public const string RedundanciesInDeclarations = "Redundancies in Symbol Declarations";
+        public const string Opportunities = "Language Usage Opportunities";
+        public const string Notifications = "Code Notifications";
+        public const string CompilerWarnings = "Compiler Warnings";
+        public const string CompilerErrors = "Compiler Errors";
+        public const string NUnit = "NUnit";
+    }
 }
 

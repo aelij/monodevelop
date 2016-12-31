@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.Completion;
@@ -14,11 +15,9 @@ namespace TestMonoEditor
     {
         private readonly RoslynHost _host;
 
-        public RoslynCompletionTextEditorExtension(RoslynHost host, TextEditor textEditor, Document document, ICompletionWidget completionWidget)
+        public RoslynCompletionTextEditorExtension(RoslynHost host)
         {
             _host = host;
-            //CompletionWidget = completionWidget;
-            //Initialize(textEditor, document);
         }
 
         public override string CompletionLanguage => "C#";
@@ -137,7 +136,7 @@ namespace TestMonoEditor
                 .ConfigureAwait(false);
 
             var list = new CompletionDataList(
-                completions.Items.Select(x => new CompletionData(x.DisplayText)))
+                completions?.Items.Select(x => new CompletionData(x.DisplayText)) ?? Array.Empty<CompletionData> ())
             {
                 TriggerWordLength = triggerWordLength
             };
@@ -153,10 +152,5 @@ namespace TestMonoEditor
             return list;
 
         }
-    }
-
-    internal class DummyViewContent : ViewContent
-    {
-        public override Control Control { get; }
     }
 }

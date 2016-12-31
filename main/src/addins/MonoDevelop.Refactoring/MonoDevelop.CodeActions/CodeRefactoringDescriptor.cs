@@ -31,71 +31,70 @@ using System.Linq;
 
 namespace MonoDevelop.CodeActions
 {
-	/// <summary>
-	/// This class wraps a roslyn ICodeRefactoringProvider and adds required meta data to it.
-	/// </summary>
-	class CodeRefactoringDescriptor
-	{
-		readonly Type codeActionType;
-		readonly ExportCodeRefactoringProviderAttribute attr;
+    /// <summary>
+    /// This class wraps a roslyn ICodeRefactoringProvider and adds required meta data to it.
+    /// </summary>
+    internal class CodeRefactoringDescriptor
+    {
+        private readonly Type codeActionType;
+        private readonly ExportCodeRefactoringProviderAttribute attr;
 
-		CodeRefactoringProvider instance;
+        private CodeRefactoringProvider instance;
 
-		/// <summary>
-		/// Gets the identifier string.
-		/// </summary>
-		internal string IdString {
-			get {
-				return codeActionType.FullName;
-			}
-		}
+        /// <summary>
+        /// Gets the identifier string.
+        /// </summary>
+        internal string IdString => codeActionType.FullName;
 
-		/// <summary>
-		/// Gets the display name for this action.
-		/// </summary>
-		public string Name { get { return attr.Name; } }
+        /// <summary>
+        /// Gets the display name for this action.
+        /// </summary>
+        public string Name => attr.Name;
 
-		/// <summary>
-		/// Gets the language for this action.
-		/// </summary>
-		public string Language { get { return attr.Languages.FirstOrDefault (); } }
+        /// <summary>
+        /// Gets the language for this action.
+        /// </summary>
+        public string Language => attr.Languages.FirstOrDefault();
 
-		/// <summary>
-		/// Gets or sets a value indicating whether this code action is enabled by the user.
-		/// </summary>
-		/// <value><c>true</c> if this code action is enabled; otherwise, <c>false</c>.</value>
-		public bool IsEnabled {
-			get {
-				return PropertyService.Get ("CodeActions." + Language + "." + IdString, true);
-			}
-			set {
-				PropertyService.Set ("CodeActions." + Language + "." + IdString, value);
-			}
-		}
+        /// <summary>
+        /// Gets or sets a value indicating whether this code action is enabled by the user.
+        /// </summary>
+        /// <value><c>true</c> if this code action is enabled; otherwise, <c>false</c>.</value>
+        public bool IsEnabled
+        {
+            get
+            {
+                return PropertyService.Get("CodeActions." + Language + "." + IdString, true);
+            }
+            set
+            {
+                PropertyService.Set("CodeActions." + Language + "." + IdString, value);
+            }
+        }
 
-		internal CodeRefactoringDescriptor (Type codeActionType, ExportCodeRefactoringProviderAttribute attr)
-		{
-			if (codeActionType == null)
-				throw new ArgumentNullException ("codeActionType");
-			if (attr == null)
-				throw new ArgumentNullException ("attr");
-			this.codeActionType = codeActionType;
-			this.attr = attr;
-		}
+        internal CodeRefactoringDescriptor(Type codeActionType, ExportCodeRefactoringProviderAttribute attr)
+        {
+            if (codeActionType == null)
+                throw new ArgumentNullException(nameof(codeActionType));
+            if (attr == null)
+                throw new ArgumentNullException(nameof(attr));
+            this.codeActionType = codeActionType;
+            this.attr = attr;
+        }
 
-		/// <summary>
-		/// Gets the roslyn code action provider.
-		/// </summary>
-		public CodeRefactoringProvider GetProvider ()
-		{
-			if (instance == null)
-				instance = (CodeRefactoringProvider)Activator.CreateInstance (codeActionType);
-			return instance;
-		}
+        /// <summary>
+        /// Gets the roslyn code action provider.
+        /// </summary>
+        public CodeRefactoringProvider GetProvider()
+        {
+            if (instance == null)
+                instance = (CodeRefactoringProvider)Activator.CreateInstance(codeActionType);
+            return instance;
+        }
 
-		public override string ToString ()
-		{
-			return string.Format ("[CodeActionDescriptor: IdString={0}, Name={1}, Language={2}]", IdString, Name, Language);
-		}
-	}
+        public override string ToString()
+        {
+            return $"[CodeActionDescriptor: IdString={IdString}, Name={Name}, Language={Language}]";
+        }
+    }
 }

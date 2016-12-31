@@ -35,12 +35,12 @@ namespace MonoDevelop.Components.MainToolbar
 		readonly List<StatusBarContextImpl> contexts = new List<StatusBarContextImpl> ();
 		StatusBarContextImpl activeContext;
 
-		internal StatusBar StatusBar {
+		internal IStatusBar StatusBar {
 			get;
 			private set;
 		}
 
-		public StatusBarContextHandler (StatusBar statusBar)
+		public StatusBarContextHandler (IStatusBar statusBar)
 		{
 			StatusBar = statusBar;
 			mainContext = new MainStatusBarContextImpl (this);
@@ -48,7 +48,7 @@ namespace MonoDevelop.Components.MainToolbar
 			contexts.Add (mainContext);
 		}
 
-		internal StatusBar MainContext {
+		internal IStatusBar MainContext {
 			get { return mainContext; }
 		}
 

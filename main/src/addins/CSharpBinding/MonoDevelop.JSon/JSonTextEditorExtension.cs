@@ -46,7 +46,7 @@ namespace MonoDevelop.JSon
 			stateTracker = new CacheIndentEngine (indentEngine);
 			Editor.SetIndentationTracker (new JSonIndentationTracker (Editor, stateTracker));
 		}
-		public override bool KeyPress (KeyDescriptor descriptor)
+		public override bool KeyPress (KeyDescriptor descriptor, ParameterHintingResult provider)
 		{
 			var result = base.KeyPress (descriptor);
 

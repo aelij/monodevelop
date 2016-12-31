@@ -2,131 +2,24 @@
   "version": 2,
   "targets": {
     ".NETFramework,Version=v4.6": {
-      "ICSharpCode.NRefactory/5.5.1": {
-        "type": "package",
-        "dependencies": {
-          "Mono.Cecil": "0.9.5.4"
-        },
-        "compile": {
-          "lib/Net40/ICSharpCode.NRefactory.CSharp.dll": {},
-          "lib/Net40/ICSharpCode.NRefactory.Cecil.dll": {},
-          "lib/Net40/ICSharpCode.NRefactory.Xml.dll": {},
-          "lib/Net40/ICSharpCode.NRefactory.dll": {}
-        },
-        "runtime": {
-          "lib/Net40/ICSharpCode.NRefactory.CSharp.dll": {},
-          "lib/Net40/ICSharpCode.NRefactory.Cecil.dll": {},
-          "lib/Net40/ICSharpCode.NRefactory.Xml.dll": {},
-          "lib/Net40/ICSharpCode.NRefactory.dll": {}
-        }
-      },
-      "Mono.Cecil/0.9.5.4": {
-        "type": "package",
-        "compile": {
-          "lib/net40/Mono.Cecil.Mdb.dll": {},
-          "lib/net40/Mono.Cecil.Pdb.dll": {},
-          "lib/net40/Mono.Cecil.Rocks.dll": {},
-          "lib/net40/Mono.Cecil.dll": {}
-        },
-        "runtime": {
-          "lib/net40/Mono.Cecil.Mdb.dll": {},
-          "lib/net40/Mono.Cecil.Pdb.dll": {},
-          "lib/net40/Mono.Cecil.Rocks.dll": {},
-          "lib/net40/Mono.Cecil.dll": {}
-        }
-      },
       "Xwt/1.0.0": {
         "type": "project"
       }
     },
     ".NETFramework,Version=v4.6/win": {
-      "ICSharpCode.NRefactory/5.5.1": {
-        "type": "package",
-        "dependencies": {
-          "Mono.Cecil": "0.9.5.4"
-        },
-        "compile": {
-          "lib/Net40/ICSharpCode.NRefactory.CSharp.dll": {},
-          "lib/Net40/ICSharpCode.NRefactory.Cecil.dll": {},
-          "lib/Net40/ICSharpCode.NRefactory.Xml.dll": {},
-          "lib/Net40/ICSharpCode.NRefactory.dll": {}
-        },
-        "runtime": {
-          "lib/Net40/ICSharpCode.NRefactory.CSharp.dll": {},
-          "lib/Net40/ICSharpCode.NRefactory.Cecil.dll": {},
-          "lib/Net40/ICSharpCode.NRefactory.Xml.dll": {},
-          "lib/Net40/ICSharpCode.NRefactory.dll": {}
-        }
-      },
-      "Mono.Cecil/0.9.5.4": {
-        "type": "package",
-        "compile": {
-          "lib/net40/Mono.Cecil.Mdb.dll": {},
-          "lib/net40/Mono.Cecil.Pdb.dll": {},
-          "lib/net40/Mono.Cecil.Rocks.dll": {},
-          "lib/net40/Mono.Cecil.dll": {}
-        },
-        "runtime": {
-          "lib/net40/Mono.Cecil.Mdb.dll": {},
-          "lib/net40/Mono.Cecil.Pdb.dll": {},
-          "lib/net40/Mono.Cecil.Rocks.dll": {},
-          "lib/net40/Mono.Cecil.dll": {}
-        }
-      },
       "Xwt/1.0.0": {
         "type": "project"
       }
     }
   },
   "libraries": {
-    "ICSharpCode.NRefactory/5.5.1": {
-      "sha512": "iFnWweJykC6nHF535Qv1gYMseEWcM8/CvBMDxZWlg4ExafRg5uJm5R30GufpbzSYrxg3ry7RJ4Pnw6ghKmuqfg==",
-      "type": "package",
-      "path": "icsharpcode.nrefactory/5.5.1",
-      "files": [
-        "ICSharpCode.NRefactory.5.5.1.nupkg.sha512",
-        "ICSharpCode.NRefactory.nuspec",
-        "lib/Net40/ICSharpCode.NRefactory.CSharp.dll",
-        "lib/Net40/ICSharpCode.NRefactory.CSharp.xml",
-        "lib/Net40/ICSharpCode.NRefactory.Cecil.dll",
-        "lib/Net40/ICSharpCode.NRefactory.Cecil.xml",
-        "lib/Net40/ICSharpCode.NRefactory.Xml.dll",
-        "lib/Net40/ICSharpCode.NRefactory.Xml.xml",
-        "lib/Net40/ICSharpCode.NRefactory.dll",
-        "lib/Net40/ICSharpCode.NRefactory.xml"
-      ]
-    },
-    "Mono.Cecil/0.9.5.4": {
-      "sha512": "lSrFKGdaagNNm+GSDbHnYo3m31ceBk2PsszYdXFmphfTqB1fnX8lMEasSC6dYzHfiM+3PaMXEMFqgMJYFv1I8A==",
-      "type": "package",
-      "path": "mono.cecil/0.9.5.4",
-      "files": [
-        "Mono.Cecil.0.9.5.4.nupkg.sha512",
-        "Mono.Cecil.nuspec",
-        "lib/net20/Mono.Cecil.Mdb.dll",
-        "lib/net20/Mono.Cecil.Pdb.dll",
-        "lib/net20/Mono.Cecil.dll",
-        "lib/net35/Mono.Cecil.Mdb.dll",
-        "lib/net35/Mono.Cecil.Pdb.dll",
-        "lib/net35/Mono.Cecil.Rocks.dll",
-        "lib/net35/Mono.Cecil.dll",
-        "lib/net40/Mono.Cecil.Mdb.dll",
-        "lib/net40/Mono.Cecil.Pdb.dll",
-        "lib/net40/Mono.Cecil.Rocks.dll",
-        "lib/net40/Mono.Cecil.dll",
-        "lib/sl40/Mono.Cecil.Rocks.dll",
-        "lib/sl40/Mono.Cecil.dll"
-      ]
-    },
     "Xwt/1.0.0": {
       "type": "project",
       "msbuildProject": "../../../external/xwt/Xwt/Xwt.csproj"
     }
   },
   "projectFileDependencyGroups": {
-    "": [
-      "ICSharpCode.NRefactory >= 5.5.1"
-    ],
+    "": [],
     ".NETFramework,Version=v4.6": []
   },
   "packageFolders": {
@@ -148,9 +41,6 @@
           }
         }
       }
-    },
-    "dependencies": {
-      "ICSharpCode.NRefactory": "5.5.1"
     },
     "frameworks": {
       "net46": {}

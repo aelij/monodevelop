@@ -4,21 +4,13 @@ using MonoDevelop.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Gtk;
 using MonoDevelop.Ide;
 using Xwt;
 using Xwt.WPFBackend;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Runtime.InteropServices;
-using System.Windows.Threading;
 using System.Globalization;
 using System.Windows.Data;
 using System.Runtime.CompilerServices;
-using System.Windows.Controls;
-using System.Windows.Media;
 
 namespace WindowsPlatform.MainToolbar
 {
@@ -235,7 +227,7 @@ namespace WindowsPlatform.MainToolbar
 			}
 		}
 
-		public StatusBar StatusBar {
+		public IStatusBar StatusBar {
 			get	{ return toolbar.StatusBar; }
 		}
 

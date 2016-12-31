@@ -30,92 +30,98 @@ using System.Collections.Generic;
 
 namespace MonoDevelop.Ide.Editor.Extension
 {
-	public abstract class TextEditorExtension : ICommandRouter, IDisposable
-	{
-		public DocumentContext DocumentContext {
-			get;
-			protected set;
-		}
+    public abstract class TextEditorExtension : ICommandRouter, IDisposable
+    {
+        public static IEnumerable<TextEditorExtension> GetDefaultExtensions()
+        {
+            yield return new BraceMatcherTextEditorExtension();
+            yield return new DefaultCommandTextEditorExtension();
+            yield return new FoldingTextEditorExtension();
+            yield return new ErrorHandlerTextEditorExtension();
+            yield return new AutoInsertBracketTextEditorExtension();
+        }
 
-		public TextEditor Editor {
-			get;
-			protected set;
-		}
+        public DocumentContext DocumentContext
+        {
+            get;
+            protected set;
+        }
 
-		internal TextEditorExtension Next {
-			get;
-			set;
-		}
+        public TextEditor Editor
+        {
+            get;
+            protected set;
+        }
 
-		protected internal void Initialize (TextEditor editor, DocumentContext context)
-		{
-			if (editor == null)
-				throw new ArgumentNullException (nameof (editor));
-			if (context == null)
-				throw new ArgumentNullException (nameof (context));
-			if (DocumentContext != null)
-				throw new InvalidOperationException ("Extension is already initialized.");
-			DocumentContext = context;
-			Editor = editor;
-			Initialize ();
-		}
+        internal TextEditorExtension Next
+        {
+            get;
+            set;
+        }
 
-		protected virtual void Initialize ()
-		{
-		}
+        protected internal void Initialize(TextEditor editor, DocumentContext context)
+        {
+            if (editor == null)
+                throw new ArgumentNullException(nameof(editor));
+            if (context == null)
+                throw new ArgumentNullException(nameof(context));
+            if (DocumentContext != null)
+                throw new InvalidOperationException("Extension is already initialized.");
+            DocumentContext = context;
+            Editor = editor;
+            Initialize();
+        }
 
-		public virtual bool IsValidInContext (DocumentContext context)
-		{
-			return true;
-		}
+        protected virtual void Initialize()
+        {
+        }
 
-		/// <summary>
-		/// Return true if the key press should be processed by the editor.
-		/// When a key is pressed, and before the key is processed by the editor, this method will be invoked.
-		/// </summary>
-		public virtual bool KeyPress (KeyDescriptor descriptor)
-		{
-			return Next == null || Next.KeyPress (descriptor);
-		}
+        public virtual bool IsValidInContext(DocumentContext context)
+        {
+            return true;
+        }
 
-		public virtual void Dispose ()
-		{
-			Editor = null;
-			DocumentContext = null;
-		}
+        /// <summary>
+        /// Return true if the key press should be processed by the editor.
+        /// When a key is pressed, and before the key is processed by the editor, this method will be invoked.
+        /// </summary>
+        public virtual bool KeyPress(KeyDescriptor descriptor)
+        {
+            return Next == null || Next.KeyPress(descriptor);
+        }
 
-		void CheckInitialized ()
-		{
-			if (DocumentContext == null)
-				throw new InvalidOperationException ("Editor extension not yet initialized");
-		}
+        public virtual void Dispose()
+        {
+            Editor = null;
+            DocumentContext = null;
+        }
 
-		object ICommandRouter.GetNextCommandTarget ()
-		{
-			return Next;
-		}
+        object ICommandRouter.GetNextCommandTarget()
+        {
+            return Next;
+        }
 
-		internal protected virtual object OnGetContent (Type type)
-		{
-			if (type.IsInstanceOfType (this))
-				return this;
-			else
-				return null;
-		}
+        protected internal virtual object OnGetContent(Type type)
+        {
+            if (type.IsInstanceOfType(this))
+                return this;
+            else
+                return null;
+        }
 
-		internal protected virtual IEnumerable<object> OnGetContents (Type type)
-		{
-			var c = OnGetContent (type);
-			if (c != null)
-				yield return c;
-		}
-	}
+        protected internal virtual IEnumerable<object> OnGetContents(Type type)
+        {
+            var c = OnGetContent(type);
+            if (c != null)
+                yield return c;
+        }
+    }
 
-	class TextEditorExtensionMarker : TextEditorExtension
-	{
-		public override bool IsValidInContext (DocumentContext context)
-		{
-			return false;
-		}
-	}
+    class TextEditorExtensionMarker : TextEditorExtension
+    {
+        public override bool IsValidInContext(DocumentContext context)
+        {
+            return false;
+        }
+    }
 }

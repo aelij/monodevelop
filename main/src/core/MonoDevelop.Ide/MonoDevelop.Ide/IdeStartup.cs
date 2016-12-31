@@ -29,11 +29,9 @@
 
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
@@ -55,6 +53,7 @@ using MonoDevelop.Core.Instrumentation;
 using MonoDevelop.Core.ProgressMonitoring;
 using MonoDevelop.Ide.Gui;
 using Xwt;
+using Action = System.Action;
 using Application = Xwt.Application;
 using MessageDialog = Xwt.MessageDialog;
 using Process = System.Diagnostics.Process;
@@ -66,19 +65,71 @@ namespace MonoDevelop.Ide
 {
     public class IdeStartup
     {
-        Socket listenSocket;
-        ArrayList errorsList = new ArrayList();
         private const int IpcBasePort = 40000;
 
-        public Task<int> Run(string[] args)
+        private static DateTime lastIdle;
+        private static bool lockupCheckRunning = true;
+
+        private string socketFilename;
+
+        public bool EnablePerfLog { get; set; }
+
+        public IdeStartup(MonoDevelopOptions options = null, ComponentServices componentServices = null)
         {
-            var options = MonoDevelopOptions.Parse(args);
-            if (options.Error != null || options.ShowHelp)
-                return Task.FromResult(options.Error != null ? -1 : 0);
-            return Task.FromResult(Run(options));
+            ComponentServices = componentServices ?? new MefComponentServices();
+            Options = options ?? MonoDevelopOptions.Default;
         }
 
-        int Run(MonoDevelopOptions options)
+        public MonoDevelopOptions Options { get; }
+
+        public ComponentServices ComponentServices { get; }
+
+        public int Run(Action createUi = null)
+        {
+            if (Options.ShowHelp || Options.Error != null)
+                return Options.Error != null ? -1 : 0;
+
+            LoggingService.Initialize(Options.RedirectOutput);
+
+            if (!Platform.IsWindows)
+            {
+                // Limit maximum threads when running on mono
+                int threadCount = 125;
+                ThreadPool.SetMaxThreads(threadCount, threadCount);
+            }
+
+            int ret = -1;
+            try
+            {
+                var exename = Path.GetFileNameWithoutExtension(Assembly.GetEntryAssembly().Location);
+                if (!Platform.IsMac && !Platform.IsWindows)
+                    // ReSharper disable once PossibleNullReferenceException
+                    exename = exename.ToLower();
+                Runtime.SetProcessName(exename);
+                var app = new IdeStartup();
+
+                ret = app.RunInternal(createUi);
+            }
+            catch (Exception ex)
+            {
+                LoggingService.LogFatalError(
+                    string.Format(
+                        "{0} failed to start. Some of the assemblies required to run {0} (for example gtk-sharp)" +
+                        "may not be properly installed in the GAC.",
+                        BrandingService.ApplicationName
+                    ), ex);
+            }
+            finally
+            {
+                Runtime.Shutdown();
+            }
+
+            LoggingService.Shutdown();
+
+            return ret;
+        }
+
+        private int RunInternal(Action createUi)
         {
             LoggingService.LogInfo("Starting {0} {1}", BrandingService.ApplicationName, IdeVersionInfo.MonoDevelopVersion);
             LoggingService.LogInfo("Running on {0}", IdeVersionInfo.GetRuntimeInfo());
@@ -90,7 +141,7 @@ namespace MonoDevelop.Ide
 
             Counters.Initialization.BeginTiming();
 
-            if (options.PerfLog)
+            if (EnablePerfLog)
             {
                 string logFile = Path.Combine(Environment.CurrentDirectory, "monodevelop.perf-log");
                 LoggingService.LogInfo("Logging instrumentation service data to file: " + logFile);
@@ -111,8 +162,7 @@ namespace MonoDevelop.Ide
                 LoggingService.LogError("Error initialising GLib logging.", ex);
             }
 
-            var args = options.RemainingArgs.ToArray();
-            IdeTheme.InitializeGtk(BrandingService.ApplicationName, ref args);
+            IdeTheme.InitializeGtk(BrandingService.ApplicationName);
 
             LoggingService.LogInfo("Using GTK+ {0}", IdeVersionInfo.GetGtkVersion());
 
@@ -133,24 +183,11 @@ namespace MonoDevelop.Ide
                     settings.SetProperty("gtk-im-module", new Value("ime"));
             }
 
-            string socketFilename = null;
-            EndPoint ep;
-
             DispatchService.Initialize();
 
             // Set a synchronization context for the main gtk thread
             SynchronizationContext.SetSynchronizationContext(DispatchService.SynchronizationContext);
             Runtime.MainSynchronizationContext = SynchronizationContext.Current;
-
-            var startupInfo = new StartupInfo(args);
-
-            // If a combine was specified, force --newwindow.
-
-            if (!options.NewWindow && startupInfo.HasFiles)
-            {
-                Counters.Initialization.Trace("Pre-Initializing Runtime to load files in existing window");
-                Runtime.Initialize();
-            }
 
             Counters.Initialization.Trace("Initializing Runtime");
             Runtime.Initialize();
@@ -169,38 +206,9 @@ namespace MonoDevelop.Ide
 
             monitor.Step();
 
-            if (options.IpcTcp)
+            if (Options.SingleProcess)
             {
-                listenSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
-                ep = new IPEndPoint(IPAddress.Loopback, IpcBasePort + HashSdbmBounded(Environment.UserName));
-            }
-            else
-            {
-                socketFilename = "/tmp/md-" + Environment.GetEnvironmentVariable("USER") + "-socket";
-                listenSocket = new Socket(AddressFamily.Unix, SocketType.Stream, ProtocolType.IP);
-                ep = new UnixEndPoint(socketFilename);
-            }
-
-            // If not opening a combine, connect to existing monodevelop and pass filename(s) and exit
-            if (!options.NewWindow && startupInfo.HasFiles)
-            {
-                try
-                {
-                    StringBuilder builder = new StringBuilder();
-                    foreach (var file in startupInfo.RequestedFileList)
-                    {
-                        builder.AppendFormat("{0};{1};{2}\n", file.FileName, file.Line, file.Column);
-                    }
-                    listenSocket.Connect(ep);
-                    listenSocket.Send(Encoding.UTF8.GetBytes(builder.ToString()));
-                    return 0;
-                }
-                catch
-                {
-                    // Reset the socket
-                    if (null != socketFilename && File.Exists(socketFilename))
-                        File.Delete(socketFilename);
-                }
+                EnsureSingleProcess();
             }
 
             Counters.Initialization.Trace("Checking System");
@@ -214,16 +222,13 @@ namespace MonoDevelop.Ide
                 Counters.Initialization.Trace("Loading Icons");
                 //force initialisation before the workbench so that it can register stock icons for GTK before they get requested
                 ImageService.Initialize();
+                ImageService.LoadDefaultStockSet();
 
                 // If we display an error dialog before the main workbench window on OS X then a second application menu is created
                 // which is then replaced with a second empty Apple menu.
                 // XBC #33699
                 Counters.Initialization.Trace("Initializing IdeApp");
                 IdeApp.Initialize(monitor);
-
-                if (errorsList.Count > 0)
-                {
-                }
 
                 // Load requested files
                 Counters.Initialization.Trace("Opening Files");
@@ -242,24 +247,9 @@ namespace MonoDevelop.Ide
 
             if (error != null)
             {
-                string message = BrandingService.BrandApplicationName(GettextCatalog.GetString("MonoDevelop failed to start"));
+                string message = BrandingService.BrandApplicationName("MonoDevelop failed to start");
                 MessageService.ShowFatalError(message, null, error);
                 return 1;
-            }
-
-            errorsList = null;
-
-            // FIXME: we should probably track the last 'selected' one
-            // and do this more cleanly
-            try
-            {
-                listenSocket.Bind(ep);
-                listenSocket.Listen(5);
-                listenSocket.BeginAccept(ListenCallback, listenSocket);
-            }
-            catch
-            {
-                // Socket already in use
             }
 
             Initialized = true;
@@ -270,10 +260,13 @@ namespace MonoDevelop.Ide
             Counters.Initialization.EndTiming();
 
             StartLockupTracker();
+
+            createUi?.Invoke();
+
             IdeApp.Run();
 
             // unloading services
-            if (null != socketFilename)
+            if (socketFilename != null)
                 File.Delete(socketFilename);
             lockupCheckRunning = false;
             Runtime.Shutdown();
@@ -283,11 +276,65 @@ namespace MonoDevelop.Ide
             return 0;
         }
 
-        static DateTime lastIdle;
-        static bool lockupCheckRunning = true;
+        private void EnsureSingleProcess()
+        {
+            var startupInfo = new StartupInfo(Options.RemainingArgs);
+            socketFilename = null;
+            Socket listenSocket;
+            EndPoint ep;
 
-        [Conditional("DEBUG")]
-        static void StartLockupTracker()
+            if (Options.IpcTcp)
+            {
+                listenSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
+                ep = new IPEndPoint(IPAddress.Loopback, IpcBasePort + HashSdbmBounded(Environment.UserName));
+            }
+            else
+            {
+                socketFilename = "/tmp/md-" + Environment.GetEnvironmentVariable("USER") + "-socket";
+                listenSocket = new Socket(AddressFamily.Unix, SocketType.Stream, ProtocolType.IP);
+                ep = new UnixEndPoint(socketFilename);
+            }
+
+            // If not opening a combine, connect to existing monodevelop and pass filename(s) and exit
+            if (!Options.NewWindow && startupInfo.HasFiles)
+            {
+                try
+                {
+                    StringBuilder builder = new StringBuilder();
+                    foreach (var file in startupInfo.RequestedFileList)
+                    {
+                        builder.AppendFormat("{0};{1};{2}\n", file.FileName, file.Line, file.Column);
+                    }
+                    listenSocket.Connect(ep);
+                    listenSocket.Send(Encoding.UTF8.GetBytes(builder.ToString()));
+                    Environment.Exit(0);
+                }
+                catch
+                {
+                    // Reset the socket
+                    if (socketFilename != null && File.Exists(socketFilename))
+                        File.Delete(socketFilename);
+                }
+            }
+            else
+            {
+                // FIXME: we should probably track the last 'selected' one
+                // and do this more cleanly
+                try
+                {
+                    listenSocket.Bind(ep);
+                    listenSocket.Listen(5);
+                    listenSocket.BeginAccept(ListenCallback, listenSocket);
+                }
+                catch
+                {
+                    // Socket already in use
+                }
+            }
+        }
+
+        [Conditional("DEBUG_PARANOIA")]
+        private static void StartLockupTracker()
         {
             if (Platform.IsWindows)
                 return;
@@ -323,9 +370,9 @@ namespace MonoDevelop.Ide
 
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        static extern bool SetDllDirectory(string lpPathName);
+        private static extern bool SetDllDirectory(string lpPathName);
 
-        static bool CheckWindowsGtk()
+        private static bool CheckWindowsGtk()
         {
             string location = null;
             Version version = null;
@@ -378,7 +425,7 @@ namespace MonoDevelop.Ide
             return true;
         }
 
-        static bool DisplayWindowsOkCancelMessage(string message, string caption)
+        private static bool DisplayWindowsOkCancelMessage(string message, string caption)
         {
             var name = typeof(int).Assembly.FullName.Replace("mscorlib", "System.Windows.Forms");
             var asm = Assembly.Load(name);
@@ -394,7 +441,7 @@ namespace MonoDevelop.Ide
 
         public bool Initialized { get; private set; }
 
-        void ListenCallback(IAsyncResult state)
+        private static void ListenCallback(IAsyncResult state)
         {
             Socket sock = (Socket)state.AsyncState;
 
@@ -416,7 +463,7 @@ namespace MonoDevelop.Ide
             }
         }
 
-        static bool OpenFile(string file)
+        private static bool OpenFile(string file)
         {
             if (string.IsNullOrEmpty(file))
                 return false;
@@ -446,7 +493,7 @@ namespace MonoDevelop.Ide
             return false;
         }
 
-        void CheckFileWatcher()
+        private static void CheckFileWatcher()
         {
             string watchesFile = "/proc/sys/fs/inotify/max_user_watches";
             try
@@ -473,7 +520,7 @@ namespace MonoDevelop.Ide
             }
         }
 
-        static void SetupExceptionManager()
+        private static void SetupExceptionManager()
         {
             TaskScheduler.UnobservedTaskException += (sender, e) =>
             {
@@ -494,7 +541,7 @@ namespace MonoDevelop.Ide
             };
         }
 
-        static void HandleException(Exception ex, bool willShutdown)
+        private static void HandleException(Exception ex, bool willShutdown)
         {
             var msg =
                 $"An unhandled exception has occured. Terminating {BrandingService.ApplicationName}? {willShutdown}";
@@ -516,7 +563,7 @@ namespace MonoDevelop.Ide
         }
 
         /// <summary>SDBM-style hash, bounded to a range of 1000.</summary>
-        static int HashSdbmBounded(string input)
+        private static int HashSdbmBounded(string input)
         {
             ulong hash = 0;
             foreach (char t in input)
@@ -529,62 +576,17 @@ namespace MonoDevelop.Ide
 
             return (int)(hash % 1000);
         }
-
-        public static int Main(string[] args)
-        {
-            var options = MonoDevelopOptions.Parse(args);
-            if (options.ShowHelp || options.Error != null)
-                return options.Error != null ? -1 : 0;
-
-            LoggingService.Initialize(options.RedirectOutput);
-
-            if (!Platform.IsWindows)
-            {
-                // Limit maximum threads when running on mono
-                int threadCount = 125;
-                ThreadPool.SetMaxThreads(threadCount, threadCount);
-            }
-
-            int ret = -1;
-            try
-            {
-                var exename = Path.GetFileNameWithoutExtension(Assembly.GetEntryAssembly().Location);
-                if (!Platform.IsMac && !Platform.IsWindows)
-                    // ReSharper disable once PossibleNullReferenceException
-                    exename = exename.ToLower();
-                Runtime.SetProcessName(exename);
-                var app = new IdeStartup();
-                ret = app.Run(options);
-            }
-            catch (Exception ex)
-            {
-                LoggingService.LogFatalError(
-                    string.Format(
-                        "{0} failed to start. Some of the assemblies required to run {0} (for example gtk-sharp)" +
-                        "may not be properly installed in the GAC.",
-                        BrandingService.ApplicationName
-                    ), ex);
-            }
-            finally
-            {
-                Runtime.Shutdown();
-            }
-
-            LoggingService.Shutdown();
-
-            return ret;
-        }
     }
 
     public class MonoDevelopOptions
     {
-        MonoDevelopOptions()
+        private MonoDevelopOptions()
         {
             IpcTcp = (PlatformID.Unix != Environment.OSVersion.Platform);
             RedirectOutput = true;
         }
 
-        OptionSet GetOptionSet()
+        private OptionSet GetOptionSet()
         {
             return new OptionSet {
                 { "no-splash", "Do not display splash screen (deprecated).", s => {} },
@@ -630,6 +632,10 @@ namespace MonoDevelop.Ide
             return opt;
         }
 
+        public static MonoDevelopOptions Default { get; } =
+            new MonoDevelopOptions { RemainingArgs = Environment.GetCommandLineArgs() };
+
+        public bool SingleProcess { get; set; }
         public bool IpcTcp { get; set; }
         public bool NewWindow { get; set; }
         public bool ShowHelp { get; set; }

@@ -35,11 +35,7 @@ using Microsoft.CodeAnalysis.CodeActions;
 using MonoDevelop.Core;
 using MonoDevelop.Ide.Editor;
 using MonoDevelop.CodeIssues;
-using Mono.Addins;
-using RefactoringEssentials;
-using MonoDevelop.Core.Text;
 using System.Linq;
-using System.ComponentModel;
 
 namespace MonoDevelop.CodeActions
 {

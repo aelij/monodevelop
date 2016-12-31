@@ -6,6 +6,6 @@
     "win": {}
   },
   "dependencies": {
-    "ICSharpCode.NRefactory": "5.5.1"
+    "Microsoft.Composition": "1.0.30"
   }
 }

@@ -26,7 +26,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using GLib;
+using Gtk;
 using MonoDevelop.Core;
 using MonoDevelop.Ide;
 
@@ -50,8 +53,8 @@ namespace MonoDevelop.Components.Extensions
 		}
 		internal FileFilterSet FilterSet { get; set; } 
 		public FileChooserAction Action { get; set; }
-		public IList<SelectFileDialogFilter> Filters { get { return FilterSet.Filters; } }
-		public FilePath CurrentFolder { get; set; }
+		public IList<SelectFileDialogFilter> Filters => FilterSet.Filters;
+	    public FilePath CurrentFolder { get; set; }
 		public bool SelectMultiple { get; set; }
 		public FilePath[] SelectedFiles { get; set; }
 		public string InitialFileName { get; set; }
@@ -69,31 +72,27 @@ namespace MonoDevelop.Components.Extensions
 	{
 		public SelectFileDialogFilter (string name, params string[] patterns)
 		{
-			this.Name = name;
-			this.Patterns = patterns;
+			Name = name;
+			Patterns = patterns;
 		}
 		
 		public SelectFileDialogFilter (string name, IList<string> patterns, IList<string> mimetypes)
 		{
-			this.Name = name;
-			this.Patterns = patterns;
-			this.MimeTypes = mimetypes;
+			Name = name;
+			Patterns = patterns;
+			MimeTypes = mimetypes;
 		}
 		
 		/// <summary>Label for the filter</summary>
-		public string Name { get; private set; }
+		public string Name { get; }
 		
 		/// <summary>Filename glob patterns permitted by this filter</summary>
-		public IList<string> Patterns { get; private set; }
+		public IList<string> Patterns { get; }
 		
 		/// <summary>MIME types permitted by this filter</summary>
-		public IList<string> MimeTypes { get; private set; }
+		public IList<string> MimeTypes { get; }
 		
-		public static SelectFileDialogFilter AllFiles {
-			get {
-				return new SelectFileDialogFilter ( ("All Files"), "*");
-			}
-		}
+		public static SelectFileDialogFilter AllFiles => new SelectFileDialogFilter ( ("All Files"), "*");
 	}
 	
 	/// <summary>
@@ -130,18 +129,14 @@ namespace MonoDevelop.Components.Extensions
 		/// <summary>
 		/// List of selected files (or folders).
 		/// </summary>
-		public FilePath[] SelectedFiles {
-			get { return data.SelectedFiles; }
-		}
-		
-		/// <summary>
+		public FilePath[] SelectedFiles => data.SelectedFiles;
+
+	    /// <summary>
 		/// Selected file (or folder) when using single selection mode.
 		/// </summary>
-		public FilePath SelectedFile {
-			get { return data.SelectedFiles.Length > 0 ? data.SelectedFiles [0] : null; }
-		}
-		
-		/// <summary>
+		public FilePath SelectedFile => data.SelectedFiles.Length > 0 ? data.SelectedFiles [0] : null;
+
+	    /// <summary>
 		/// File name to show by default.
 		/// </summary>
 		public string InitialFileName {
@@ -152,11 +147,9 @@ namespace MonoDevelop.Components.Extensions
 		/// <summary>
 		/// File filters that allow the user to choose the kinds of files the dialog displays.
 		/// </summary>
-		public IList<SelectFileDialogFilter> Filters {
-			get { return data.Filters; }
-		}
-		
-		/// <summary>
+		public IList<SelectFileDialogFilter> Filters => data.Filters;
+
+	    /// <summary>
 		/// The default file filter. If there is only one, the user will not have a choice of file types.
 		/// </summary>
 		public SelectFileDialogFilter DefaultFilter {
@@ -196,13 +189,9 @@ namespace MonoDevelop.Components.Extensions
 			return data.FilterSet.AddAllFilesFilter ();
 		}
 		
-		public bool HasFilters {
-			get {
-				return data.FilterSet.HasFilters;
-			}
-		}
-		
-		/// <summary>
+		public bool HasFilters => data.FilterSet.HasFilters;
+
+	    /// <summary>
 		/// Adds the default file filters registered by MD core and addins. Includes the All Files filter.
 		/// </summary>
 		public void AddDefaultFileFilters ()
@@ -218,11 +207,11 @@ namespace MonoDevelop.Components.Extensions
 
 		void SetGtkFileFilters (FileSelector fdiag)
 		{
-			var list = new List<Gtk.FileFilter> ();
-			Gtk.FileFilter defaultGtkFilter = null;
+			var list = new List<FileFilter> ();
+			FileFilter defaultGtkFilter = null;
 			
 			foreach (var filter in data.Filters) {
-				var gf = new Gtk.FileFilter ();
+				var gf = new FileFilter ();
 				if (!string.IsNullOrEmpty (filter.Name))
 					gf.Name = filter.Name;
 				if (filter.Patterns != null)
@@ -245,7 +234,7 @@ namespace MonoDevelop.Components.Extensions
 			fdiag.Destroyed += CaptureDefaultFilter;
 		}
 
-		[GLib.ConnectBefore]
+		[ConnectBefore]
 		void CaptureDefaultFilter (object sender, EventArgs e)
 		{
 			FileSelector fsel = (FileSelector) sender;
@@ -280,7 +269,7 @@ namespace MonoDevelop.Components.Extensions
 			
 			if (!CurrentFolder.IsNullOrEmpty && !string.IsNullOrEmpty (InitialFileName)) {
 				var checkName = data.CurrentFolder.Combine (InitialFileName);
-				if (System.IO.File.Exists (checkName))
+				if (File.Exists (checkName))
 					fdiag.SetFilename (checkName);
 			}
 			
@@ -320,7 +309,7 @@ namespace MonoDevelop.Components.Extensions
 			try {
 				int result = MessageService.RunCustomDialog (fdiag, data.TransientFor ?? MessageService.RootWindow);
 				GetDefaultProperties (fdiag);
-				return result == (int) Gtk.ResponseType.Ok;
+				return result == (int) ResponseType.Ok;
 			} finally {
 				fdiag.Destroy ();
 				fdiag.Dispose ();

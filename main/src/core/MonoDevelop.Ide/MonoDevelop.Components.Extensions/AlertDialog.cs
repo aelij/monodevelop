@@ -24,7 +24,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
 using MonoDevelop.Ide;
 using MonoDevelop.Ide.Gui.Dialogs;
 using System.Collections.Generic;
@@ -41,8 +40,8 @@ namespace MonoDevelop.Components.Extensions
         public bool ApplyToAll { get; set; }
         public AlertButton ResultButton { get; set; }
 
-        public IList<AlertButton> Buttons { get { return Message.Buttons; } }
-        public IList<AlertOption> Options { get { return Message.Options; } }
+        public IList<AlertButton> Buttons => Message.Buttons;
+        public IList<AlertOption> Options => Message.Options;
 
         // If the dialog is closed clicking the close window button we may have no result.
         // In that case, try to find a cancelling button
@@ -85,16 +84,10 @@ namespace MonoDevelop.Components.Extensions
 
             if (data.Message.CancellationToken.CanBeCanceled)
             {
-                data.Message.CancellationToken.Register(delegate
-                {
-                    Gtk.Application.Invoke(delegate
-                    {
-                        if (alertDialog != null)
-                        {
-                            alertDialog.Respond(Gtk.ResponseType.DeleteEvent);
-                        }
-                    });
-                });
+                data.Message.CancellationToken.Register(
+                    () => Gtk.Application.Invoke ((sender, args) => 
+                        // ReSharper disable once AccessToModifiedClosure
+                        alertDialog?.Respond (Gtk.ResponseType.DeleteEvent)));
             }
 
             if (!data.Message.CancellationToken.IsCancellationRequested)

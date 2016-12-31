@@ -757,7 +757,7 @@ namespace MonoDevelop.MacIntegration
 			return new Xwt.Rectangle ((int) x, (int) y, (int) width, (int) height);
 		}
 
-		internal override void GrabDesktopFocus (Gtk.Window window)
+	    public override void GrabDesktopFocus (Gtk.Window window)
 		{
 			window.Present ();
 			NSApplication.SharedApplication.ActivateIgnoringOtherApps (true);
@@ -821,7 +821,7 @@ namespace MonoDevelop.MacIntegration
 			}
 		}
 
-		internal override void SetMainWindowDecorations (Gtk.Window window)
+	    public override void SetMainWindowDecorations (Gtk.Window window)
 		{
 			NSWindow w = GtkQuartz.GetWindow (window);
 			w.IsOpaque = true;
@@ -829,7 +829,7 @@ namespace MonoDevelop.MacIntegration
 			IdeTheme.ApplyTheme (w);
 		}
 
-		internal override void RemoveWindowShadow (Gtk.Window window)
+	    public override void RemoveWindowShadow (Gtk.Window window)
 		{
 			if (window == null)
 				throw new ArgumentNullException ("window");
@@ -837,12 +837,12 @@ namespace MonoDevelop.MacIntegration
 			w.HasShadow = false;
 		}
 
-		internal override IMainToolbarView CreateMainToolbar (Gtk.Window window)
+	    public override IMainToolbarView CreateMainToolbar (Gtk.Window window)
 		{
 			return new MonoDevelop.MacIntegration.MainToolbar.MainToolbar (window);
 		}
 
-		internal override void AttachMainToolbar (Gtk.VBox parent, IMainToolbarView toolbar)
+	    public override void AttachMainToolbar (Gtk.VBox parent, IMainToolbarView toolbar)
 		{
 			var nativeToolbar = (MonoDevelop.MacIntegration.MainToolbar.MainToolbar)toolbar;
 			NSWindow w = GtkQuartz.GetWindow (nativeToolbar.gtkWindow);
@@ -888,7 +888,7 @@ namespace MonoDevelop.MacIntegration
 			return toplevels.Any (t => (t.Value != null && t.Value.Modal && t.Value.Visible) || (t.Key.IsVisible && (t.Key is NSPanel)));
 		}
 
-		internal override void AddChildWindow (Gtk.Window parent, Gtk.Window child)
+	    public override void AddChildWindow (Gtk.Window parent, Gtk.Window child)
 		{
 			NSWindow w = GtkQuartz.GetWindow (parent);
 			child.Realize ();
@@ -897,7 +897,7 @@ namespace MonoDevelop.MacIntegration
 			w.AddChildWindow (overlay, NSWindowOrderingMode.Above);
 		}
 
-		internal override void PlaceWindow (Gtk.Window window, int x, int y, int width, int height)
+	    public override void PlaceWindow (Gtk.Window window, int x, int y, int width, int height)
 		{
 			if (window.GdkWindow == null)
 				return; // Not yet realized
@@ -938,7 +938,7 @@ namespace MonoDevelop.MacIntegration
 			}
 		}
 
-		internal override void RestartIde (bool reopenWorkspace)
+	    public override void RestartIde (bool reopenWorkspace)
 		{
 			FilePath bundlePath = NSBundle.MainBundle.BundlePath;
 

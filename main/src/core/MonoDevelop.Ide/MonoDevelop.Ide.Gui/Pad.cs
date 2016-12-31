@@ -34,22 +34,22 @@ namespace MonoDevelop.Ide.Gui
     public class Pad
     {
         private readonly IPadWindow window;
-        private readonly PadCodon content;
-        private readonly DefaultWorkbench workbench;
+        private readonly PadDefinition content;
+        private readonly IDefaultWorkbenchWindow workbenchWindow;
         private string[] categories;
 
-        internal Pad(DefaultWorkbench workbench, PadCodon content)
+        internal Pad(IDefaultWorkbenchWindow workbenchWindow, PadDefinition content)
         {
-            window = workbench.GetPadWindow(content);
+            window = workbenchWindow.GetPadWindow(content);
             window.PadHidden += delegate
             {
                 IsOpenedAutomatically = false;
             };
             this.content = content;
-            this.workbench = workbench;
+            this.workbenchWindow = workbenchWindow;
         }
 
-        internal PadCodon InternalContent => content;
+        internal PadDefinition InternalContent => content;
 
         public object Content => window.Content;
 
@@ -76,7 +76,7 @@ namespace MonoDevelop.Ide.Gui
 
         public void BringToFront(bool grabFocus)
         {
-            workbench.BringToFront(content);
+            workbenchWindow.BringToFront(content);
             window.Activate(grabFocus);
         }
 
@@ -121,7 +121,7 @@ namespace MonoDevelop.Ide.Gui
         public void Destroy()
         {
             Visible = false;
-            workbench.RemovePad(content);
+            workbenchWindow.RemovePad(content);
         }
     }
 }

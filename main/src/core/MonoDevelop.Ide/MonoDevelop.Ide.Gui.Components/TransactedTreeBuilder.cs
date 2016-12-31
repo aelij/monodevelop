@@ -357,7 +357,7 @@ namespace MonoDevelop.Ide.Gui.Components
 		
 			public void ScrollToNode ()
 			{
-				tree.ScrollToCell (tree.store.GetPath (node.NodeIter));
+				tree.ScrollToCell (tree.Store.GetPath (node.NodeIter));
 			}
 
 			public bool FindChild (object dataObject)
@@ -710,7 +710,7 @@ namespace MonoDevelop.Ide.Gui.Components
 			public TransactedNodeStore (ExtensibleTreeView tree)
 			{
 				this.tree = tree;
-				iterToNode = new Dictionary<Gtk.TreeIter,TreeNode> (new IterComparer (tree.store));
+				iterToNode = new Dictionary<Gtk.TreeIter,TreeNode> (new IterComparer (tree.Store));
 			}
 			
 			public TreeNode GetNode (Gtk.TreeIter it)
@@ -836,7 +836,7 @@ namespace MonoDevelop.Ide.Gui.Components
 					return;
 				}
 				else if (node.Modified) {
-					if (!this.tree.store.IterIsValid (node.NodeIter)) {
+					if (!this.tree.Store.IterIsValid (node.NodeIter)) {
 						LoggingService.LogError ("Found invalid iter for node. " + node.DataItem);
 						return;
 					}
@@ -897,7 +897,7 @@ namespace MonoDevelop.Ide.Gui.Components
 			void MarkChildrenDeleted (Gtk.TreeIter it)
 			{
 				Gtk.TreeIter child;
-				if (!tree.store.IterChildren (out child, it))
+				if (!tree.Store.IterChildren (out child, it))
 					return;
 				do {
 					TreeNode node;
@@ -905,12 +905,12 @@ namespace MonoDevelop.Ide.Gui.Components
 						MarkDeleted (node);
 					} else {
 						MarkChildrenDeleted (child);
-						object childData = tree.store.GetValue (child, ExtensibleTreeView.DataItemColumn);
+						object childData = tree.Store.GetValue (child, ExtensibleTreeView.DataItemColumn);
 						if (childData != null)
 							tree.UnregisterNode (childData, child, null, true);
 					}
 				}
-				while (tree.store.IterNext (ref child));
+				while (tree.Store.IterNext (ref child));
 			}
 		}
 	

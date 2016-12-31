@@ -26,22 +26,29 @@
 
 using System;
 using System.Collections.Generic;
-using MonoDevelop.Ide.Desktop;
-using MonoDevelop.Core;
 using System.IO;
-using MonoDevelop.Components;
-using MonoDevelop.Components.MainToolbar;
-using MonoDevelop.Ide.Fonts;
 using System.Threading.Tasks;
+using MonoDevelop.Components;
+using MonoDevelop.Components.Commands;
+using MonoDevelop.Components.MainToolbar;
+using MonoDevelop.Core;
+using MonoDevelop.Core.Text;
+using MonoDevelop.Ide.Desktop;
+using MonoDevelop.Ide.Fonts;
+using Xwt;
+using Xwt.Drawing;
+using IconSize = Gtk.IconSize;
+using VBox = Gtk.VBox;
+using Window = Gtk.Window;
 
 namespace MonoDevelop.Ide
 {
     public static class DesktopService
     {
-        static PlatformService platformService;
-        static Xwt.Toolkit nativeToolkit;
+        private static IPlatformService platformService;
+        private static Toolkit nativeToolkit;
 
-        static PlatformService PlatformService
+        public static IPlatformService PlatformService
         {
             get
             {
@@ -51,15 +58,15 @@ namespace MonoDevelop.Ide
             }
         }
 
-        public static void Initialize(PlatformService p = null)
+        public static void Initialize(IPlatformService p = null)
         {
             if (platformService != null)
                 return;
 
             if (p == null)
             {
-                p = new DefaultPlatformService ();
-                LoggingService.LogFatalError("A platform service implementation has not been found.");
+                p = new DefaultPlatformService();
+                LoggingService.LogWarning("A platform service implementation has not been found.");
             }
             platformService = p;
             PlatformService.Initialize();
@@ -80,15 +87,7 @@ namespace MonoDevelop.Ide
         /// Returns the XWT toolkit for the native toolkit (Cocoa on Mac, WPF on Windows)
         /// </summary>
         /// <returns>The native toolkit.</returns>
-        public static Xwt.Toolkit NativeToolkit
-        {
-            get
-            {
-                if (nativeToolkit == null)
-                    nativeToolkit = platformService.LoadNativeToolkit();
-                return nativeToolkit;
-            }
-        }
+        public static Toolkit NativeToolkit => nativeToolkit ?? (nativeToolkit = platformService.LoadNativeToolkit());
 
         public static void SetGlobalProgress(double progress)
         {
@@ -110,25 +109,7 @@ namespace MonoDevelop.Ide
             return PlatformService.GetApplications(filename);
         }
 
-        [Obsolete("Use FontService")]
-        public static string DefaultMonospaceFont
-        {
-            get { return PlatformService.DefaultMonospaceFont; }
-        }
-
-        public static string PlatformName
-        {
-            get { return PlatformService.Name; }
-        }
-
-        [Obsolete]
-        public static string DefaultControlLeftRightBehavior
-        {
-            get
-            {
-                return PlatformService.DefaultControlLeftRightBehavior;
-            }
-        }
+        public static string PlatformName => PlatformService.Name;
 
         public static void ShowUrl(string url)
         {
@@ -175,10 +156,10 @@ namespace MonoDevelop.Ide
             if (!File.Exists(file))
                 return false;
 
-            return !MonoDevelop.Core.Text.TextFileUtility.IsBinary(file);
+            return !TextFileUtility.IsBinary(file);
         }
 
-        public async static Task<bool> GetFileIsTextAsync(string file, string mimeType = null)
+        public static async Task<bool> GetFileIsTextAsync(string file, string mimeType = null)
         {
             if (mimeType == null)
             {
@@ -222,27 +203,27 @@ namespace MonoDevelop.Ide
             return GetMimeTypeInheritanceChain(GetMimeTypeForUri(filename));
         }
 
-        public static Xwt.Drawing.Image GetIconForFile(string filename)
+        public static Image GetIconForFile(string filename)
         {
             return PlatformService.GetIconForFile(filename);
         }
 
-        public static Xwt.Drawing.Image GetIconForFile(string filename, Gtk.IconSize size)
+        public static Image GetIconForFile(string filename, IconSize size)
         {
             return PlatformService.GetIconForFile(filename).WithSize(size);
         }
 
-        public static Xwt.Drawing.Image GetIconForType(string mimeType)
+        public static Image GetIconForType(string mimeType)
         {
             return PlatformService.GetIconForType(mimeType);
         }
 
-        public static Xwt.Drawing.Image GetIconForType(string mimeType, Gtk.IconSize size)
+        public static Image GetIconForType(string mimeType, IconSize size)
         {
             return PlatformService.GetIconForType(mimeType).WithSize(size);
         }
 
-        internal static bool SetGlobalMenu(MonoDevelop.Components.Commands.CommandManager commandManager,
+        internal static bool SetGlobalMenu(CommandManager commandManager,
             string commandMenuAddinPath, string appMenuAddinPath)
         {
             return PlatformService.SetGlobalMenu(commandManager, commandMenuAddinPath, appMenuAddinPath);
@@ -260,18 +241,12 @@ namespace MonoDevelop.Ide
             PlatformService.SetFileAttributes(fileName, attributes);
         }
 
-        public static Xwt.Rectangle GetUsableMonitorGeometry(int screenNumber, int monitorNumber)
+        public static Rectangle GetUsableMonitorGeometry(int screenNumber, int monitorNumber)
         {
             return PlatformService.GetUsableMonitorGeometry(screenNumber, monitorNumber);
         }
 
-        public static bool CanOpenTerminal
-        {
-            get
-            {
-                return PlatformService.CanOpenTerminal;
-            }
-        }
+        public static bool CanOpenTerminal => PlatformService.CanOpenTerminal;
 
         /// <summary>
         /// Opens an external terminal window.
@@ -287,15 +262,9 @@ namespace MonoDevelop.Ide
             PlatformService.OpenTerminal(workingDirectory, environmentVariables, windowTitle);
         }
 
-        public static RecentFiles RecentFiles
-        {
-            get
-            {
-                return PlatformService.RecentFiles;
-            }
-        }
+        public static RecentFiles RecentFiles => PlatformService.RecentFiles;
 
-        static void NotifyFileRemoved(object sender, FileEventArgs args)
+        private static void NotifyFileRemoved(object sender, FileEventArgs args)
         {
             foreach (FileEventInfo e in args)
             {
@@ -306,7 +275,7 @@ namespace MonoDevelop.Ide
             }
         }
 
-        static void NotifyFileRenamed(object sender, FileCopyEventArgs args)
+        private static void NotifyFileRenamed(object sender, FileCopyEventArgs args)
         {
             foreach (FileCopyEventInfo e in args)
             {
@@ -335,39 +304,39 @@ namespace MonoDevelop.Ide
         /// <summary>
         /// Grab the desktop focus for the window.
         /// </summary>
-        internal static void GrabDesktopFocus(Gtk.Window window)
+        internal static void GrabDesktopFocus(Window window)
         {
             PlatformService.GrabDesktopFocus(window);
         }
 
-        public static void RemoveWindowShadow(Window window)
+        public static void RemoveWindowShadow(Components.Window window)
         {
             PlatformService.RemoveWindowShadow(window);
         }
 
-
-        public static void SetMainWindowDecorations(Window window)
+        public static void SetMainWindowDecorations(Components.Window window)
         {
             PlatformService.SetMainWindowDecorations(window);
         }
 
-        internal static MainToolbarController CreateMainToolbar(Gtk.Window window)
+        internal static IMainToolbarController CreateMainToolbar(Window window)
         {
-            return new MainToolbarController(PlatformService.CreateMainToolbar(window));
+            var mainToolbarView = PlatformService.CreateMainToolbar(window);
+            return mainToolbarView != null ? new MainToolbarController(mainToolbarView) : null;
         }
 
-        internal static void AttachMainToolbar(Gtk.VBox parent, MainToolbarController toolbar)
+        internal static void AttachMainToolbar(VBox parent, IMainToolbarController toolbar)
         {
             PlatformService.AttachMainToolbar(parent, toolbar.ToolbarView);
             toolbar.Initialize();
         }
 
-        public static bool GetIsFullscreen(Window window)
+        public static bool GetIsFullscreen(Components.Window window)
         {
             return PlatformService.GetIsFullscreen(window);
         }
 
-        public static void SetIsFullscreen(Window window, bool isFullscreen)
+        public static void SetIsFullscreen(Components.Window window, bool isFullscreen)
         {
             PlatformService.SetIsFullscreen(window, isFullscreen);
         }
@@ -377,17 +346,17 @@ namespace MonoDevelop.Ide
             return PlatformService.IsModalDialogRunning();
         }
 
-        internal static void AddChildWindow(Gtk.Window parent, Gtk.Window child)
+        internal static void AddChildWindow(Window parent, Window child)
         {
             PlatformService.AddChildWindow(parent, child);
         }
 
-        internal static void RemoveChildWindow(Gtk.Window parent, Gtk.Window child)
+        internal static void RemoveChildWindow(Window parent, Window child)
         {
             PlatformService.RemoveChildWindow(parent, child);
         }
 
-        internal static void PlaceWindow(Gtk.Window window, int x, int y, int width, int height)
+        internal static void PlaceWindow(Window window, int x, int y, int width, int height)
         {
             PlatformService.PlaceWindow(window, x, y, width, height);
         }

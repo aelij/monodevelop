@@ -366,7 +366,7 @@ namespace MonoDevelop.MacIntegration.MainToolbar
 	}
 
 	[Register]
-	class StatusBar : NSButton, MonoDevelop.Ide.StatusBar
+	class StatusBar : NSButton, MonoDevelop.Ide.IStatusBar
 	{
 		public enum MessageType
 		{
@@ -843,7 +843,7 @@ namespace MonoDevelop.MacIntegration.MainToolbar
 			// Nothing to do here.
 		}
 
-		public MonoDevelop.Ide.StatusBar MainContext {
+		public MonoDevelop.Ide.IStatusBar MainContext {
 			get {
 				return ctxHandler.MainContext;
 			}

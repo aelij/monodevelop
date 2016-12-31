@@ -148,10 +148,10 @@ namespace MonoDevelop.Ide.Editor
 			textEditorImpl.ViewContent.DiscardChanges ();
 		}
 
-		protected override void OnSetProject (MonoDevelop.Projects.Project project)
+		protected override void OnSetProject (MonoDevelop.Projects.Project p)
 		{
-			base.OnSetProject (project);
-			textEditorImpl.ViewContent.Project = project;
+			base.OnSetProject (p);
+			textEditorImpl.ViewContent.Project = p;
 		}
 
 		public override ProjectReloadCapability ProjectReloadCapability {

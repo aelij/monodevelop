@@ -7723,6 +7723,7 @@
     <Compile Include="MonoDevelop.Ide.Gui.Components\NodeBuilderExtension.cs" />
     <Compile Include="MonoDevelop.Ide.Gui\DisplayBindingService.cs" />
     <Compile Include="MonoDevelop.Ide.Gui\BackgroundProgressMonitor.cs" />
+    <Compile Include="MonoDevelop.Ide.Gui\IDefaultWorkbenchWindow.cs" />
     <Compile Include="MonoDevelop.Ide.Gui\StatusProgressMonitor.cs" />
     <Compile Include="MonoDevelop.Ide.CodeTemplates\CodeTemplate.cs" />
     <Compile Include="MonoDevelop.Ide.CodeTemplates\CodeTemplateService.cs" />
@@ -7738,7 +7739,7 @@
     <Compile Include="MonoDevelop.Ide.Gui.Pads\DefaultMonitorPad.cs" />
     <Compile Include="MonoDevelop.Ide.Gui.Pads\SolutionPad.cs" />
     <Compile Include="MonoDevelop.Ide.Gui.Pads\TreeViewPad.cs" />
-    <Compile Include="MonoDevelop.Ide.Gui\DefaultWorkbench.cs" />
+    <Compile Include="MonoDevelop.Ide.Gui\DefaultWorkbenchWindow.cs" />
     <Compile Include="MonoDevelop.Ide.Gui\SdiWorkspaceWindow.cs" />
     <Compile Include="MonoDevelop.Ide.Gui\ConfigurationComboBox.cs" />
     <Compile Include="MonoDevelop.Ide.Gui\IPadContainer.cs" />
@@ -7748,6 +7749,7 @@
     <Compile Include="MonoDevelop.Ide.Gui\StartupInfo.cs" />
     <Compile Include="MonoDevelop.Ide.Editor\Error.cs" />
     <Compile Include="MonoDevelop.Ide.Editor\FoldingRegion.cs" />
+    <Compile Include="MonoDevelop.Ide\ComponentServices.cs" />
     <Compile Include="MonoDevelop.Ide\Services.cs" />
     <Compile Include="MonoDevelop.Ide.Gui\FileViewer.cs" />
     <Compile Include="MonoDevelop.Ide.Gui.Dialogs\FileSelectorDialog.cs" />

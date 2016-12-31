@@ -28,42 +28,32 @@ using System;
 
 namespace MonoDevelop.Ide.Editor.Extension
 {
-	public sealed class QuickTask
-	{
-		Lazy<string> description;
-		public string Description {
-			get {
-				return description.Value;
-			}
-		}
-		
-		public int Location {
-			get;
-			private set;
-		}
-		
-		public DiagnosticSeverity Severity {
-			get;
-			private set;
-		}
-		
-		public QuickTask (Func<string> descriptionFunc, int location, DiagnosticSeverity severity)
-		{
-			this.description = new Lazy<string> (descriptionFunc);
-			this.Location = location;
-			this.Severity = severity;
-		}
+    public sealed class QuickTask
+    {
+        private readonly Lazy<string> description;
+        public string Description => description.Value;
 
-		public QuickTask (string description, int location, DiagnosticSeverity severity)
-		{
-			this.description = new Lazy<string> (() => description);
-			this.Location = location;
-			this.Severity = severity;
-		}
+        public int Location { get; }
 
-		public override string ToString ()
-		{
-			return string.Format ("[QuickTask: Description={0}, Location={1}, Severity={2}]", Description, Location, Severity);
-		}
-	}
+        public DiagnosticSeverity Severity { get; }
+
+        public QuickTask(Func<string> descriptionFunc, int location, DiagnosticSeverity severity)
+        {
+            description = new Lazy<string>(descriptionFunc);
+            Location = location;
+            Severity = severity;
+        }
+
+        public QuickTask(string description, int location, DiagnosticSeverity severity)
+        {
+            this.description = new Lazy<string>(() => description);
+            Location = location;
+            Severity = severity;
+        }
+
+        public override string ToString()
+        {
+            return $"[QuickTask: Description={Description}, Location={Location}, Severity={Severity}]";
+        }
+    }
 }

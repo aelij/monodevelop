@@ -2,24 +2,6 @@
   "version": 2,
   "targets": {
     ".NETFramework,Version=v4.6": {
-      "ICSharpCode.NRefactory/5.5.1": {
-        "type": "package",
-        "dependencies": {
-          "Mono.Cecil": "0.9.5.4"
-        },
-        "compile": {
-          "lib/Net40/ICSharpCode.NRefactory.CSharp.dll": {},
-          "lib/Net40/ICSharpCode.NRefactory.Cecil.dll": {},
-          "lib/Net40/ICSharpCode.NRefactory.Xml.dll": {},
-          "lib/Net40/ICSharpCode.NRefactory.dll": {}
-        },
-        "runtime": {
-          "lib/Net40/ICSharpCode.NRefactory.CSharp.dll": {},
-          "lib/Net40/ICSharpCode.NRefactory.Cecil.dll": {},
-          "lib/Net40/ICSharpCode.NRefactory.Xml.dll": {},
-          "lib/Net40/ICSharpCode.NRefactory.dll": {}
-        }
-      },
       "Microsoft.CodeAnalysis.Analyzers/1.1.0": {
         "type": "package",
         "frameworkAssemblies": [
@@ -120,7 +102,7 @@
           "lib/net46/Microsoft.CodeAnalysis.Workspaces.dll": {}
         }
       },
-      "Microsoft.Composition/1.0.27": {
+      "Microsoft.Composition/1.0.30": {
         "type": "package",
         "compile": {
           "lib/portable-net45+win8+wp8+wpa81/System.Composition.AttributedModel.dll": {},
@@ -135,21 +117,6 @@
           "lib/portable-net45+win8+wp8+wpa81/System.Composition.Hosting.dll": {},
           "lib/portable-net45+win8+wp8+wpa81/System.Composition.Runtime.dll": {},
           "lib/portable-net45+win8+wp8+wpa81/System.Composition.TypedParts.dll": {}
-        }
-      },
-      "Mono.Cecil/0.9.5.4": {
-        "type": "package",
-        "compile": {
-          "lib/net40/Mono.Cecil.Mdb.dll": {},
-          "lib/net40/Mono.Cecil.Pdb.dll": {},
-          "lib/net40/Mono.Cecil.Rocks.dll": {},
-          "lib/net40/Mono.Cecil.dll": {}
-        },
-        "runtime": {
-          "lib/net40/Mono.Cecil.Mdb.dll": {},
-          "lib/net40/Mono.Cecil.Pdb.dll": {},
-          "lib/net40/Mono.Cecil.Rocks.dll": {},
-          "lib/net40/Mono.Cecil.dll": {}
         }
       },
       "System.AppContext/4.1.0": {
@@ -722,7 +689,6 @@
         "type": "project",
         "framework": ".NETFramework,Version=v4.6",
         "dependencies": {
-          "ICSharpCode.NRefactory": "5.5.1",
           "Xwt": "1.0.0"
         }
       },
@@ -730,6 +696,7 @@
         "type": "project",
         "framework": ".NETFramework,Version=v4.6",
         "dependencies": {
+          "Microsoft.Composition": "1.0.30",
           "System.Collections.Immutable": "1.3.0"
         }
       },
@@ -738,24 +705,6 @@
       }
     },
     ".NETFramework,Version=v4.6/win": {
-      "ICSharpCode.NRefactory/5.5.1": {
-        "type": "package",
-        "dependencies": {
-          "Mono.Cecil": "0.9.5.4"
-        },
-        "compile": {
-          "lib/Net40/ICSharpCode.NRefactory.CSharp.dll": {},
-          "lib/Net40/ICSharpCode.NRefactory.Cecil.dll": {},
-          "lib/Net40/ICSharpCode.NRefactory.Xml.dll": {},
-          "lib/Net40/ICSharpCode.NRefactory.dll": {}
-        },
-        "runtime": {
-          "lib/Net40/ICSharpCode.NRefactory.CSharp.dll": {},
-          "lib/Net40/ICSharpCode.NRefactory.Cecil.dll": {},
-          "lib/Net40/ICSharpCode.NRefactory.Xml.dll": {},
-          "lib/Net40/ICSharpCode.NRefactory.dll": {}
-        }
-      },
       "Microsoft.CodeAnalysis.Analyzers/1.1.0": {
         "type": "package",
         "frameworkAssemblies": [
@@ -856,7 +805,7 @@
           "lib/net46/Microsoft.CodeAnalysis.Workspaces.dll": {}
         }
       },
-      "Microsoft.Composition/1.0.27": {
+      "Microsoft.Composition/1.0.30": {
         "type": "package",
         "compile": {
           "lib/portable-net45+win8+wp8+wpa81/System.Composition.AttributedModel.dll": {},
@@ -871,21 +820,6 @@
           "lib/portable-net45+win8+wp8+wpa81/System.Composition.Hosting.dll": {},
           "lib/portable-net45+win8+wp8+wpa81/System.Composition.Runtime.dll": {},
           "lib/portable-net45+win8+wp8+wpa81/System.Composition.TypedParts.dll": {}
-        }
-      },
-      "Mono.Cecil/0.9.5.4": {
-        "type": "package",
-        "compile": {
-          "lib/net40/Mono.Cecil.Mdb.dll": {},
-          "lib/net40/Mono.Cecil.Pdb.dll": {},
-          "lib/net40/Mono.Cecil.Rocks.dll": {},
-          "lib/net40/Mono.Cecil.dll": {}
-        },
-        "runtime": {
-          "lib/net40/Mono.Cecil.Mdb.dll": {},
-          "lib/net40/Mono.Cecil.Pdb.dll": {},
-          "lib/net40/Mono.Cecil.Rocks.dll": {},
-          "lib/net40/Mono.Cecil.dll": {}
         }
       },
       "System.AppContext/4.1.0": {
@@ -1406,7 +1340,6 @@
         "type": "project",
         "framework": ".NETFramework,Version=v4.6",
         "dependencies": {
-          "ICSharpCode.NRefactory": "5.5.1",
           "Xwt": "1.0.0"
         }
       },
@@ -1414,6 +1347,7 @@
         "type": "project",
         "framework": ".NETFramework,Version=v4.6",
         "dependencies": {
+          "Microsoft.Composition": "1.0.30",
           "System.Collections.Immutable": "1.3.0"
         }
       },
@@ -1423,23 +1357,6 @@
     }
   },
   "libraries": {
-    "ICSharpCode.NRefactory/5.5.1": {
-      "sha512": "iFnWweJykC6nHF535Qv1gYMseEWcM8/CvBMDxZWlg4ExafRg5uJm5R30GufpbzSYrxg3ry7RJ4Pnw6ghKmuqfg==",
-      "type": "package",
-      "path": "icsharpcode.nrefactory/5.5.1",
-      "files": [
-        "ICSharpCode.NRefactory.5.5.1.nupkg.sha512",
-        "ICSharpCode.NRefactory.nuspec",
-        "lib/Net40/ICSharpCode.NRefactory.CSharp.dll",
-        "lib/Net40/ICSharpCode.NRefactory.CSharp.xml",
-        "lib/Net40/ICSharpCode.NRefactory.Cecil.dll",
-        "lib/Net40/ICSharpCode.NRefactory.Cecil.xml",
-        "lib/Net40/ICSharpCode.NRefactory.Xml.dll",
-        "lib/Net40/ICSharpCode.NRefactory.Xml.xml",
-        "lib/Net40/ICSharpCode.NRefactory.dll",
-        "lib/Net40/ICSharpCode.NRefactory.xml"
-      ]
-    },
     "Microsoft.CodeAnalysis.Analyzers/1.1.0": {
       "sha512": "HS3iRWZKcUw/8eZ/08GXKY2Bn7xNzQPzf8gRPHGSowX7u7XXu9i9YEaBeBNKUXWfI7qjvT2zXtLUvbN0hds8vg==",
       "type": "package",
@@ -1508,13 +1425,13 @@
         "microsoft.codeanalysis.workspaces.common.nuspec"
       ]
     },
-    "Microsoft.Composition/1.0.27": {
-      "sha512": "pwu80Ohe7SBzZ6i69LVdzowp6V+LaVRzd5F7A6QlD42vQkX0oT7KXKWWPlM/S00w1gnMQMRnEdbtOV12z6rXdQ==",
+    "Microsoft.Composition/1.0.30": {
+      "sha512": "IDOxST2DCUziePSD2vK3Z7LI6e1rejJCp21/rKZ8fdsyTcq9SfnAV8udi0GSIpjO9wwSLZx9Kfc7co3PTs7IlA==",
       "type": "package",
-      "path": "microsoft.composition/1.0.27",
+      "path": "microsoft.composition/1.0.30",
       "files": [
         "License-Stable.rtf",
-        "Microsoft.Composition.1.0.27.nupkg.sha512",
+        "Microsoft.Composition.1.0.30.nupkg.sha512",
         "Microsoft.Composition.nuspec",
         "lib/portable-net45+win8+wp8+wpa81/System.Composition.AttributedModel.XML",
         "lib/portable-net45+win8+wp8+wpa81/System.Composition.AttributedModel.dll",
@@ -1526,28 +1443,6 @@
         "lib/portable-net45+win8+wp8+wpa81/System.Composition.Runtime.dll",
         "lib/portable-net45+win8+wp8+wpa81/System.Composition.TypedParts.XML",
         "lib/portable-net45+win8+wp8+wpa81/System.Composition.TypedParts.dll"
-      ]
-    },
-    "Mono.Cecil/0.9.5.4": {
-      "sha512": "lSrFKGdaagNNm+GSDbHnYo3m31ceBk2PsszYdXFmphfTqB1fnX8lMEasSC6dYzHfiM+3PaMXEMFqgMJYFv1I8A==",
-      "type": "package",
-      "path": "mono.cecil/0.9.5.4",
-      "files": [
-        "Mono.Cecil.0.9.5.4.nupkg.sha512",
-        "Mono.Cecil.nuspec",
-        "lib/net20/Mono.Cecil.Mdb.dll",
-        "lib/net20/Mono.Cecil.Pdb.dll",
-        "lib/net20/Mono.Cecil.dll",
-        "lib/net35/Mono.Cecil.Mdb.dll",
-        "lib/net35/Mono.Cecil.Pdb.dll",
-        "lib/net35/Mono.Cecil.Rocks.dll",
-        "lib/net35/Mono.Cecil.dll",
-        "lib/net40/Mono.Cecil.Mdb.dll",
-        "lib/net40/Mono.Cecil.Pdb.dll",
-        "lib/net40/Mono.Cecil.Rocks.dll",
-        "lib/net40/Mono.Cecil.dll",
-        "lib/sl40/Mono.Cecil.Rocks.dll",
-        "lib/sl40/Mono.Cecil.dll"
       ]
     },
     "System.AppContext/4.1.0": {

@@ -6,6 +6,5 @@
     "win": {}
   },
   "dependencies": {
-    "ICSharpCode.NRefactory": "5.5.1"
   }
 }

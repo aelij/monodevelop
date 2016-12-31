@@ -369,7 +369,7 @@ namespace MonoDevelop.CSharp.Formatting
 			}
 		}
 
-		public override bool KeyPress (KeyDescriptor descriptor)
+		public override bool KeyPress (KeyDescriptor descriptor, ParameterHintingResult provider)
 		{
 			completionWindowWasVisible = CompletionWindowManager.IsVisible;
 			cursorPositionBeforeKeyPress = Editor.CaretOffset;

@@ -25,8 +25,8 @@
 
 using Gtk;
 using MonoDevelop.Ide.Fonts;
-using ICSharpCode.NRefactory.TypeSystem;
-using ICSharpCode.NRefactory.Semantics;
+//using ICSharpCode.NRefactory.TypeSystem;
+//using ICSharpCode.NRefactory.Semantics;
 
 namespace MonoDevelop.SourceEditor
 {
@@ -37,15 +37,16 @@ namespace MonoDevelop.SourceEditor
 		public LanguageItemWindow (ExtensibleTextEditor ed, Xwt.ModifierKeys modifierState, object result, string errorInformations, object unit)
 		{
 			string tooltip = null;
-			if (result is UnknownIdentifierResolveResult) {
-				tooltip = string.Format ("error CS0103: The name `{0}' does not exist in the current context", ((UnknownIdentifierResolveResult)result).Identifier);
-			} else if (result is UnknownMemberResolveResult) {
-				var ur = (UnknownMemberResolveResult)result;
-				if (ur.TargetType.Kind != TypeKind.Unknown)
-					tooltip = string.Format ("error CS0117: `{0}' does not contain a definition for `{1}'", ur.TargetType.FullName, ur.MemberName);
-			} else {
+            // TODO-AELIJ: check this
+			//if (result is UnknownIdentifierResolveResult) {
+			//	tooltip = string.Format ("error CS0103: The name `{0}' does not exist in the current context", ((UnknownIdentifierResolveResult)result).Identifier);
+			//} else if (result is UnknownMemberResolveResult) {
+			//	var ur = (UnknownMemberResolveResult)result;
+			//	if (ur.TargetType.Kind != TypeKind.Unknown)
+			//		tooltip = string.Format ("error CS0117: `{0}' does not contain a definition for `{1}'", ur.TargetType.FullName, ur.MemberName);
+			//} else {
 				tooltip = errorInformations;
-			}
+			//}
 			if (string.IsNullOrEmpty (tooltip)|| tooltip == "?") {
 				IsEmpty = true;
 				return;

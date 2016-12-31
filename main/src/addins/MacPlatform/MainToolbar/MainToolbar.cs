@@ -347,7 +347,7 @@ namespace MonoDevelop.MacIntegration.MainToolbar
 			}
 		}
 
-		public MonoDevelop.Ide.StatusBar StatusBar {
+		public MonoDevelop.Ide.IStatusBar StatusBar {
 			get { return statusBar; }
 		}
 		#endregion

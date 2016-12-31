@@ -39,73 +39,73 @@ namespace MonoDevelop.Projects
 
 namespace MonoDevelop.Ide.Editor
 {
-    
-
     /// <summary>
     /// A document context puts a textual document in a semantic context inside a project and gives access
     /// to the parse information of the textual document.
     /// </summary>
     public abstract class DocumentContext
-	{
-		/// <summary>
-		/// The name of the document. It's the file name for files on disc. 
-		/// For unsaved files that name is different.
-		/// </summary>
-		public abstract string Name {
-			get;
-		}
+    {
+        /// <summary>
+        /// The name of the document. It's the file name for files on disc. 
+        /// For unsaved files that name is different.
+        /// </summary>
+        public abstract string Name
+        {
+            get;
+        }
 
-		/// <summary>
-		/// Project != null
-		/// </summary>
-		public virtual bool HasProject => Project != null;
+        /// <summary>
+        /// Project != null
+        /// </summary>
+        public virtual bool HasProject => Project != null;
 
-	    internal virtual bool IsAdHocProject => false;
+        internal virtual bool IsAdHocProject => false;
 
-	    /// <summary>
-		/// Gets the project this context is in.
-		/// </summary>
-		public abstract Project Project {
-			get;
-		}
+        /// <summary>
+        /// Gets the project this context is in.
+        /// </summary>
+        public abstract Project Project
+        {
+            get;
+        }
 
-		public virtual T GetContent<T>() where T : class
-		{
-		    return this as T;
-		}
+        public virtual T GetContent<T>() where T : class
+        {
+            return this as T;
+        }
 
-		public virtual IEnumerable<T> GetContents<T>() where T : class
-		{
-			var t = this as T;
-			if (t != null)
-				yield return t;
-		}
+        public virtual IEnumerable<T> GetContents<T>() where T : class
+        {
+            var t = this as T;
+            if (t != null)
+                yield return t;
+        }
 
-		/// <summary>
-		/// This is called after the ParsedDocument updated.
-		/// </summary>
-		public event EventHandler DocumentParsed;
+        /// <summary>
+        /// This is called after the ParsedDocument updated.
+        /// </summary>
+        public event EventHandler DocumentParsed;
 
-		protected void OnDocumentParsed (EventArgs e)
-		{
-		    DocumentParsed?.Invoke (this, e);
-		}
+        protected void OnDocumentParsed(EventArgs e)
+        {
+            DocumentParsed?.Invoke(this, e);
+        }
 
-		public abstract void AttachToProject (Project project);
+        public abstract void AttachToProject(Project project);
 
-		/// <summary>
-		/// Forces a reparse of the document. This call doesn't block the ui thread. 
-		/// The next call to ParsedDocument will give always the current parsed document but may block the UI thread.
-		/// </summary>
-		public abstract void ReparseDocument ();
+        /// <summary>
+        /// Forces a reparse of the document. This call doesn't block the ui thread. 
+        /// The next call to ParsedDocument will give always the current parsed document but may block the UI thread.
+        /// </summary>
+        public abstract void ReparseDocument();
 
-		// TODO: IMO that needs to be handled differently (this is atm only used in the ASP.NET binding)
-		// Maybe using the file service. Files can be changed/saved w/o beeing opened.
-		public event EventHandler Saved;
+        // TODO: IMO that needs to be handled differently (this is atm only used in the ASP.NET binding)
+        // Maybe using the file service. Files can be changed/saved w/o beeing opened.
+        public event EventHandler Saved;
 
-		protected virtual void OnSaved (EventArgs e)
-		{
-		    Saved?.Invoke (this, e);
-		}
-	}
+        protected virtual void OnSaved(EventArgs e)
+        {
+            Saved?.Invoke(this, e);
+        }
+    }
 }

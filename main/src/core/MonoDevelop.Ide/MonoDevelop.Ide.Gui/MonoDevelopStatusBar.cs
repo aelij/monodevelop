@@ -101,7 +101,7 @@ namespace MonoDevelop.Ide
 				dfr.BorderColor = Styles.DockSeparatorColor.ToGdkColor ();
 			};
 			dfr.ShowAll ();
-			DefaultWorkbench wb = (DefaultWorkbench)IdeApp.Workbench.RootWindow;
+			DefaultWorkbenchWindow wb = (DefaultWorkbenchWindow)IdeApp.Workbench.RootWindow;
 			var dockBar = wb.DockFrame.ExtractDockBar (PositionType.Bottom);
 			dockBar.AlignToEnd = true;
 			dockBar.ShowBorder = false;

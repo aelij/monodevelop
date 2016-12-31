@@ -40,11 +40,8 @@ namespace MonoDevelop.Ide.Fonts
         private static void LoadDefaults()
         {
             MonospaceFont?.Dispose();
-
-#pragma warning disable 618
-            MonospaceFontName = DesktopService.DefaultMonospaceFont;
+            MonospaceFontName = DesktopService.PlatformService.DefaultMonospaceFont;
             MonospaceFont = FontDescription.FromString(MonospaceFontName);
-#pragma warning restore 618
         }
 
         internal static void Initialize()
@@ -64,9 +61,6 @@ namespace MonoDevelop.Ide.Fonts
         public static string MonospaceFontName { get; private set; } = String.Empty;
 
         public static string SansFontName => Gui.Styles.DefaultFontName;
-
-        [Obsolete("Use MonospaceFont")]
-        public static FontDescription DefaultMonospaceFontDescription => MonospaceFont ?? (MonospaceFont = LoadFont (DesktopService.DefaultMonospaceFont));
 
         private static FontDescription LoadFont(string name)
         {
@@ -94,9 +88,7 @@ namespace MonoDevelop.Ide.Fonts
             if (result == null)
             {
                 var font = GetFont(name);
-                if (font == null)
-                    throw new InvalidOperationException("Font " + name + " not found.");
-                return font;
+                return font ?? MonospaceFontName;
             }
             return result;
         }
@@ -179,9 +171,9 @@ namespace MonoDevelop.Ide.Fonts
             return FontService.GetFontDescription(name);
         }
 
-        protected override bool OnSetValue(FontDescription value)
+        protected override bool OnSetValue(FontDescription o)
         {
-            FontService.SetFont(name, value.ToString());
+            FontService.SetFont(name, o.ToString());
             return true;
         }
     }

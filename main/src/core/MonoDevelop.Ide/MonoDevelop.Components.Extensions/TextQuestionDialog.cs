@@ -24,89 +24,100 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
 using Gtk;
+using MonoDevelop.Ide;
 
 namespace MonoDevelop.Components.Extensions
 {
-	public interface ITextQuestionDialogHandler : IDialogHandler<TextQuestionDialogData>
-	{
-	}
-	
-	public class TextQuestionDialogData : PlatformDialogData
-	{
-		public string Question { get; set; }
-		public string Caption { get; set; }
-		public string Value { get; set; }
-		public bool IsPassword { get; set; }
-	}
-	
-	public class TextQuestionDialog : PlatformDialog<TextQuestionDialogData>
-	{
-		public string Question {
-			get { return data.Question; }
-			set { data.Question = value; }
-		}
-		
-		public string Caption {
-			get { return data.Caption; }
-			set { data.Caption = value; }
-		}
-		
-		public string Value {
-			get { return data.Value; }
-			set { data.Value = value; }
-		}
-		
-		public bool IsPassword {
-			get { return data.IsPassword; }
-			set { data.IsPassword = value; }
-		}
-		
-		protected override bool RunDefault ()
-		{
-			Gtk.Dialog md = null;
-			try {
-				md = new Gtk.Dialog (Caption, TransientFor, DialogFlags.Modal | DialogFlags.DestroyWithParent) {
-					HasSeparator = false,
-					BorderWidth = 6,
-				};
-				
-				var questionLabel = new Label (Question) {
-					UseMarkup = true,
-					Xalign = 0.0F,
-				};
-				md.VBox.PackStart (questionLabel, true, false, 6);
-				
-				var responseEntry = new Entry (Value ?? "") {
-					Visibility = !IsPassword,
-				};
-				responseEntry.Activated += (sender, e) => {
-					md.Respond (ResponseType.Ok);
-				};
-				md.VBox.PackStart (responseEntry, false, true, 6);
-				
-				md.AddActionWidget (new Button (Gtk.Stock.Cancel) { CanDefault = true }, ResponseType.Cancel);
-				md.AddActionWidget (new Button (Gtk.Stock.Ok), ResponseType.Ok);
+    public interface ITextQuestionDialogHandler : IDialogHandler<TextQuestionDialogData>
+    {
+    }
 
-				md.DefaultResponse = ResponseType.Cancel;
-				
-				md.Child.ShowAll ();
-				
-				var response = (ResponseType) MonoDevelop.Ide.MessageService.RunCustomDialog (md, TransientFor);
-				if (response == ResponseType.Ok) {
-					Value = responseEntry.Text;
-					return true;
-				}
-				
-				return false;
-			} finally {
-				if (md != null) {
-					md.Destroy ();
-					md.Dispose ();
-				}
-			}
-		}
-	}
+    public class TextQuestionDialogData : PlatformDialogData
+    {
+        public string Question { get; set; }
+        public string Caption { get; set; }
+        public string Value { get; set; }
+        public bool IsPassword { get; set; }
+    }
+
+    public class TextQuestionDialog : PlatformDialog<TextQuestionDialogData>
+    {
+        public string Question
+        {
+            get { return data.Question; }
+            set { data.Question = value; }
+        }
+
+        public string Caption
+        {
+            get { return data.Caption; }
+            set { data.Caption = value; }
+        }
+
+        public string Value
+        {
+            get { return data.Value; }
+            set { data.Value = value; }
+        }
+
+        public bool IsPassword
+        {
+            get { return data.IsPassword; }
+            set { data.IsPassword = value; }
+        }
+
+        protected override bool RunDefault()
+        {
+            Gtk.Dialog md = null;
+            try
+            {
+                md = new Gtk.Dialog(Caption, TransientFor, DialogFlags.Modal | DialogFlags.DestroyWithParent)
+                {
+                    HasSeparator = false,
+                    BorderWidth = 6
+                };
+
+                var questionLabel = new Label(Question)
+                {
+                    UseMarkup = true,
+                    Xalign = 0.0F
+                };
+                md.VBox.PackStart(questionLabel, true, false, 6);
+
+                var responseEntry = new Entry(Value ?? "")
+                {
+                    Visibility = !IsPassword
+                };
+                // ReSharper disable once AccessToDisposedClosure
+                responseEntry.Activated += (sender, e) => md.Respond(ResponseType.Ok);
+                md.VBox.PackStart(responseEntry, false, true, 6);
+
+                md.AddActionWidget(new Button(Stock.Cancel) { CanDefault = true }, ResponseType.Cancel);
+                md.AddActionWidget(new Button(Stock.Ok), ResponseType.Ok);
+
+                md.DefaultResponse = ResponseType.Cancel;
+
+                md.Child.ShowAll();
+
+                var response = (ResponseType)MessageService.RunCustomDialog(md, TransientFor);
+                if (response == ResponseType.Ok)
+                {
+                    Value = responseEntry.Text;
+                    return true;
+                }
+
+                return false;
+            }
+            finally
+            {
+                if (md != null)
+                {
+                    md.Destroy();
+                    md.Dispose();
+                }
+            }
+        }
+    }
 }
 

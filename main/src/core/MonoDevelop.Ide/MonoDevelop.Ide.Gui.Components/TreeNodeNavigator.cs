@@ -62,7 +62,7 @@ namespace MonoDevelop.Ide.Gui.Components
 			
 			void AssertIsValid ()
 			{
-				if (!pad.sorting && !currentIter.Equals (Gtk.TreeIter.Zero) && !store.IterIsValid (currentIter)) {
+				if (!pad.Sorting && !currentIter.Equals (Gtk.TreeIter.Zero) && !store.IterIsValid (currentIter)) {
 					if (dataItem == null || !MoveToObject (dataItem))
 						throw new InvalidOperationException ("Tree iterator has been invalidated.");
 				}

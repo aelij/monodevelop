@@ -27,85 +27,76 @@
 
 using System;
 using MonoDevelop.Core;
-using Gtk;
-using MonoDevelop.Ide.CodeCompletion;
-using MonoDevelop.Ide.Gui;
-using System.Collections.Generic;
-using MonoDevelop.Components.Docking;
-using MonoDevelop.Ide.Gui.Dialogs;
-using MonoDevelop.Components;
-using MonoDevelop.Components.MainToolbar;
-
 using StockIcons = MonoDevelop.Ide.Gui.Stock;
 
 namespace MonoDevelop.Ide
 {
-	
-	/// <summary>
-	/// The MonoDevelop status bar.
-	/// </summary>
-	
-	public interface StatusBarContextBase: IDisposable
-	{
-		/// <summary>
-		/// Shows a message with an error icon
-		/// </summary>
-		void ShowError (string error);
-		
-		/// <summary>
-		/// Shows a message with a warning icon
-		/// </summary>
-		void ShowWarning (string warning);
-		
-		/// <summary>
-		/// Shows a message in the status bar
-		/// </summary>
-		void ShowMessage (string message);
-		
-		/// <summary>
-		/// Shows a message in the status bar
-		/// </summary>
-		void ShowMessage (string message, bool isMarkup);
-		
-		/// <summary>
-		/// Shows a message in the status bar
-		/// </summary>
-		void ShowMessage (IconId image, string message);
 
-		/// <summary>
-		/// Shows a message in the status bar
-		/// </summary>
-		void ShowMessage (IconId image, string message, bool isMarkup);
-		
-		/// <summary>
-		/// Shows a progress bar, with the provided label next to it
-		/// </summary>
-		void BeginProgress (string name);
-		
-		/// <summary>
-		/// Shows a progress bar, with the provided label and icon next to it
-		/// </summary>
-		void BeginProgress (IconId image, string name);
-		
-		/// <summary>
-		/// Sets the progress fraction. It can only be used after calling BeginProgress.
-		/// </summary>
-		void SetProgressFraction (double work);
+    /// <summary>
+    /// The MonoDevelop status bar.
+    /// </summary>
 
-		/// <summary>
-		/// Hides the progress bar shown with BeginProgress
-		/// </summary>
-		void EndProgress ();
-		
-		/// <summary>
-		/// Pulses the progress bar shown with BeginProgress
-		/// </summary>
-		void Pulse ();
-		
-		/// <summary>
-		/// When set, the status bar progress will be automatically pulsed at short intervals
-		/// </summary>
-		bool AutoPulse { get; set; }
-	}
-	
+    public interface IStatusBarContextBase : IDisposable
+    {
+        /// <summary>
+        /// Shows a message with an error icon
+        /// </summary>
+        void ShowError(string error);
+
+        /// <summary>
+        /// Shows a message with a warning icon
+        /// </summary>
+        void ShowWarning(string warning);
+
+        /// <summary>
+        /// Shows a message in the status bar
+        /// </summary>
+        void ShowMessage(string message);
+
+        /// <summary>
+        /// Shows a message in the status bar
+        /// </summary>
+        void ShowMessage(string message, bool isMarkup);
+
+        /// <summary>
+        /// Shows a message in the status bar
+        /// </summary>
+        void ShowMessage(IconId image, string message);
+
+        /// <summary>
+        /// Shows a message in the status bar
+        /// </summary>
+        void ShowMessage(IconId image, string message, bool isMarkup);
+
+        /// <summary>
+        /// Shows a progress bar, with the provided label next to it
+        /// </summary>
+        void BeginProgress(string name);
+
+        /// <summary>
+        /// Shows a progress bar, with the provided label and icon next to it
+        /// </summary>
+        void BeginProgress(IconId image, string name);
+
+        /// <summary>
+        /// Sets the progress fraction. It can only be used after calling BeginProgress.
+        /// </summary>
+        void SetProgressFraction(double work);
+
+        /// <summary>
+        /// Hides the progress bar shown with BeginProgress
+        /// </summary>
+        void EndProgress();
+
+        /// <summary>
+        /// Pulses the progress bar shown with BeginProgress
+        /// </summary>
+        void Pulse();
+
+        /// <summary>
+        /// When set, the status bar progress will be automatically pulsed at short intervals
+        /// </summary>
+        bool AutoPulse { get; set; }
+    }
+
 }

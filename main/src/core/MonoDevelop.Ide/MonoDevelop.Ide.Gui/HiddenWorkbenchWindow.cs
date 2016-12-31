@@ -29,87 +29,77 @@ using System.Collections.Generic;
 
 namespace MonoDevelop.Ide.Gui
 {
-	public class HiddenWorkbenchWindow : MonoDevelop.Ide.Gui.IWorkbenchWindow
-	{
-		string title;
-		public string Title {
-			get {
-				return title;
-			}
-			set {
-				title = value;
-			}
-		}
-		
-		public string DocumentType {
-			get { return ""; }
-			set {}
-		}
-		
-		public MonoDevelop.Ide.Gui.Document Document {
-			get;
-			set;
-		}
+    public class HiddenWorkbenchWindow : IWorkbenchWindow
+    {
+        public string Title { get; set; }
 
-		public bool ShowNotification {
-			get { return false; }
-			set {}
-		}
-		
-		MonoDevelop.Ide.Gui.ViewContent viewContent;
-		public MonoDevelop.Ide.Gui.ViewContent ViewContent {
-			get { return viewContent; }
-			set { viewContent = value; }
-		}
-		
-		public IEnumerable<BaseViewContent> SubViewContents { get { return new BaseViewContent[0]; } }
-		
-		public MonoDevelop.Ide.Gui.BaseViewContent ActiveViewContent {
-			get { return ViewContent;}
-			set {}
-		}
-		
-		public bool CloseWindow (bool force)
-		{
-			return true;
-		}
-		
-		public void SelectWindow ()
-		{
-		}
-		
-		public void SwitchView (int viewNumber)
-		{
-		}
-		public void SwitchView (MonoDevelop.Ide.Gui.BaseViewContent subViewContent)
-		{
-		}
+        public string DocumentType
+        {
+            get { return ""; }
+            set { }
+        }
 
-		public int FindView<T> ()
-		{
-			return -1;
-		}
-		
-		public void AttachViewContent (MonoDevelop.Ide.Gui.BaseViewContent subViewContent)
-		{
-			
-		}
+        public Document Document { get; set; }
 
-		public void InsertViewContent (int index, MonoDevelop.Ide.Gui.BaseViewContent subViewContent)
-		{
-			
-		}
+        public bool ShowNotification
+        {
+            get { return false; }
+            set { }
+        }
 
-		public DocumentToolbar GetToolbar (BaseViewContent targetView)
-		{
-			return null;
-		}
+        public ViewContent ViewContent { get; set; }
 
-		public event EventHandler TitleChanged { add {} remove {} }
-		public event EventHandler DocumentChanged { add {} remove {} }
-		public event MonoDevelop.Ide.Gui.WorkbenchWindowEventHandler Closing { add {} remove {} }
-		public event MonoDevelop.Ide.Gui.WorkbenchWindowEventHandler Closed { add {} remove {} }
-		public event MonoDevelop.Ide.Gui.ActiveViewContentEventHandler ActiveViewContentChanged { add {} remove {} }
-		public event EventHandler ViewsChanged { add {} remove {} }
-	}
+        public IEnumerable<BaseViewContent> SubViewContents => new BaseViewContent[0];
+
+        public BaseViewContent ActiveViewContent
+        {
+            get { return ViewContent; }
+            set { }
+        }
+
+        public bool CloseWindow(bool force)
+        {
+            return true;
+        }
+
+        public void SelectWindow()
+        {
+        }
+
+        public void SwitchView(int viewNumber)
+        {
+        }
+        public void SwitchView(BaseViewContent subViewContent)
+        {
+        }
+
+        public int FindView<T>()
+        {
+            return -1;
+        }
+
+        public void AttachViewContent(BaseViewContent subViewContent)
+        {
+
+        }
+
+        public void InsertViewContent(int index, BaseViewContent subViewContent)
+        {
+
+        }
+
+        public DocumentToolbar GetToolbar(BaseViewContent targetView)
+        {
+            return null;
+        }
+
+        // ReSharper disable ValueParameterNotUsed
+        public event EventHandler TitleChanged { add { } remove { } }
+        public event EventHandler DocumentChanged { add { } remove { } }
+        public event WorkbenchWindowEventHandler Closing { add { } remove { } }
+        public event WorkbenchWindowEventHandler Closed { add { } remove { } }
+        public event ActiveViewContentEventHandler ActiveViewContentChanged { add { } remove { } }
+        public event EventHandler ViewsChanged { add { } remove { } }
+        // ReSharper restore ValueParameterNotUsed
+    }
 }

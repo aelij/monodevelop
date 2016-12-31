@@ -32,207 +32,220 @@ using System.Runtime.CompilerServices;
 
 namespace MonoDevelop.Core
 {
-	/// <summary>
-	/// Access to branding information. Only the ApplicationName is guaranteed to be non-null.
-	/// </summary>
-	public static class BrandingService
-	{
-		static FilePath brandingDir;
-		static FilePath localizedBrandingDir;
-		static XDocument brandingDocument;
-		static XDocument localizedBrandingDocument;
-		
-		static string applicationName;
-		static string applicationLongName;
-		static string privacyStatement;
+    /// <summary>
+    /// Access to branding information. Only the ApplicationName is guaranteed to be non-null.
+    /// </summary>
+    public static class BrandingService
+    {
+        private static FilePath brandingDir;
+        private static FilePath localizedBrandingDir;
+        private static readonly XDocument brandingDocument;
+        private static readonly XDocument localizedBrandingDocument;
 
-		public static readonly string SuiteName;
-		public static readonly string ProfileDirectoryName;
-		public static readonly string StatusSteadyIconId;
-		public static readonly string HelpAboutIconId;
+        private static string applicationName;
+        private static string applicationLongName;
 
-		public static string ApplicationName {
-			get {
-				return applicationName;
-			}
-			set {
-				if (string.IsNullOrEmpty (value))
-					value = "MonoDevelop";
+        public static string SuiteName { get; }
+        public static string ProfileDirectoryName { get; }
+        public static string StatusSteadyIconId { get; }
+        public static string HelpAboutIconId { get; }
 
-				if (applicationName != value) {
-					applicationName = value;
-					OnApplicationNameChanged ();
-				}
-			}
-		}
+        public static string ApplicationName
+        {
+            get
+            {
+                return applicationName;
+            }
+            set
+            {
+                if (string.IsNullOrEmpty(value))
+                    value = "MonoDevelop";
 
-		public static string ApplicationLongName {
-			get {
-				return applicationLongName;
-			}
-			set {
-				if (string.IsNullOrEmpty (value))
-					value = "MonoDevelop";
+                if (applicationName != value)
+                {
+                    applicationName = value;
+                    OnApplicationNameChanged();
+                }
+            }
+        }
 
-				if (applicationLongName != value) {
-					applicationLongName = value;
-					OnApplicationNameChanged ();
-				}
-			}
-		}
+        public static string ApplicationLongName
+        {
+            get
+            {
+                return applicationLongName;
+            }
+            set
+            {
+                if (string.IsNullOrEmpty(value))
+                    value = "MonoDevelop";
 
-		public static string PrivacyStatement {
-			get {
-				return privacyStatement;
-			}
+                if (applicationLongName != value)
+                {
+                    applicationLongName = value;
+                    OnApplicationNameChanged();
+                }
+            }
+        }
 
-			set {
-				privacyStatement = value;
-			}
-		}
+        public static string PrivacyStatement { get; set; }
 
-		static BrandingService ()
-		{
-			try {
-				FilePath asmPath = typeof (BrandingService).Assembly.Location;
-				brandingDir = asmPath.ParentDirectory.Combine ("branding");
-				if (!Directory.Exists (brandingDir)) {
-					brandingDir = null;
-				} else {
-					var langCode = System.Globalization.CultureInfo.CurrentCulture.TwoLetterISOLanguageName;
-					localizedBrandingDir = brandingDir.Combine (langCode);
-					if (!Directory.Exists (localizedBrandingDir)) {
-						localizedBrandingDir = null;
-					}
-				}
-				
-				//read the files after detecting both directories, in case there's an error
-				if (brandingDir != null) { 
-					var brandingFile = brandingDir.Combine ("Branding.xml");
-					if (File.Exists (brandingFile)) {
-						brandingDocument = XDocument.Load (brandingFile);
-					}
-					if (localizedBrandingDir != null) {
-						var localizedBrandingFile = brandingDir.Combine ("Branding.xml");
-						if (File.Exists (localizedBrandingFile)) {
-							localizedBrandingDocument = XDocument.Load (localizedBrandingFile);
-						}
-					}
-				}
-				ApplicationName = GetString ("ApplicationName");
-				ApplicationLongName = GetString ("ApplicationLongName") ?? ApplicationName;
-				SuiteName = GetString ("SuiteName");
-				ProfileDirectoryName = GetString ("ProfileDirectoryName");
-				StatusSteadyIconId = GetString ("StatusAreaSteadyIcon");
-				HelpAboutIconId = GetString ("HelpAboutIcon");
-			} catch (Exception ex) {
-				LoggingService.LogError ("Could not read branding document", ex);
-			}
+        static BrandingService()
+        {
+            try
+            {
+                FilePath asmPath = typeof(BrandingService).Assembly.Location;
+                brandingDir = asmPath.ParentDirectory.Combine("branding");
+                if (!Directory.Exists(brandingDir))
+                {
+                    brandingDir = null;
+                }
+                else
+                {
+                    var langCode = System.Globalization.CultureInfo.CurrentCulture.TwoLetterISOLanguageName;
+                    localizedBrandingDir = brandingDir.Combine(langCode);
+                    if (!Directory.Exists(localizedBrandingDir))
+                    {
+                        localizedBrandingDir = null;
+                    }
+                }
 
-			if (string.IsNullOrEmpty (SuiteName))
-				SuiteName = ApplicationName;
+                //read the files after detecting both directories, in case there's an error
+                if (brandingDir != null)
+                {
+                    var brandingFile = brandingDir.Combine("Branding.xml");
+                    if (File.Exists(brandingFile))
+                    {
+                        brandingDocument = XDocument.Load(brandingFile);
+                    }
+                    if (localizedBrandingDir != null)
+                    {
+                        var localizedBrandingFile = brandingDir.Combine("Branding.xml");
+                        if (File.Exists(localizedBrandingFile))
+                        {
+                            localizedBrandingDocument = XDocument.Load(localizedBrandingFile);
+                        }
+                    }
+                }
+                ApplicationName = GetString("ApplicationName");
+                ApplicationLongName = GetString("ApplicationLongName") ?? ApplicationName;
+                SuiteName = GetString("SuiteName");
+                ProfileDirectoryName = GetString("ProfileDirectoryName");
+                StatusSteadyIconId = GetString("StatusAreaSteadyIcon");
+                HelpAboutIconId = GetString("HelpAboutIcon");
+            }
+            catch (Exception ex)
+            {
+                LoggingService.LogError("Could not read branding document", ex);
+            }
 
-			if (string.IsNullOrEmpty (ProfileDirectoryName))
-				ProfileDirectoryName = ApplicationName;
+            if (string.IsNullOrEmpty(SuiteName))
+                SuiteName = ApplicationName;
 
-			if (string.IsNullOrEmpty (StatusSteadyIconId))
-				StatusSteadyIconId = "md-status-steady";
+            if (string.IsNullOrEmpty(ProfileDirectoryName))
+                ProfileDirectoryName = ApplicationName;
 
-			if (string.IsNullOrEmpty (HelpAboutIconId))
-				HelpAboutIconId = "md-about";
-		}
-		
-		public static string GetString (params string[] keyPath)
-		{
-			var el = GetElement (keyPath);
-			return el == null? null : (string) el;
-		}
-		
-		public static int? GetInt (params string[] keyPath)
-		{
-			return (int?) GetElement (keyPath);
-		}
-		
-		public static bool? GetBool (params string[] keyPath)
-		{
-			return (bool?) GetElement (keyPath);
-		}
-		
-		public static XElement GetElement (params string[] keyPath)
-		{
-			if (keyPath == null)
-				throw new ArgumentNullException ();
-			if (keyPath.Length == 0)
-				throw new ArgumentException ();
-			
-			if (localizedBrandingDocument != null) {
-				var el = GetElement (localizedBrandingDocument, keyPath);
-				if (el != null)
-					return el;
-			}
-			
-			if (brandingDocument != null) {
-				var el = GetElement (brandingDocument, keyPath);
-				if (el != null)
-					return el;
-			}
-			return null;
-		}
-		
-		static XElement GetElement (XDocument doc, string[] keyPath)
-		{
-			int idx = 0;
-			XElement el = doc.Root;
-			do {
-				el = el.Element (keyPath[idx++]);
-			} while (idx < keyPath.Length && el != null);
-			return el;
-		}
-		
-		[MethodImpl (MethodImplOptions.NoInlining)]
-		public static FilePath GetFile (string name)
-		{
-			if (localizedBrandingDir != null) {
-				var file = localizedBrandingDir.Combine (name);
-				if (File.Exists (file))
-					return file;
-			}
-			
-			if (brandingDir != null) {
-				var file = brandingDir.Combine (name);
-				if (File.Exists (file))
-					return file;
-			}
-			
-			return null;
-		}
-		
-		[MethodImpl (MethodImplOptions.NoInlining)]
-		public static Stream GetStream (string name, bool lookInCallingAssembly=false)
-		{
-			//read branding directory, then calling assembly's resources
-			var file = GetFile (name);
-			if (file != null)
-				return File.OpenRead (file);
-			
-			if (lookInCallingAssembly)
-				return Assembly.GetCallingAssembly ().GetManifestResourceStream (name);
-			
-			return null;
-		}
+            if (string.IsNullOrEmpty(StatusSteadyIconId))
+                StatusSteadyIconId = "md-status-steady";
 
-		public static string BrandApplicationName (string s)
-		{
-			return s.Replace ("MonoDevelop", ApplicationName);
-		}
+            if (string.IsNullOrEmpty(HelpAboutIconId))
+                HelpAboutIconId = "md-about";
+        }
 
-		public static event EventHandler ApplicationNameChanged;
+        public static string GetString(params string[] keyPath)
+        {
+            var el = GetElement(keyPath);
+            return el == null ? null : (string)el;
+        }
 
-		static void OnApplicationNameChanged ()
-		{
-			var handler = ApplicationNameChanged;
-			if (handler != null)
-				handler (null, new EventArgs ());
-		}
-	}
+        public static int? GetInt(params string[] keyPath)
+        {
+            return (int?)GetElement(keyPath);
+        }
+
+        public static bool? GetBool(params string[] keyPath)
+        {
+            return (bool?)GetElement(keyPath);
+        }
+
+        public static XElement GetElement(params string[] keyPath)
+        {
+            if (keyPath == null)
+                throw new ArgumentNullException();
+            if (keyPath.Length == 0)
+                throw new ArgumentException();
+
+            if (localizedBrandingDocument != null)
+            {
+                var el = GetElement(localizedBrandingDocument, keyPath);
+                if (el != null)
+                    return el;
+            }
+
+            if (brandingDocument != null)
+            {
+                var el = GetElement(brandingDocument, keyPath);
+                if (el != null)
+                    return el;
+            }
+            return null;
+        }
+
+        private static XElement GetElement(XDocument doc, string[] keyPath)
+        {
+            int idx = 0;
+            XElement el = doc.Root;
+            do
+            {
+                el = el.Element(keyPath[idx++]);
+            } while (idx < keyPath.Length && el != null);
+            return el;
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static FilePath GetFile(string name)
+        {
+            if (localizedBrandingDir != null)
+            {
+                var file = localizedBrandingDir.Combine(name);
+                if (File.Exists(file))
+                    return file;
+            }
+
+            if (brandingDir != null)
+            {
+                var file = brandingDir.Combine(name);
+                if (File.Exists(file))
+                    return file;
+            }
+
+            return null;
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static Stream GetStream(string name, bool lookInCallingAssembly = false)
+        {
+            //read branding directory, then calling assembly's resources
+            var file = GetFile(name);
+            if (file != null)
+                return File.OpenRead(file);
+
+            if (lookInCallingAssembly)
+                return Assembly.GetCallingAssembly().GetManifestResourceStream(name);
+
+            return null;
+        }
+
+        public static string BrandApplicationName(string s)
+        {
+            return s.Replace("MonoDevelop", ApplicationName);
+        }
+
+        public static event EventHandler ApplicationNameChanged;
+
+        private static void OnApplicationNameChanged()
+        {
+            ApplicationNameChanged?.Invoke(null, new EventArgs());
+        }
+    }
 }

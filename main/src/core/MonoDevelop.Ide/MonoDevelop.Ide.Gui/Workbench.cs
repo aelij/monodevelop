@@ -38,7 +38,6 @@ using System.Threading.Tasks;
 using Gtk;
 using MonoDevelop.Components.Docking;
 using MonoDevelop.Components.DockNotebook;
-using MonoDevelop.Components.MainToolbar;
 using MonoDevelop.Core;
 using MonoDevelop.Core.Annotations;
 using MonoDevelop.Core.Instrumentation;
@@ -63,9 +62,8 @@ namespace MonoDevelop.Ide.Gui
     /// </summary>
     public sealed class Workbench
     {
-        private ImmutableList<Document> documents = ImmutableList<Document>.Empty;
-        internal DefaultWorkbench workbench;
         private PadCollection pads;
+        private IDefaultWorkbenchWindow window;
 
         public event EventHandler ActiveDocumentChanged;
         public event EventHandler LayoutChanged;
@@ -78,19 +76,19 @@ namespace MonoDevelop.Ide.Gui
             try
             {
                 Counters.Initialization.Trace("Creating DefaultWorkbench");
-                workbench = new DefaultWorkbench();
+                window = new DefaultWorkbenchWindow();
                 monitor.Step();
 
                 Counters.Initialization.Trace("Initializing Workspace");
-                workbench.InitializeWorkspace();
+                window.InitializeWorkspace();
                 monitor.Step();
 
                 Counters.Initialization.Trace("Initializing Layout");
-                workbench.InitializeLayout();
+                window.InitializeLayout();
                 monitor.Step();
 
-                workbench.Visible = false;
-                workbench.ActiveWorkbenchWindowChanged += OnDocumentChanged;
+                window.Visible = false;
+                window.ActiveWorkbenchWindowChanged += OnDocumentChanged;
 
                 IdeApp.FocusOut += delegate
                 {
@@ -116,7 +114,7 @@ namespace MonoDevelop.Ide.Gui
             RootWindow.Realize();
             Counters.Initialization.Trace("Making Visible");
             RootWindow.Visible = true;
-            workbench.CurrentLayout = "Solution";
+            window.CurrentLayout = "Solution";
 
             // now we have an layout set notify it
             Counters.Initialization.Trace("Setting layout");
@@ -127,10 +125,10 @@ namespace MonoDevelop.Ide.Gui
 
         internal bool Close()
         {
-            return workbench.Close();
+            return window.Close();
         }
 
-        public ImmutableList<Document> Documents => documents;
+        public ImmutableList<Document> Documents { get; private set; } = ImmutableList<Document>.Empty;
 
         /// <summary>
         /// This is a wrapper for use with AutoTest
@@ -144,9 +142,9 @@ namespace MonoDevelop.Ide.Gui
         {
             get
             {
-                if (workbench.ActiveWorkbenchWindow == null)
+                if (window.ActiveWorkbenchWindow == null)
                     return null;
-                return WrapDocument(workbench.ActiveWorkbenchWindow);
+                return WrapDocument(window.ActiveWorkbenchWindow);
             }
         }
 
@@ -154,7 +152,7 @@ namespace MonoDevelop.Ide.Gui
         {
             var fullPath = (FilePath)FileService.GetFullPath(name);
 
-            foreach (Document doc in documents)
+            foreach (Document doc in Documents)
             {
                 var fullDocPath = (FilePath)FileService.GetFullPath(doc.Name);
 
@@ -173,7 +171,7 @@ namespace MonoDevelop.Ide.Gui
             {
                 var fullPath = (FilePath)FileService.GetFullPath(f);
 
-                Document doc = documents.Find(d => d.Editor != null && (fullPath == FileService.GetFullPath(d.Name)));
+                Document doc = Documents.Find(d => d.Editor != null && (fullPath == FileService.GetFullPath(d.Name)));
                 if (doc != null)
                 {
                     results[idx] = doc.Editor.CreateReader();
@@ -196,14 +194,14 @@ namespace MonoDevelop.Ide.Gui
                 if (pads == null)
                 {
                     pads = new PadCollection();
-                    foreach (PadCodon pc in workbench.PadContentCollection)
+                    foreach (PadDefinition pc in window.PadContentCollection)
                         WrapPad(pc);
                 }
                 return pads;
             }
         }
 
-        public Window RootWindow => workbench;
+        public Window RootWindow => (Window)window;
 
         /// <summary>
         /// When set to <c>true</c>, opened documents will automatically be reloaded when a change in the underlying
@@ -259,38 +257,38 @@ namespace MonoDevelop.Ide.Gui
 
         public bool FullScreen
         {
-            get { return workbench.FullScreen; }
-            set { workbench.FullScreen = value; }
+            get { return window.FullScreen; }
+            set { window.FullScreen = value; }
         }
 
         public string CurrentLayout
         {
-            get { return workbench.CurrentLayout; }
+            get { return window.CurrentLayout; }
             set
             {
-                if (value != workbench.CurrentLayout)
+                if (value != window.CurrentLayout)
                 {
-                    workbench.CurrentLayout = value;
+                    window.CurrentLayout = value;
                     LayoutChanged?.Invoke(this, EventArgs.Empty);
                 }
             }
         }
 
-        public IList<string> Layouts => workbench.Layouts;
+        public IList<string> Layouts => window.Layouts;
 
-        public StatusBar StatusBar => workbench.StatusBar.MainContext;
+        public IStatusBar StatusBar => window.StatusBar;
 
         public void ShowCommandBar(string barId)
         {
-            workbench.Toolbar.ShowCommandBar(barId);
+            window.ShowCommandBar(barId);
         }
 
         public void HideCommandBar(string barId)
         {
-            workbench.Toolbar.HideCommandBar(barId);
+            window.HideCommandBar(barId);
         }
 
-        internal MainToolbarController Toolbar => workbench.Toolbar;
+        //internal MainToolbarController Toolbar => window.Toolbar;
 
         public Pad GetPad<T>()
         {
@@ -304,7 +302,7 @@ namespace MonoDevelop.Ide.Gui
 
         public void DeleteLayout(string name)
         {
-            workbench.DeleteLayout(name);
+            window.DeleteLayout(name);
             LayoutChanged?.Invoke(this, EventArgs.Empty);
         }
 
@@ -392,36 +390,36 @@ namespace MonoDevelop.Ide.Gui
                 ActiveDocument?.Close();
         }
 
-        internal Pad ShowPad(PadCodon content)
+        internal Pad ShowPad(PadDefinition content)
         {
-            workbench.ShowPad(content);
+            window.ShowPad(content);
             return WrapPad(content);
         }
 
-        internal Pad AddPad(PadCodon content)
+        internal Pad AddPad(PadDefinition content)
         {
-            workbench.AddPad(content);
+            window.AddPad(content);
             return WrapPad(content);
         }
 
         public Pad AddPad(PadContent padContent, string id, string label, string defaultPlacement, IconId icon)
         {
-            return AddPad(new PadCodon(padContent, id, label, defaultPlacement, DockItemStatus.Dockable, icon));
+            return AddPad(new PadDefinition(padContent, id, label, defaultPlacement, DockItemStatus.Dockable, icon));
         }
 
         public Pad AddPad(PadContent padContent, string id, string label, string defaultPlacement, DockItemStatus defaultStatus, IconId icon)
         {
-            return AddPad(new PadCodon(padContent, id, label, defaultPlacement, defaultStatus, icon));
+            return AddPad(new PadDefinition(padContent, id, label, defaultPlacement, defaultStatus, icon));
         }
 
         public Pad ShowPad(PadContent padContent, string id, string label, string defaultPlacement, IconId icon)
         {
-            return ShowPad(new PadCodon(padContent, id, label, defaultPlacement, DockItemStatus.Dockable, icon));
+            return ShowPad(new PadDefinition(padContent, id, label, defaultPlacement, DockItemStatus.Dockable, icon));
         }
 
         public Pad ShowPad(PadContent padContent, string id, string label, string defaultPlacement, DockItemStatus defaultStatus, IconId icon)
         {
-            return ShowPad(new PadCodon(padContent, id, label, defaultPlacement, defaultStatus, icon));
+            return ShowPad(new PadDefinition(padContent, id, label, defaultPlacement, defaultStatus, icon));
         }
 
         public Task<Document> OpenDocument(FilePath fileName, Project project, bool bringToFront)
@@ -541,7 +539,8 @@ namespace MonoDevelop.Ide.Gui
                         break;
                     }
                 }
-                Counters.OpenDocumentTimer.Trace("Initializing monitor");
+
+                await RealOpenFile(new ProgressMonitor(), info);
 
                 if (info.NewContent != null)
                 {
@@ -565,7 +564,7 @@ namespace MonoDevelop.Ide.Gui
 
         public Document OpenDocument(ViewContent content, bool bringToFront)
         {
-            workbench.ShowView(content, bringToFront);
+            window.ShowView(content, bringToFront);
             if (bringToFront)
                 Present();
             return WrapDocument(content.WorkbenchWindow);
@@ -573,7 +572,7 @@ namespace MonoDevelop.Ide.Gui
 
         public void ToggleMaximize()
         {
-            workbench.ToggleFullViewMode();
+            window.ToggleFullViewMode();
         }
 
         public Document NewDocument(string defaultName, string mimeType, string content)
@@ -604,7 +603,7 @@ namespace MonoDevelop.Ide.Gui
             newContent.UntitledName = defaultName;
             newContent.IsDirty = true;
             newContent.Binding = binding;
-            workbench.ShowView(newContent, true, binding);
+            window.ShowView(newContent, true, binding);
 
             var document = WrapDocument(newContent.WorkbenchWindow);
             return document;
@@ -627,15 +626,15 @@ namespace MonoDevelop.Ide.Gui
                 ActiveDocument.LastTimeActive = DateTime.Now;
         }
 
-        internal Document WrapDocument(IWorkbenchWindow window)
+        internal Document WrapDocument(IWorkbenchWindow workbenchWindow)
         {
-            if (window == null) return null;
-            Document doc = FindDocument(window);
+            if (workbenchWindow == null) return null;
+            Document doc = FindDocument(workbenchWindow);
             if (doc != null) return doc;
-            doc = new Document(window);
-            window.Closing += OnWindowClosing;
-            window.Closed += OnWindowClosed;
-            documents = documents.Add(doc);
+            doc = new Document(workbenchWindow);
+            workbenchWindow.Closing += OnWindowClosing;
+            workbenchWindow.Closed += OnWindowClosed;
+            Documents = Documents.Add(doc);
 
             doc.OnDocumentAttached();
             OnDocumentOpened(new DocumentEventArgs(doc));
@@ -643,7 +642,7 @@ namespace MonoDevelop.Ide.Gui
             return doc;
         }
 
-        private Pad WrapPad(PadCodon padContent)
+        private Pad WrapPad(PadDefinition padContent)
         {
             if (pads == null)
             {
@@ -653,7 +652,7 @@ namespace MonoDevelop.Ide.Gui
                         return p;
                 }
             }
-            Pad pad = new Pad(workbench, padContent);
+            Pad pad = new Pad(window, padContent);
             Pads.Add(pad);
             pad.Window.PadDestroyed += delegate
             {
@@ -664,8 +663,8 @@ namespace MonoDevelop.Ide.Gui
 
         private async void OnWindowClosing(object sender, WorkbenchWindowEventArgs args)
         {
-            var window = (IWorkbenchWindow)sender;
-            var viewContent = window.ViewContent;
+            var workbenchWindow = (IWorkbenchWindow)sender;
+            var viewContent = workbenchWindow.ViewContent;
             if (!args.Forced && viewContent != null && viewContent.IsDirty)
             {
                 AlertButton result = MessageService.GenericAlert(Stock.Warning,
@@ -677,10 +676,10 @@ namespace MonoDevelop.Ide.Gui
                     AlertButton.CloseWithoutSave, AlertButton.Cancel, viewContent.IsUntitled ? AlertButton.SaveAs : AlertButton.Save);
                 if (result == AlertButton.Save || result == AlertButton.SaveAs)
                 {
-                    await FindDocument(window).Save();
+                    await FindDocument(workbenchWindow).Save();
                     args.Cancel = viewContent.IsDirty;
                     if (args.Cancel)
-                        FindDocument(window).Select();
+                        FindDocument(workbenchWindow).Select();
                 }
                 else
                 {
@@ -689,28 +688,19 @@ namespace MonoDevelop.Ide.Gui
                         viewContent.DiscardChanges();
                 }
             }
-            OnDocumentClosing(FindDocument(window));
+            OnDocumentClosing(FindDocument(workbenchWindow));
         }
 
         private void OnWindowClosed(object sender, WorkbenchWindowEventArgs args)
         {
-            IWorkbenchWindow window = (IWorkbenchWindow)sender;
-            var doc = FindDocument(window);
-            window.Closing -= OnWindowClosing;
-            window.Closed -= OnWindowClosed;
-            documents = documents.Remove(doc);
+            IWorkbenchWindow workbenchWindow = (IWorkbenchWindow)sender;
+            var doc = FindDocument(workbenchWindow);
+            workbenchWindow.Closing -= OnWindowClosing;
+            workbenchWindow.Closed -= OnWindowClosed;
+            Documents = Documents.Remove(doc);
 
             OnDocumentClosed(doc);
             doc.DisposeDocument();
-        }
-
-        // When looking for the project to which the file belongs, look first
-        // in the active project, then the active solution, and so on
-        // ReSharper disable once UnusedParameter.Local
-        private static Project GetProjectContainingFile(FilePath fileName)
-        {
-            // TODO-AELIJ ?
-            return null;
         }
 
         private async Task<bool> RealOpenFile(ProgressMonitor monitor, FileOpenInformation openFileInfo)
@@ -766,7 +756,7 @@ namespace MonoDevelop.Ide.Gui
 
             IDisplayBinding binding;
             IViewDisplayBinding viewBinding;
-            Project project = openFileInfo.Project ?? GetProjectContainingFile(fileName);
+            Project project = openFileInfo.Project;
 
             if (openFileInfo.DisplayBinding != null)
             {
@@ -799,7 +789,7 @@ namespace MonoDevelop.Ide.Gui
                 {
                     if (viewBinding != null)
                     {
-                        var fw = new LoadFileWrapper(monitor, workbench, viewBinding, project, openFileInfo);
+                        var fw = new LoadFileWrapper(monitor, window, viewBinding, project, openFileInfo);
                         await fw.Invoke(fileName);
                     }
                     else
@@ -835,10 +825,10 @@ namespace MonoDevelop.Ide.Gui
             return true;
         }
 
-        internal Document FindDocument(IWorkbenchWindow window)
+        internal Document FindDocument(IWorkbenchWindow workbenchWindow)
         {
             foreach (Document doc in Documents)
-                if (doc.Window == window)
+                if (doc.Window == workbenchWindow)
                     return doc;
             return null;
         }
@@ -853,27 +843,27 @@ namespace MonoDevelop.Ide.Gui
 
         internal void ReorderTab(int oldPlacement, int newPlacement)
         {
-            workbench.ReorderTab(oldPlacement, newPlacement);
+            window.ReorderTab(oldPlacement, newPlacement);
         }
 
         internal void ReorderDocuments(int oldPlacement, int newPlacement)
         {
-            ViewContent content = workbench.InternalViewContentCollection[oldPlacement];
-            workbench.InternalViewContentCollection.RemoveAt(oldPlacement);
-            workbench.InternalViewContentCollection.Insert(newPlacement, content);
+            ViewContent content = window.ViewContentCollection[oldPlacement];
+            window.ViewContentCollection.RemoveAt(oldPlacement);
+            window.ViewContentCollection.Insert(newPlacement, content);
 
-            Document doc = documents[oldPlacement];
-            documents = documents.RemoveAt(oldPlacement).Insert(newPlacement, doc);
+            Document doc = Documents[oldPlacement];
+            Documents = Documents.RemoveAt(oldPlacement).Insert(newPlacement, doc);
         }
 
         internal void LockActiveWindowChangeEvent()
         {
-            workbench.LockActiveWindowChangeEvent();
+            window.LockActiveWindowChangeEvent();
         }
 
         internal void UnlockActiveWindowChangeEvent()
         {
-            workbench.UnlockActiveWindowChangeEvent();
+            window.UnlockActiveWindowChangeEvent();
         }
 
         private List<FileData> fileStatus;
@@ -926,8 +916,6 @@ namespace MonoDevelop.Ide.Gui
             {
                 try
                 {
-                    //					DateTime t = DateTime.Now;
-
                     await fileStatusLock.WaitAsync();
                     if (fileStatus == null)
                         return;
@@ -955,7 +943,6 @@ namespace MonoDevelop.Ide.Gui
                     if (modified.Count > 0)
                         FileService.NotifyFilesChanged(modified);
 
-                    //					Console.WriteLine ("CheckFileStatus " + (DateTime.Now - t).TotalMilliseconds + "ms " + fileStatus.Count);
                     fileStatus = null;
                 }
                 finally
@@ -967,7 +954,7 @@ namespace MonoDevelop.Ide.Gui
 
         private IEnumerable<FilePath> GetKnownFiles()
         {
-            foreach (Document doc in documents)
+            foreach (Document doc in Documents)
             {
                 if (!doc.HasProject && doc.IsFile)
                     yield return doc.FileName;
@@ -1137,20 +1124,20 @@ namespace MonoDevelop.Ide.Gui
         private readonly IViewDisplayBinding binding;
         private readonly Project project;
         private readonly FileOpenInformation fileInfo;
-        private readonly DefaultWorkbench workbench;
+        private readonly IDefaultWorkbenchWindow workbenchWindow;
         private readonly ProgressMonitor monitor;
         private ViewContent newContent;
 
-        public LoadFileWrapper(ProgressMonitor monitor, DefaultWorkbench workbench, IViewDisplayBinding binding, FileOpenInformation fileInfo)
+        public LoadFileWrapper(ProgressMonitor monitor, IDefaultWorkbenchWindow workbenchWindow, IViewDisplayBinding binding, FileOpenInformation fileInfo)
         {
             this.monitor = monitor;
-            this.workbench = workbench;
+            this.workbenchWindow = workbenchWindow;
             this.fileInfo = fileInfo;
             this.binding = binding;
         }
 
-        public LoadFileWrapper(ProgressMonitor monitor, DefaultWorkbench workbench, IViewDisplayBinding binding, Project project, FileOpenInformation fileInfo)
-            : this(monitor, workbench, binding, fileInfo)
+        public LoadFileWrapper(ProgressMonitor monitor, IDefaultWorkbenchWindow workbenchWindow, IViewDisplayBinding binding, Project project, FileOpenInformation fileInfo)
+            : this(monitor, workbenchWindow, binding, fileInfo)
         {
             this.project = project;
         }
@@ -1212,7 +1199,7 @@ namespace MonoDevelop.Ide.Gui
 
             Counters.OpenDocumentTimer.Trace("Showing view");
 
-            workbench.ShowView(newContent, fileInfo.Options.HasFlag(OpenDocumentOptions.BringToFront), binding, fileInfo.DockNotebook);
+            workbenchWindow.ShowView(newContent, fileInfo, binding);
 
             // ReSharper disable once PossibleNullReferenceException
             newContent.WorkbenchWindow.DocumentType = binding.Name;

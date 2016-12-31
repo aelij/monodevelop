@@ -145,7 +145,7 @@ namespace MonoDevelop.Components.DockNotebook
 			var tab = notebook.AddTab ();
 			tab.Content = workspaceWindow;
 
-			window.Title = DefaultWorkbench.GetTitle (workspaceWindow);
+			window.Title = DefaultWorkbenchWindow.GetTitle (workspaceWindow);
 
 			workspaceWindow.SetDockNotebook (notebook, tab);
 
@@ -178,7 +178,7 @@ namespace MonoDevelop.Components.DockNotebook
 				
 				motherContainer.tabControl = otherContainer.tabControl;
 				if (motherContainer.isMasterTab) {
-					((DefaultWorkbench)IdeApp.Workbench.RootWindow).TabControl = (SdiDragNotebook)motherContainer.tabControl;
+					((DefaultWorkbenchWindow)IdeApp.Workbench.RootWindow).TabControl = (SdiDragNotebook)motherContainer.tabControl;
 				}
 				motherContainer.isMasterTab |= otherContainer.isMasterTab;
 				motherContainer.Remove (paned);
@@ -194,7 +194,7 @@ namespace MonoDevelop.Components.DockNotebook
 
 		DockNotebook Insert (SdiWorkspaceWindow window, Action<DockNotebookContainer> callback)
 		{
-			var newNotebook = new SdiDragNotebook ((DefaultWorkbench)IdeApp.Workbench.RootWindow);
+			var newNotebook = new SdiDragNotebook ((DefaultWorkbenchWindow)IdeApp.Workbench.RootWindow);
 
 			newNotebook.NavigationButtonsVisible = false;
 			newNotebook.InitSize ();

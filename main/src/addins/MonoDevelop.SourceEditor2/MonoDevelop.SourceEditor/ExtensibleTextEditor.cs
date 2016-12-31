@@ -31,6 +31,7 @@ using Gdk;
 using GLib;
 using Gtk;
 using Mono.TextEditor;
+using Mono.TextEditor.Highlighting;
 using Mono.TextEditor.Vi;
 using MonoDevelop.Components;
 using MonoDevelop.Components.Commands;
@@ -48,6 +49,7 @@ using EditMode = Mono.TextEditor.EditMode;
 using Image = Xwt.Drawing.Image;
 using ITextEditorOptions = Mono.TextEditor.ITextEditorOptions;
 using Key = Gdk.Key;
+using SyntaxModeService = MonoDevelop.Ide.Editor.Highlighting.SyntaxModeService;
 using TextLink = Mono.TextEditor.TextLink;
 using Timeout = GLib.Timeout;
 
@@ -89,25 +91,46 @@ namespace MonoDevelop.SourceEditor
             }
         }
 
+        private bool updatingSemanticHighlighting;
+
         private void UpdateSemanticHighlighting()
         {
-            var oldSemanticHighighting = Document.SyntaxMode as SemanticHighlightingSyntaxMode;
+            if (updatingSemanticHighlighting) return;
 
-            if (semanticHighlighting == null)
+            updatingSemanticHighlighting = true;
+
+            try
             {
-                if (oldSemanticHighighting != null)
-                    Document.MimeType = Document.MimeType;
-            }
-            else
-            {
-                if (oldSemanticHighighting == null)
+                var oldSemanticHighighting = Document.SyntaxMode as SemanticHighlightingSyntaxMode;
+
+                if (semanticHighlighting == null)
                 {
-                    Document.SyntaxMode = new SemanticHighlightingSyntaxMode(this, Document.SyntaxMode, semanticHighlighting);
+                    if (oldSemanticHighighting != null)
+                        Document.MimeType = Document.MimeType;
                 }
                 else
                 {
-                    oldSemanticHighighting.UpdateSemanticHighlighting(semanticHighlighting);
+                    var syntaxMode = semanticHighlighting as ISyntaxMode;
+                    if (syntaxMode != null)
+                    {
+                        Document.SyntaxMode = syntaxMode;
+                    }
+                    else
+                    {
+                        if (oldSemanticHighighting == null)
+                        {
+                            Document.SyntaxMode = new SemanticHighlightingSyntaxMode(this, Document.SyntaxMode, semanticHighlighting);
+                        }
+                        else
+                        {
+                            oldSemanticHighighting.UpdateSemanticHighlighting(semanticHighlighting);
+                        }
+                    }
                 }
+            }
+            finally
+            {
+                updatingSemanticHighlighting = false;
             }
         }
 

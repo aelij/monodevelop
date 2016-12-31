@@ -31,13 +31,13 @@ using System.Diagnostics;
 using Mono.TextEditor.Highlighting;
 using Mono.TextEditor.Utils;
 using System.Linq;
-using ICSharpCode.NRefactory.Editor;
 using System.Threading.Tasks;
 using System.Threading;
+using Mono.TextEditor.NRefactory;
 
 namespace Mono.TextEditor
 {
-	public class TextDocument : ICSharpCode.NRefactory.AbstractAnnotatable, IDocument
+	public class TextDocument : AbstractAnnotatable, IDocument
 	{
 		ImmutableText buffer;
 		readonly ILineSplitter splitter;
@@ -243,7 +243,7 @@ namespace Mono.TextEditor
 			}
 		}
 
-		public void Insert (int offset, string text, ICSharpCode.NRefactory.Editor.AnchorMovementType anchorMovementType = AnchorMovementType.Default)
+		public void Insert (int offset, string text, AnchorMovementType anchorMovementType = AnchorMovementType.Default)
 		{
 			Replace (offset, 0, text, anchorMovementType);
 		}
@@ -263,7 +263,7 @@ namespace Mono.TextEditor
 			Replace (offset, count, value, AnchorMovementType.Default);
 		}
 
-		public void Replace (int offset, int count, string value, ICSharpCode.NRefactory.Editor.AnchorMovementType anchorMovementType = AnchorMovementType.Default)
+		public void Replace (int offset, int count, string value, AnchorMovementType anchorMovementType = AnchorMovementType.Default)
 		{
 			if (offset < 0)
 				throw new ArgumentOutOfRangeException (nameof (offset), "must be > 0, was: " + offset);
@@ -866,7 +866,7 @@ namespace Mono.TextEditor
 			OnUndone (new UndoOperationEventArgs (operation));
 		}
 
-		public void RollbackTo (ICSharpCode.NRefactory.Editor.ITextSourceVersion version)
+		public void RollbackTo (ITextSourceVersion version)
 		{
 			var steps = Version.CompareAge (version);
 			if (steps < 0)
@@ -1862,7 +1862,7 @@ namespace Mono.TextEditor
 		#endregion
 
 		#region IDocument implementation
-		event EventHandler<ICSharpCode.NRefactory.Editor.TextChangeEventArgs> ICSharpCode.NRefactory.Editor.IDocument.TextChanging {
+		event EventHandler<TextChangeEventArgs> IDocument.TextChanging {
 			add {
 				// TODO
 			}
@@ -1871,7 +1871,7 @@ namespace Mono.TextEditor
 			}
 		}
 
-		event EventHandler<ICSharpCode.NRefactory.Editor.TextChangeEventArgs> ICSharpCode.NRefactory.Editor.IDocument.TextChanged {
+		event EventHandler<TextChangeEventArgs> IDocument.TextChanged {
 			add {
 				// TODO
 			}
@@ -1880,7 +1880,7 @@ namespace Mono.TextEditor
 			}
 		}
 
-		event EventHandler ICSharpCode.NRefactory.Editor.IDocument.ChangeCompleted {
+		event EventHandler IDocument.ChangeCompleted {
 			add {
 				// TODO
 			}
@@ -1889,67 +1889,67 @@ namespace Mono.TextEditor
 			}
 		}
 
-		ICSharpCode.NRefactory.Editor.IDocumentLine ICSharpCode.NRefactory.Editor.IDocument.GetLineByNumber (int lineNumber)
+		IDocumentLine IDocument.GetLineByNumber (int lineNumber)
 		{
 			return GetLine (lineNumber);
 		}
 
-		ICSharpCode.NRefactory.Editor.IDocumentLine ICSharpCode.NRefactory.Editor.IDocument.GetLineByOffset (int offset)
+		IDocumentLine IDocument.GetLineByOffset (int offset)
 		{
 			return GetLineByOffset (offset);
 		}
 
-		int ICSharpCode.NRefactory.Editor.IDocument.GetOffset (int line, int column)
+		int IDocument.GetOffset (int line, int column)
 		{
 			return LocationToOffset (line, column);
 		}
 
-		public int GetOffset (ICSharpCode.NRefactory.TextLocation location)
+		public int GetOffset (TextLocation location)
 		{
 			return LocationToOffset (location.Line, location.Column);
 		}
 
-		ICSharpCode.NRefactory.TextLocation ICSharpCode.NRefactory.Editor.IDocument.GetLocation (int offset)
+		TextLocation IDocument.GetLocation (int offset)
 		{
 			return OffsetToLocation (offset);
 		}
 
-		void ICSharpCode.NRefactory.Editor.IDocument.Insert (int offset, ITextSource text)
+		void IDocument.Insert (int offset, ITextSource text)
 		{
 			Insert (offset, text.Text);
 		}
 
-		void ICSharpCode.NRefactory.Editor.IDocument.Replace (int offset, int count, ITextSource text)
+		void IDocument.Replace (int offset, int count, ITextSource text)
 		{
 			Replace (offset, count, text.Text);
 		}
 
-		void ICSharpCode.NRefactory.Editor.IDocument.Insert (int offset, string text)
+		void IDocument.Insert (int offset, string text)
 		{
 			Insert (offset, text);
 		}
 
-		void ICSharpCode.NRefactory.Editor.IDocument.Insert (int offset, ITextSource text, AnchorMovementType anchorMovementType)
+		void IDocument.Insert (int offset, ITextSource text, AnchorMovementType anchorMovementType)
 		{
 			Insert (offset, text.Text, anchorMovementType);
 		}
 
-		void ICSharpCode.NRefactory.Editor.IDocument.Insert (int offset, string text, AnchorMovementType anchorMovementType)
+		void IDocument.Insert (int offset, string text, AnchorMovementType anchorMovementType)
 		{
 			Insert (offset, text, anchorMovementType);
 		}
 
-		void ICSharpCode.NRefactory.Editor.IDocument.StartUndoableAction ()
+		void IDocument.StartUndoableAction ()
 		{
 			BeginAtomicUndo ();
 		}
 
-		void ICSharpCode.NRefactory.Editor.IDocument.EndUndoableAction ()
+		void IDocument.EndUndoableAction ()
 		{
 			EndAtomicUndo ();
 		}
 
-		ICSharpCode.NRefactory.Editor.ITextAnchor ICSharpCode.NRefactory.Editor.IDocument.CreateAnchor (int offset)
+		ITextAnchor IDocument.CreateAnchor (int offset)
 		{
 			throw new NotImplementedException ();
 		}
@@ -1963,22 +1963,22 @@ namespace Mono.TextEditor
 		#endregion
 
 		#region ITextSource implementation
-		void ICSharpCode.NRefactory.Editor.ITextSource.WriteTextTo (System.IO.TextWriter writer)
+		void ITextSource.WriteTextTo (System.IO.TextWriter writer)
 		{
 			throw new NotImplementedException ();
 		}
 
-		void ICSharpCode.NRefactory.Editor.ITextSource.WriteTextTo (System.IO.TextWriter writer, int offset, int length)
+		void ITextSource.WriteTextTo (System.IO.TextWriter writer, int offset, int length)
 		{
 			throw new NotImplementedException ();
 		}
 
-		ICSharpCode.NRefactory.Editor.ITextSource ICSharpCode.NRefactory.Editor.ITextSource.CreateSnapshot ()
+		ITextSource ITextSource.CreateSnapshot ()
 		{
 			throw new NotImplementedException ();
 		}
 
-		public ICSharpCode.NRefactory.Editor.ITextSource CreateSnapshot (int offset, int length)
+		public ITextSource CreateSnapshot (int offset, int length)
 		{
 			throw new NotImplementedException ();
 		}
@@ -1993,12 +1993,12 @@ namespace Mono.TextEditor
 			return new ImmutableTextTextReader(buffer.GetText(offset, length));
 		}
 
-		string ICSharpCode.NRefactory.Editor.ITextSource.GetText (int offset, int length)
+		string ITextSource.GetText (int offset, int length)
 		{
 			return GetTextAt (offset, length);
 		}
 
-		public string GetText (ICSharpCode.NRefactory.Editor.ISegment segment)
+		public string GetText (ISegment segment)
 		{
 			return GetTextAt (segment.Offset, segment.Length);
 		}
@@ -2009,7 +2009,7 @@ namespace Mono.TextEditor
 			}
 		}
 
-		int ICSharpCode.NRefactory.Editor.ITextSource.TextLength {
+		int ITextSource.TextLength {
 			get {
 				return TextLength;
 			}
@@ -2052,7 +2052,7 @@ namespace Mono.TextEditor
 			return buffer.GetText (offset, count);
 		}
 
-		ICSharpCode.NRefactory.Editor.IDocument ICSharpCode.NRefactory.Editor.IDocument.CreateDocumentSnapshot ()
+		IDocument IDocument.CreateDocumentSnapshot ()
 		{
 			return new SnapshotDocument (this);
 		}

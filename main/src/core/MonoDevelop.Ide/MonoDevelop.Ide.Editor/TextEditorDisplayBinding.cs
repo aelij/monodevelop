@@ -33,82 +33,76 @@ using MonoDevelop.Ide.Editor.Highlighting;
 
 namespace MonoDevelop.Ide.Editor
 {
-	public class TextEditorDisplayBinding : IViewDisplayBinding
-	{
-		static bool IsInitialized = false;
+    public class TextEditorDisplayBinding : IViewDisplayBinding
+    {
+        private static bool isInitialized;
 
-		public static FilePath SyntaxModePath {
-			get {
-				return UserProfile.Current.UserDataRoot.Combine ("HighlightingSchemes");
-			}
-		}
+        public static FilePath SyntaxModePath => UserProfile.Current.UserDataRoot.Combine("HighlightingSchemes");
 
-		static TextEditorDisplayBinding ()
-		{
-			InitSourceEditor ();
-		}
+        static TextEditorDisplayBinding()
+        {
+            InitSourceEditor();
+        }
 
-		public static void InitSourceEditor ()
-		{
-			if (IsInitialized)
-				return;
-			IsInitialized = true;
+        public static void InitSourceEditor()
+        {
+            if (isInitialized)
+                return;
+            isInitialized = true;
 
-			// MonoDevelop.SourceEditor.Extension.TemplateExtensionNodeLoader.Init ();
-			DefaultSourceEditorOptions.Init ();
-			// SyntaxModeService.EnsureLoad ();
-			LoadCustomStylesAndModes ();
-		}
+            // MonoDevelop.SourceEditor.Extension.TemplateExtensionNodeLoader.Init ();
+            DefaultSourceEditorOptions.Init();
+            // SyntaxModeService.EnsureLoad ();
+            LoadCustomStylesAndModes();
+        }
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		public static void LoadCustomStylesAndModes ()
-		{
-			bool success = true;
-			if (!Directory.Exists (SyntaxModePath)) {
-				try {
-					Directory.CreateDirectory (SyntaxModePath);
-				} catch (Exception e) {
-					success = false;
-					LoggingService.LogError ("Can't create syntax mode directory", e);
-				}
-			}
-			if (success)
-				SyntaxModeService.LoadStylesAndModes (SyntaxModePath);
-		}
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public static void LoadCustomStylesAndModes()
+        {
+            bool success = true;
+            if (!Directory.Exists(SyntaxModePath))
+            {
+                try
+                {
+                    Directory.CreateDirectory(SyntaxModePath);
+                }
+                catch (Exception e)
+                {
+                    success = false;
+                    LoggingService.LogError("Can't create syntax mode directory", e);
+                }
+            }
+            if (success)
+                SyntaxModeService.LoadStylesAndModes(SyntaxModePath);
+        }
 
-		public string Name {
-			get {
-				return GettextCatalog.GetString ("Source Code Editor");
-			}
-		}
+        public string Name => GettextCatalog.GetString("Source Code Editor");
 
-		public bool CanHandle (FilePath fileName, string mimeType, Project ownerProject)
-		{
-			if (fileName != null)
-				return DesktopService.GetFileIsText (fileName, mimeType);
+        public bool CanHandle(FilePath fileName, string mimeType, Project ownerProject)
+        {
+            if (fileName != null)
+                return DesktopService.GetFileIsText(fileName, mimeType);
 
-			if (!string.IsNullOrEmpty (mimeType))
-				return DesktopService.GetMimeTypeIsText (mimeType);
+            if (!string.IsNullOrEmpty(mimeType))
+                return DesktopService.GetMimeTypeIsText(mimeType);
 
-			return false;
-		}
+            return false;
+        }
 
-		public ViewContent CreateContent (FilePath fileName, string mimeType, Project ownerProject)
-		{
-			var editor = TextEditorFactory.CreateNewEditor ();
-			editor.MimeType = mimeType;
-			editor.GetViewContent ().Project = ownerProject;
-			editor.GetViewContent ().ContentName = fileName;
-			return editor.GetViewContent (); 
-		}
+        public ViewContent CreateContent(FilePath fileName, string mimeType, Project ownerProject)
+        {
+            var editor = TextEditorFactory.CreateNewEditor();
+            editor.MimeType = mimeType;
+            editor.GetViewContent().Project = ownerProject;
+            editor.GetViewContent().ContentName = fileName;
+            return editor.GetViewContent();
+        }
 
-		public bool CanHandleFile (string fileName)
-		{
-			return DesktopService.GetFileIsText (fileName);
-		}
+        public bool CanHandleFile(string fileName)
+        {
+            return DesktopService.GetFileIsText(fileName);
+        }
 
-		public bool CanUseAsDefault {
-			get { return true; }
-		}
-	}
+        public bool CanUseAsDefault => true;
+    }
 }

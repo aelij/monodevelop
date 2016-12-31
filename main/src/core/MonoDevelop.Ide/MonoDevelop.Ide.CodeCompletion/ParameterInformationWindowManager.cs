@@ -133,7 +133,7 @@ namespace MonoDevelop.Ide.CodeCompletion
                 currentMethodGroup = actualMethodGroup;
             try
             {
-                int pos = await ext.GetCurrentParameterIndex(currentMethodGroup.MethodProvider.StartOffset, token);
+                int pos = await ext.GetCurrentParameterIndex(currentMethodGroup.MethodProvider, currentMethodGroup.MethodProvider.StartOffset, token);
                 if (pos == -1)
                 {
                     if (actualMethodGroup.MethodProvider == null)
@@ -142,7 +142,7 @@ namespace MonoDevelop.Ide.CodeCompletion
                     }
                     else
                     {
-                        pos = await ext.GetCurrentParameterIndex(actualMethodGroup.MethodProvider.StartOffset, token);
+                        pos = await ext.GetCurrentParameterIndex(currentMethodGroup.MethodProvider, actualMethodGroup.MethodProvider.StartOffset, token);
                         currentMethodGroup = pos >= 0 ? actualMethodGroup : null;
                     }
                 }
@@ -261,7 +261,7 @@ namespace MonoDevelop.Ide.CodeCompletion
                     window.Widget = completionWidget;
                 }
                 wasAbove = false;
-                int curParam = window.Ext != null ? await window.Ext.GetCurrentParameterIndex(currentMethodGroup.MethodProvider.StartOffset) : 0;
+                int curParam = window.Ext != null ? await window.Ext.GetCurrentParameterIndex(currentMethodGroup.MethodProvider, currentMethodGroup.MethodProvider.StartOffset) : 0;
                 var geometry2 = DesktopService.GetUsableMonitorGeometry(window.Screen.Number, window.Screen.GetMonitorAtPoint(X, Y));
                 window.ShowParameterInfo(currentMethodGroup.MethodProvider, currentMethodGroup.CurrentOverload, curParam - 1, (int)geometry2.Width);
                 PositionParameterInfoWindow(window.Allocation);
@@ -288,7 +288,7 @@ namespace MonoDevelop.Ide.CodeCompletion
             lastH = allocation.Height;
             var isCompletionWindowVisible = wasCompletionWindowVisible = (CompletionWindowManager.Wnd?.Visible ?? false);
             var ctx = window.Widget.CurrentCodeCompletionContext;
-            int cparam = window.Ext != null ? await window.Ext.GetCurrentParameterIndex(currentMethodGroup.MethodProvider.StartOffset) : 0;
+            int cparam = window.Ext != null ? await window.Ext.GetCurrentParameterIndex(currentMethodGroup.MethodProvider, currentMethodGroup.MethodProvider.StartOffset) : 0;
 
             X = currentMethodGroup.CompletionContext.TriggerXCoord;
             if (isCompletionWindowVisible)

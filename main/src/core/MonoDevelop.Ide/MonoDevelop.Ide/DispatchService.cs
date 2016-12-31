@@ -29,181 +29,195 @@
 
 using System;
 using System.Threading;
-using System.Collections;
 using System.Diagnostics;
 
 using MonoDevelop.Core;
 using MonoDevelop.Ide.Gui;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace MonoDevelop.Ide
 {
-	public static class DispatchService
-	{
-		static GuiSyncContext guiContext;
+    public static class DispatchService
+    {
+        private static GuiSyncContext guiContext;
 
-		class GtkSynchronizationContext: SynchronizationContext
-		{
-			public override void Post (SendOrPostCallback d, object state)
-			{
-				Gtk.Application.Invoke (delegate {
-					d (state);
-				});
-			}
+        private class GtkSynchronizationContext : SynchronizationContext
+        {
+            public override void Post(SendOrPostCallback d, object state)
+            {
+                Gtk.Application.Invoke(delegate
+                {
+                    d(state);
+                });
+            }
 
-			public override void Send (SendOrPostCallback d, object state)
-			{
-				if (Runtime.IsMainThread) {
-					d (state);
-					return;
-				}
-				var ob = new object ();
-				lock (ob) {
-					Gtk.Application.Invoke (delegate {
-						try {
-							d (state);
-						} finally {
-							Monitor.Pulse (ob);
-						}
-					});
-					Monitor.Wait (ob);
-				}
-			}
+            public override void Send(SendOrPostCallback d, object state)
+            {
+                if (Runtime.IsMainThread)
+                {
+                    d(state);
+                    return;
+                }
+                var ob = new object();
+                lock (ob)
+                {
+                    Gtk.Application.Invoke(delegate
+                    {
+                        try
+                        {
+                            d(state);
+                        }
+                        finally
+                        {
+                            Monitor.Pulse(ob);
+                        }
+                    });
+                    Monitor.Wait(ob);
+                }
+            }
 
-			public override SynchronizationContext CreateCopy ()
-			{
-				return new GtkSynchronizationContext ();
-			}
-		}
+            public override SynchronizationContext CreateCopy()
+            {
+                return new GtkSynchronizationContext();
+            }
+        }
 
-		internal static void Initialize ()
-		{
-			if (guiContext != null)
-				return;
-			
-			guiContext = new GuiSyncContext ();
+        internal static void Initialize()
+        {
+            if (guiContext != null)
+                return;
 
-			SynchronizationContext = new GtkSynchronizationContext ();
-		}
+            guiContext = new GuiSyncContext();
 
-		public static SynchronizationContext SynchronizationContext { get; private set; }
-		
-		static DateTime lastPendingEvents;
-		internal static void RunPendingEvents ()
-		{
-			// The loop is limited to 1000 iterations as a workaround for an issue that some users
-			// have experienced. Sometimes EventsPending starts return 'true' for all iterations,
-			// causing the loop to never end.
-			//
-			// The loop is also limited to running at most twice a second as some of the classes
-			// inheriting from BaseProgressMonitor call RunPendingEvents for every method invocation.
-			// This means we pump the main loop dozens of times a second resulting in many screen
-			// redraws and significantly slow down the running task.
+            SynchronizationContext = new GtkSynchronizationContext();
+        }
 
-			int maxLength = 20;
-			Gdk.Threads.Enter();
-			Stopwatch sw = new Stopwatch ();
-			sw.Start ();
+        public static SynchronizationContext SynchronizationContext { get; private set; }
 
-			// Check for less than zero in case there's a system time change
-			var diff = DateTime.UtcNow - lastPendingEvents;
-			if (diff > TimeSpan.FromMilliseconds (500) || diff < TimeSpan.Zero) {
-				lastPendingEvents = DateTime.UtcNow;
-				while (Gtk.Application.EventsPending () && sw.ElapsedMilliseconds < maxLength) {
-					Gtk.Application.RunIteration (false);
-				}
-			}
+        private static DateTime lastPendingEvents;
+        internal static void RunPendingEvents()
+        {
+            // The loop is limited to 1000 iterations as a workaround for an issue that some users
+            // have experienced. Sometimes EventsPending starts return 'true' for all iterations,
+            // causing the loop to never end.
+            //
+            // The loop is also limited to running at most twice a second as some of the classes
+            // inheriting from BaseProgressMonitor call RunPendingEvents for every method invocation.
+            // This means we pump the main loop dozens of times a second resulting in many screen
+            // redraws and significantly slow down the running task.
 
-			sw.Stop ();
+            const int maxLength = 20;
+            Gdk.Threads.Enter();
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
 
-			Gdk.Threads.Leave();
-		}
-		
-		#region Animations
+            // Check for less than zero in case there's a system time change
+            var diff = DateTime.UtcNow - lastPendingEvents;
+            if (diff > TimeSpan.FromMilliseconds(500) || diff < TimeSpan.Zero)
+            {
+                lastPendingEvents = DateTime.UtcNow;
+                while (Gtk.Application.EventsPending() && sw.ElapsedMilliseconds < maxLength)
+                {
+                    Gtk.Application.RunIteration(false);
+                }
+            }
 
-		/// <summary>
-		/// Runs a delegate at regular intervals 
-		/// </summary>
-		/// <returns>
-		/// An animation object. It can be disposed to stop the animation.
-		/// </returns>
-		/// <param name='animation'>
-		/// The delegate to run. The return value if the number of milliseconds to wait until the delegate is run again.
-		/// The execution will stop if the deletgate returns 0
-		/// </param>
-		public static IDisposable RunAnimation (Func<int> animation)
-		{
-			var ainfo = new AnimationInfo () {
-				AnimationFunc = animation,
-				NextDueTime = DateTime.Now
-			};
+            sw.Stop();
 
-			activeAnimations.Add (ainfo);
-			
-			// Don't immediately run the animation if we are going to do it in less than 20ms
-			if (animationHandle == 0 || currentAnimationSpan > 20)
-				ProcessAnimations ();
-			return ainfo;
-		}
-		
-		static List<AnimationInfo> activeAnimations = new List<AnimationInfo> ();
-		static uint animationHandle;
-		static int currentAnimationSpan;
+            Gdk.Threads.Leave();
+        }
 
-		class AnimationInfo: IDisposable {
-			public Func<int> AnimationFunc;
-			public DateTime NextDueTime;
+        #region Animations
 
-			public void Dispose ()
-			{
-				DispatchService.StopAnimation (this);
-			}
-		}
+        /// <summary>
+        /// Runs a delegate at regular intervals 
+        /// </summary>
+        /// <returns>
+        /// An animation object. It can be disposed to stop the animation.
+        /// </returns>
+        /// <param name='animation'>
+        /// The delegate to run. The return value if the number of milliseconds to wait until the delegate is run again.
+        /// The execution will stop if the deletgate returns 0
+        /// </param>
+        public static IDisposable RunAnimation(Func<int> animation)
+        {
+            var ainfo = new AnimationInfo()
+            {
+                AnimationFunc = animation,
+                NextDueTime = DateTime.Now
+            };
 
-		static bool ProcessAnimations ()
-		{
-			DateTime now = DateTime.Now;
+            ActiveAnimations.Add(ainfo);
 
-			foreach (var a in activeAnimations.Where (an => an.NextDueTime <= now).ToArray ()) {
-				int ms = a.AnimationFunc ();
-				if (ms <= 0) {
-					activeAnimations.Remove (a);
-				} else
-					a.NextDueTime = DateTime.Now + TimeSpan.FromMilliseconds (ms);
-			}
+            // Don't immediately run the animation if we are going to do it in less than 20ms
+            if (animationHandle == 0 || currentAnimationSpan > 20)
+                ProcessAnimations();
+            return ainfo;
+        }
 
-			if (activeAnimations.Count == 0) {
-				// No more animations
-				animationHandle = 0;
-				return false;
-			}
+        private static readonly List<AnimationInfo> ActiveAnimations = new List<AnimationInfo>();
+        private static uint animationHandle;
+        private static int currentAnimationSpan;
 
-			var nextDueTime = activeAnimations.Min (a => a.NextDueTime);
+        private class AnimationInfo : IDisposable
+        {
+            public Func<int> AnimationFunc;
+            public DateTime NextDueTime;
 
-			int nms = (int) (nextDueTime - DateTime.Now).TotalMilliseconds;
-			if (nms < 20)
-				nms = 20;
+            public void Dispose()
+            {
+                StopAnimation(this);
+            }
+        }
 
-			// Don't re-schedule if the current time span is more or less the same as the previous one
-			if (animationHandle != 0 && Math.Abs (nms - currentAnimationSpan) <= 3)
-				return true;
+        private static bool ProcessAnimations()
+        {
+            DateTime now = DateTime.Now;
 
-			currentAnimationSpan = nms;
-			animationHandle = GLib.Timeout.Add ((uint)currentAnimationSpan, ProcessAnimations);
-			return false;
-		}
+            foreach (var a in ActiveAnimations.Where(an => an.NextDueTime <= now).ToArray())
+            {
+                int ms = a.AnimationFunc();
+                if (ms <= 0)
+                {
+                    ActiveAnimations.Remove(a);
+                }
+                else
+                    a.NextDueTime = DateTime.Now + TimeSpan.FromMilliseconds(ms);
+            }
 
-		static void StopAnimation (AnimationInfo a)
-		{
-			activeAnimations.Remove (a);
-			if (activeAnimations.Count == 0 && animationHandle != 0) {
-				GLib.Source.Remove (animationHandle);
-				animationHandle = 0;
-			}
-		}
+            if (ActiveAnimations.Count == 0)
+            {
+                // No more animations
+                animationHandle = 0;
+                return false;
+            }
 
-		#endregion
-	}
+            var nextDueTime = ActiveAnimations.Min(a => a.NextDueTime);
+
+            int nms = (int)(nextDueTime - DateTime.Now).TotalMilliseconds;
+            if (nms < 20)
+                nms = 20;
+
+            // Don't re-schedule if the current time span is more or less the same as the previous one
+            if (animationHandle != 0 && Math.Abs(nms - currentAnimationSpan) <= 3)
+                return true;
+
+            currentAnimationSpan = nms;
+            animationHandle = GLib.Timeout.Add((uint)currentAnimationSpan, ProcessAnimations);
+            return false;
+        }
+
+        private static void StopAnimation(AnimationInfo a)
+        {
+            ActiveAnimations.Remove(a);
+            if (ActiveAnimations.Count == 0 && animationHandle != 0)
+            {
+                GLib.Source.Remove(animationHandle);
+                animationHandle = 0;
+            }
+        }
+
+        #endregion
+    }
 }

@@ -32,14 +32,28 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Text;
-using MonoDevelop.Core;
-using MonoDevelop.Components;
-using MonoDevelop.Ide.Commands;
-using MonoDevelop.Components.Commands;
-using MonoDevelop.Ide.Gui.Pads;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text;
+using Gdk;
+using GLib;
+using Gtk;
+using MonoDevelop.Components;
+using MonoDevelop.Components.Commands;
+using MonoDevelop.Core;
+using MonoDevelop.Ide.Commands;
+using MonoDevelop.Ide.Gui.Pads;
+using Pango;
+using CairoHelper = Gdk.CairoHelper;
+using Color = Gdk.Color;
+using Drag = Gtk.Drag;
+using Image = Xwt.Drawing.Image;
+using Key = Gdk.Key;
+using Layout = Pango.Layout;
+using Rectangle = Gdk.Rectangle;
+using Size = Xwt.Size;
+using Style = Gtk.Style;
+using Timeout = GLib.Timeout;
 
 [assembly: InternalsVisibleTo("MonoDevelop.UnitTesting")]
 
@@ -53,108 +67,75 @@ namespace MonoDevelop.Ide.Gui.Components
         internal const int FilledColumn = 3;
         internal const int ShowPopupColumn = 4;
 
-        NodeBuilder[] builders;
-        Dictionary<Type, NodeBuilder[]> builderChains = new Dictionary<Type, NodeBuilder[]>();
-        NodeHashtable nodeHash = new NodeHashtable();
+        private readonly Dictionary<Type, NodeBuilder[]> builderChains = new Dictionary<Type, NodeBuilder[]>();
 
-        ExtensibleTreeViewWidget widget;
-        ExtensibleTreeViewTree tree;
-        Gtk.TreeStore store;
-        Gtk.TreeViewColumn complete_column;
-        ZoomableCellRendererPixbuf pix_render;
-        CustomCellRendererText text_render;
-        TreeBuilderContext builderContext;
-        Hashtable callbacks = new Hashtable();
-        bool editingText = false;
+        private readonly ExtensibleTreeViewWidget widget;
+        private readonly ExtensibleTreeViewTree tree;
+        private ZoomableCellRendererPixbuf pixRender;
+        private CustomCellRendererText textRender;
+        private TreeBuilderContext builderContext;
+        private readonly Hashtable callbacks = new Hashtable();
+        private bool editingText;
 
-        TreePadOption[] options;
-        TreeOptions globalOptions;
+        private TreePadOption[] options;
+        private TreeOptions globalOptions;
 
-        TreeNodeNavigator workNode;
-        TreeNodeNavigator compareNode1;
-        TreeNodeNavigator compareNode2;
+        private TreeNodeNavigator workNode;
+        private TreeNodeNavigator compareNode1;
+        private TreeNodeNavigator compareNode2;
 
-        internal bool sorting;
+        internal bool Sorting;
 
-        object[] copyObjects;
-        DragOperation currentTransferOperation;
+        private TransactedNodeStore transactionStore;
+        private int updateLockCount;
+        private string contextMenuPath;
 
-        TransactedNodeStore transactionStore;
-        int updateLockCount;
-        string contextMenuPath;
-        IDictionary<string, string> contextMenuTypeNameAliases;
+        public IDictionary<string, string> ContextMenuTypeNameAliases { get; set; }
 
-        public IDictionary<string, string> ContextMenuTypeNameAliases
-        {
-            get { return contextMenuTypeNameAliases; }
-            set { contextMenuTypeNameAliases = value; }
-        }
+        internal TreeStore Store { get; private set; }
 
-        internal Gtk.TreeStore Store
-        {
-            get
-            {
-                return this.store;
-            }
-        }
-
-        internal Gtk.TreeView Tree
-        {
-            get
-            {
-                return tree;
-            }
-        }
+        internal TreeView Tree => tree;
 
         public event EventHandler SelectionChanged;
 
         public bool AllowsMultipleSelection
         {
-            get
-            {
-                return Tree.Selection.Mode == Gtk.SelectionMode.Multiple;
-            }
-            set
-            {
-                if (value)
-                    Tree.Selection.Mode = Gtk.SelectionMode.Multiple;
-                else
-                    Tree.Selection.Mode = Gtk.SelectionMode.Single;
-            }
+            get { return Tree.Selection.Mode == SelectionMode.Multiple; }
+            set { Tree.Selection.Mode = value ? SelectionMode.Multiple : SelectionMode.Single; }
         }
 
         public string Id { get; set; }
 
 
-        class ExtensibleTreeViewWidget : CompactScrolledWindow, ICommandRouter
+        private class ExtensibleTreeViewWidget : CompactScrolledWindow, ICommandRouter
         {
-            ExtensibleTreeView control;
+            private readonly ExtensibleTreeView control;
 
             public ExtensibleTreeViewWidget(ExtensibleTreeView control)
             {
                 this.control = control;
-                ShadowType = Gtk.ShadowType.None;
+                ShadowType = ShadowType.None;
                 ShowBorderLine = false;
             }
 
-            protected override void OnStyleSet(Gtk.Style previous_style)
+            protected override void OnStyleSet(Style previousStyle)
             {
-                base.OnStyleSet(previous_style);
+                base.OnStyleSet(previousStyle);
                 control.UpdateFont();
             }
 
-            protected override bool OnScrollEvent(Gdk.EventScroll evnt)
+            protected override bool OnScrollEvent(EventScroll evnt)
             {
-                var modifier = !Platform.IsMac ? Gdk.ModifierType.ControlMask
+                var modifier = !Platform.IsMac ? ModifierType.ControlMask
                                     //Mac window manager already uses control-scroll, so use command
                                     //Command might be either meta or mod1, depending on GTK version
-                                    : (Gdk.ModifierType.MetaMask | Gdk.ModifierType.Mod1Mask);
+                                    : (ModifierType.MetaMask | ModifierType.Mod1Mask);
 
                 if ((evnt.State & modifier) != 0)
                 {
-                    if (evnt.Direction == Gdk.ScrollDirection.Up)
+                    if (evnt.Direction == ScrollDirection.Up)
                         control.ZoomIn();
-                    else if (evnt.Direction == Gdk.ScrollDirection.Down)
+                    else if (evnt.Direction == ScrollDirection.Down)
                         control.ZoomOut();
 
                     return true;
@@ -190,14 +171,14 @@ namespace MonoDevelop.Ide.Gui.Components
             Initialize(builders, options);
         }
 
-        void CustomFontPropertyChanged(object sender, EventArgs a)
+        private void CustomFontPropertyChanged(object sender, EventArgs a)
         {
             UpdateFont();
         }
 
-        void UpdateFont()
+        private void UpdateFont()
         {
-            text_render.CustomFont = IdeApp.Preferences.CustomPadFont ?? tree.Style.FontDescription;
+            textRender.CustomFont = IdeApp.Preferences.CustomPadFont ?? tree.Style.FontDescription;
             tree.ColumnsAutosize();
         }
 
@@ -213,35 +194,32 @@ namespace MonoDevelop.Ide.Gui.Components
 
             SetBuilders(builders, options);
 
-            store = new Gtk.TreeStore(typeof(NodeInfo), typeof(object), typeof(object), typeof(bool), typeof(bool));
-            tree.Model = store;
-            tree.Selection.Mode = Gtk.SelectionMode.Multiple;
+            Store = new TreeStore(typeof(NodeInfo), typeof(object), typeof(object), typeof(bool), typeof(bool));
+            tree.Model = Store;
+            tree.Selection.Mode = SelectionMode.Multiple;
 
-            store.DefaultSortFunc = new Gtk.TreeIterCompareFunc(CompareNodes);
-            store.SetSortColumnId(/* GTK_TREE_SORTABLE_DEFAULT_SORT_COLUMN_ID */ -1, Gtk.SortType.Ascending);
+            Store.DefaultSortFunc = CompareNodes;
+            Store.SetSortColumnId(/* GTK_TREE_SORTABLE_DEFAULT_SORT_COLUMN_ID */ -1, SortType.Ascending);
 
             tree.HeadersVisible = false;
             tree.SearchColumn = 0;
             tree.EnableSearch = true;
-            complete_column = new Gtk.TreeViewColumn();
-            complete_column.Title = "column";
+            CompleteColumn = new TreeViewColumn { Title = "column" };
 
-            pix_render = new ZoomableCellRendererPixbuf();
-            pix_render.Xpad = 0;
-            complete_column.PackStart(pix_render, false);
+            pixRender = new ZoomableCellRendererPixbuf { Xpad = 0 };
+            CompleteColumn.PackStart(pixRender, false);
 
-            text_render = new CustomCellRendererText(this);
-            text_render.Ypad = 0;
+            textRender = new CustomCellRendererText(this) { Ypad = 0 };
             IdeApp.Preferences.CustomPadFont.Changed += CustomFontPropertyChanged;
-            text_render.EditingStarted += HandleEditingStarted;
-            text_render.Edited += HandleOnEdit;
-            text_render.EditingCanceled += HandleOnEditCancelled;
-            complete_column.PackStart(text_render, true);
+            textRender.EditingStarted += HandleEditingStarted;
+            textRender.Edited += HandleOnEdit;
+            textRender.EditingCanceled += HandleOnEditCancelled;
+            CompleteColumn.PackStart(textRender, true);
 
-            complete_column.SetCellDataFunc(pix_render, SetIconCellData);
-            complete_column.SetCellDataFunc(text_render, SetTextCellData);
+            CompleteColumn.SetCellDataFunc(pixRender, SetIconCellData);
+            CompleteColumn.SetCellDataFunc(textRender, SetTextCellData);
 
-            tree.AppendColumn(complete_column);
+            tree.AppendColumn(CompleteColumn);
 
             tree.TestExpandRow += OnTestExpandRow;
             tree.RowActivated += OnNodeActivated;
@@ -265,14 +243,11 @@ namespace MonoDevelop.Ide.Gui.Components
 
             for (int n = 3; n < 16; n++)
             {
-                Gtk.Rc.ParseString("style \"MonoDevelop.ExtensibleTreeView_" + n + "\" {\n GtkTreeView::expander-size = " + n + "\n }\n");
-                Gtk.Rc.ParseString("widget \"*.MonoDevelop.ExtensibleTreeView_" + n + "\" style  \"MonoDevelop.ExtensibleTreeView_" + n + "\"\n");
+                Rc.ParseString("style \"MonoDevelop.ExtensibleTreeView_" + n + "\" {\n GtkTreeView::expander-size = " + n + "\n }\n");
+                Rc.ParseString("widget \"*.MonoDevelop.ExtensibleTreeView_" + n + "\" style  \"MonoDevelop.ExtensibleTreeView_" + n + "\"\n");
             }
 
-            if (!string.IsNullOrEmpty(Id))
-                Zoom = PropertyService.Get<double>("MonoDevelop.Ide.ExtensibleTreeView.Zoom." + Id, 1d);
-            else
-                Zoom = 1d;
+            Zoom = !string.IsNullOrEmpty(Id) ? PropertyService.Get("MonoDevelop.Ide.ExtensibleTreeView.Zoom." + Id, 1d) : 1d;
 
             widget.Add(tree);
             widget.ShowAll();
@@ -310,7 +285,7 @@ namespace MonoDevelop.Ide.Gui.Components
 		}
 #endif
 
-        static void SetIconCellData(Gtk.TreeViewColumn col, Gtk.CellRenderer renderer, Gtk.TreeModel model, Gtk.TreeIter it)
+        private static void SetIconCellData(TreeViewColumn col, CellRenderer renderer, TreeModel model, TreeIter it)
         {
             if (model == null)
                 return;
@@ -328,7 +303,7 @@ namespace MonoDevelop.Ide.Gui.Components
             cell.OverlayTopRight = info.OverlayTopRight;
         }
 
-        static void SetTextCellData(Gtk.TreeViewColumn col, Gtk.CellRenderer renderer, Gtk.TreeModel model, Gtk.TreeIter it)
+        private static void SetTextCellData(TreeViewColumn col, CellRenderer renderer, TreeModel model, TreeIter it)
         {
             if (model == null)
                 return;
@@ -347,8 +322,8 @@ namespace MonoDevelop.Ide.Gui.Components
         {
             // Save the current state
             ITreeNavigator root = GetRootNode();
-            NodeState state = root != null ? root.SaveState() : null;
-            object obj = root != null ? root.DataItem : null;
+            NodeState state = root?.SaveState();
+            object obj = root?.DataItem;
 
             Clear();
 
@@ -367,7 +342,7 @@ namespace MonoDevelop.Ide.Gui.Components
                 root.RestoreState(state);
         }
 
-        void SetBuilders(NodeBuilder[] buildersArray, TreePadOption[] options)
+        private void SetBuilders(NodeBuilder[] buildersArray, TreePadOption[] options)
         {
             // Create default options
 
@@ -394,14 +369,16 @@ namespace MonoDevelop.Ide.Gui.Components
                 if (tnb != null)
                 {
                     if (tnb.UseReferenceEquality)
-                        nodeHash.RegisterByRefType(tnb.NodeDataType);
+                        NodeHash.RegisterByRefType(tnb.NodeDataType);
                     TypeNodeBuilder other = (TypeNodeBuilder)bc[tnb.NodeDataType];
                     if (other != null)
-                        throw new ApplicationException(string.Format("The type node builder {0} can't be used in this context because the type {1} is already handled by {2}", nb.GetType(), tnb.NodeDataType, other.GetType()));
+                        throw new ApplicationException(
+                            $"The type node builder {nb.GetType()} can't be used in this context because the type {tnb.NodeDataType} is already handled by {other.GetType()}");
                     bc[tnb.NodeDataType] = tnb;
                 }
                 else if (!(nb is NodeBuilderExtension))
-                    throw new InvalidOperationException(string.Format("Invalid NodeBuilder type: {0}. NodeBuilders must inherit either from TypeNodeBuilder or NodeBuilderExtension", nb.GetType()));
+                    throw new InvalidOperationException(
+                        $"Invalid NodeBuilder type: {nb.GetType()}. NodeBuilders must inherit either from TypeNodeBuilder or NodeBuilderExtension");
             }
 
             NodeBuilders = builders.ToArray();
@@ -415,7 +392,7 @@ namespace MonoDevelop.Ide.Gui.Components
             tree.EnableDragUriSource(nodeToUri);
         }
 
-        object[] GetDragObjects(out Xwt.Drawing.Image icon)
+        private object[] GetDragObjects(out Image icon)
         {
             ITreeNavigator[] navs = GetSelectedNodes();
             if (navs.Length == 0)
@@ -426,30 +403,30 @@ namespace MonoDevelop.Ide.Gui.Components
             var dragObjects = new object[navs.Length];
             for (int n = 0; n < navs.Length; n++)
                 dragObjects[n] = navs[n].DataItem;
-            icon = ((NodeInfo)store.GetValue(navs[0].CurrentPosition._iter, NodeInfoColumn)).Icon;
+            icon = ((NodeInfo)Store.GetValue(navs[0].CurrentPosition._iter, NodeInfoColumn)).Icon;
             return dragObjects;
         }
 
-        bool CheckAndDrop(int x, int y, bool drop, Gdk.DragContext ctx, object[] obj)
+        private bool CheckAndDrop(int x, int y, bool drop, DragContext ctx, object[] obj)
         {
-            Gtk.TreePath path;
-            Gtk.TreeViewDropPosition pos;
+            TreePath path;
+            TreeViewDropPosition pos;
             if (!tree.GetDestRowAtPos(x, y, out path, out pos))
                 return false;
 
-            Gtk.TreeIter iter;
-            if (!store.GetIter(out iter, path))
+            TreeIter iter;
+            if (!Store.GetIter(out iter, path))
                 return false;
 
             TreeNodeNavigator nav = new TreeNodeNavigator(this, iter);
             NodeBuilder[] chain = nav.BuilderChain;
             bool foundHandler = false;
 
-            DragOperation oper = ctx.Action == Gdk.DragAction.Copy ? DragOperation.Copy : DragOperation.Move;
+            DragOperation oper = ctx.Action == DragAction.Copy ? DragOperation.Copy : DragOperation.Move;
             DropPosition dropPos;
-            if (pos == Gtk.TreeViewDropPosition.After)
+            if (pos == TreeViewDropPosition.After)
                 dropPos = DropPosition.After;
-            else if (pos == Gtk.TreeViewDropPosition.Before)
+            else if (pos == TreeViewDropPosition.Before)
                 dropPos = DropPosition.Before;
             else
                 dropPos = DropPosition.Into;
@@ -488,7 +465,7 @@ namespace MonoDevelop.Ide.Gui.Components
             {
                 // We're now in an indeterminate state, so report the exception
                 // and exit.
-                GLib.ExceptionManager.RaiseUnhandledException(ex, true);
+                ExceptionManager.RaiseUnhandledException(ex, true);
                 return false;
             }
             finally
@@ -499,28 +476,28 @@ namespace MonoDevelop.Ide.Gui.Components
             return foundHandler;
         }
 
-        [GLib.ConnectBefore]
-        void HandleMotionNotifyEvent(object o, Gtk.MotionNotifyEventArgs args)
+        [ConnectBefore]
+        private void HandleMotionNotifyEvent(object o, MotionNotifyEventArgs args)
         {
-            Gtk.TreePath path;
+            TreePath path;
             int cx, cy;
-            Gtk.TreeViewColumn col;
+            TreeViewColumn col;
             bool popupShown = false;
 
             if (tree.GetPathAtPos((int)args.Event.X, (int)args.Event.Y, out path, out col, out cx, out cy))
             {
-                Gtk.TreeIter it;
-                if (store.GetIter(out it, path))
+                TreeIter it;
+                if (Store.GetIter(out it, path))
                 {
-                    var info = (NodeInfo)store.GetValue(it, NodeInfoColumn);
+                    var info = (NodeInfo)Store.GetValue(it, NodeInfoColumn);
                     if (info.StatusIconInternal != CellRendererImage.NullImage && info.StatusIconInternal != null)
                     {
                         var cellArea = tree.GetCellArea(path, tree.Columns[0]);
                         int sp, w;
-                        col.CellGetPosition(text_render, out sp, out w);
+                        col.CellGetPosition(textRender, out sp, out w);
                         cellArea.X += sp;
                         cellArea.Width = w;
-                        var rect = text_render.GetStatusIconArea(tree, cellArea);
+                        var rect = textRender.GetStatusIconArea(tree, cellArea);
                         if (cx >= rect.X && cx <= rect.Right)
                         {
                             ShowStatusMessage(it, rect, info);
@@ -533,16 +510,15 @@ namespace MonoDevelop.Ide.Gui.Components
                 HideStatusMessage();
         }
 
-        bool statusMessageVisible;
-        Gtk.TreeIter statusIconIter;
-        TooltipPopoverWindow statusPopover;
+        private bool statusMessageVisible;
+        private TreeIter statusIconIter;
+        private TooltipPopoverWindow statusPopover;
 
-        void ShowStatusMessage(Gtk.TreeIter it, Gdk.Rectangle rect, NodeInfo info)
+        private void ShowStatusMessage(TreeIter it, Rectangle rect, NodeInfo info)
         {
-            if (statusMessageVisible && store.GetPath(it).Equals(store.GetPath(statusIconIter)))
+            if (statusMessageVisible && Store.GetPath(it).Equals(Store.GetPath(statusIconIter)))
                 return;
-            if (statusPopover != null)
-                statusPopover.Destroy();
+            statusPopover?.Destroy();
             statusMessageVisible = true;
             statusIconIter = it;
 
@@ -556,7 +532,7 @@ namespace MonoDevelop.Ide.Gui.Components
             statusPopover.ShowPopup(this, rect, PopupPosition.Bottom);
         }
 
-        void HideStatusMessage()
+        private void HideStatusMessage()
         {
             if (statusMessageVisible)
             {
@@ -566,8 +542,8 @@ namespace MonoDevelop.Ide.Gui.Components
             }
         }
 
-        [GLib.ConnectBefore]
-        void HandleLeaveNotifyEvent(object o, Gtk.LeaveNotifyEventArgs args)
+        [ConnectBefore]
+        private void HandleLeaveNotifyEvent(object o, LeaveNotifyEventArgs args)
         {
             HideStatusMessage();
         }
@@ -590,66 +566,27 @@ namespace MonoDevelop.Ide.Gui.Components
 
         internal ITreeBuilder CreateBuilder()
         {
-            return CreateBuilder(Gtk.TreeIter.Zero);
+            return CreateBuilder(TreeIter.Zero);
         }
 
-        internal ITreeBuilder CreateBuilder(Gtk.TreeIter it)
+        internal ITreeBuilder CreateBuilder(TreeIter it)
         {
             if (transactionStore != null)
                 return new TransactedTreeBuilder(this, transactionStore, it);
-            else
-                return new TreeBuilder(this, it);
+            return new TreeBuilder(this, it);
         }
 
-        protected NodeBuilder[] NodeBuilders
-        {
-            get { return builders; }
-            set { builders = value; }
-        }
+        protected NodeBuilder[] NodeBuilders { get; set; }
 
-        internal Gtk.TreeViewColumn CompleteColumn
-        {
-            get
-            {
-                return complete_column;
-            }
-        }
+        internal TreeViewColumn CompleteColumn { get; private set; }
 
-        NodeHashtable NodeHash
-        {
-            get
-            {
-                return nodeHash;
-            }
-        }
+        private NodeHashtable NodeHash { get; set; } = new NodeHashtable();
 
-        internal ITreeBuilderContext BuilderContext
-        {
-            get
-            {
-                return builderContext;
-            }
-        }
+        internal ITreeBuilderContext BuilderContext => builderContext;
 
-        internal object[] CopyObjects
-        {
-            get
-            {
-                return copyObjects;
-            }
-            set
-            {
-                copyObjects = value;
-            }
-        }
+        internal object[] CopyObjects { get; set; }
 
-        internal DragOperation CurrentTransferOperation
-        {
-            get
-            {
-                return currentTransferOperation;
-            }
-        }
+        internal DragOperation CurrentTransferOperation { get; private set; }
 
         public ITreeBuilder LoadTree(object nodeObject)
         {
@@ -680,53 +617,52 @@ namespace MonoDevelop.Ide.Gui.Components
             }
         }
 
-        void InitialSelection()
+        private void InitialSelection()
         {
             if (tree.Selection.CountSelectedRows() == 0)
             {
-                Gtk.TreeIter it;
-                if (store.GetIterFirst(out it))
+                TreeIter it;
+                if (Store.GetIterFirst(out it))
                 {
                     tree.Selection.SelectIter(it);
-                    tree.SetCursor(store.GetPath(it), tree.Columns[0], false);
+                    tree.SetCursor(Store.GetPath(it), tree.Columns[0], false);
                 }
             }
         }
 
         public void Clear()
         {
-            copyObjects = tree.dragObjects = null;
+            CopyObjects = tree.DragObjects = null;
 
-            object[] obs = new object[nodeHash.Count];
-            nodeHash.Keys.CopyTo(obs, 0);
+            object[] obs = new object[NodeHash.Count];
+            NodeHash.Keys.CopyTo(obs, 0);
 
             foreach (object dataObject in obs)
                 NotifyNodeRemoved(dataObject, null);
 
-            nodeHash = new NodeHashtable();
-            store.Clear();
+            NodeHash = new NodeHashtable();
+            Store.Clear();
         }
 
         public ITreeNavigator GetSelectedNode()
         {
-            Gtk.TreePath[] sel = tree.Selection.GetSelectedRows();
+            TreePath[] sel = tree.Selection.GetSelectedRows();
             if (sel.Length == 0)
                 return null;
-            Gtk.TreeIter iter;
-            if (store.GetIter(out iter, sel[0]))
+            TreeIter iter;
+            if (Store.GetIter(out iter, sel[0]))
                 return new TreeNodeNavigator(this, iter);
-            else
-                return null;
+            return null;
         }
 
-        class SelectionGroup
+        private class SelectionGroup
         {
             public NodeBuilder[] BuilderChain;
             public List<ITreeNavigator> Nodes;
-            public Gtk.TreeStore store;
+            public TreeStore store;
 
-            NodePosition[] savedPos;
-            object[] dataItems;
+            private NodePosition[] savedPos;
+            private object[] dataItems;
 
             public object[] DataItems
             {
@@ -762,39 +698,40 @@ namespace MonoDevelop.Ide.Gui.Components
             }
         }
 
-        IEnumerable<SelectionGroup> GetSelectedNodesGrouped()
+        private ICollection<SelectionGroup> GetSelectedNodesGrouped()
         {
-            Gtk.TreePath[] paths = tree.Selection.GetSelectedRows();
+            TreePath[] paths = tree.Selection.GetSelectedRows();
             if (paths.Length == 0)
             {
                 return new SelectionGroup[0];
             }
             if (paths.Length == 1)
             {
-                Gtk.TreeIter it;
-                store.GetIter(out it, paths[0]);
+                TreeIter it;
+                Store.GetIter(out it, paths[0]);
                 SelectionGroup grp = new SelectionGroup();
                 TreeNodeNavigator nav = new TreeNodeNavigator(this, it);
                 grp.BuilderChain = nav.BuilderChain;
-                grp.Nodes = new List<ITreeNavigator>();
-                grp.Nodes.Add(nav);
-                grp.store = store;
-                return new SelectionGroup[] { grp };
+                grp.Nodes = new List<ITreeNavigator> { nav };
+                grp.store = Store;
+                return new[] { grp };
             }
 
             Dictionary<NodeBuilder[], SelectionGroup> dict = new Dictionary<NodeBuilder[], SelectionGroup>();
-            for (int n = 0; n < paths.Length; n++)
+            foreach (TreePath t in paths)
             {
-                Gtk.TreeIter it;
-                store.GetIter(out it, paths[n]);
+                TreeIter it;
+                Store.GetIter(out it, t);
                 SelectionGroup grp;
                 TreeNodeNavigator nav = new TreeNodeNavigator(this, it);
                 if (!dict.TryGetValue(nav.BuilderChain, out grp))
                 {
-                    grp = new SelectionGroup();
-                    grp.BuilderChain = nav.BuilderChain;
-                    grp.Nodes = new List<ITreeNavigator>();
-                    grp.store = store;
+                    grp = new SelectionGroup
+                    {
+                        BuilderChain = nav.BuilderChain,
+                        Nodes = new List<ITreeNavigator>(),
+                        store = Store
+                    };
                     dict[nav.BuilderChain] = grp;
                 }
                 grp.Nodes.Add(nav);
@@ -809,12 +746,12 @@ namespace MonoDevelop.Ide.Gui.Components
 
         public ITreeNavigator[] GetSelectedNodes()
         {
-            Gtk.TreePath[] paths = tree.Selection.GetSelectedRows();
+            TreePath[] paths = tree.Selection.GetSelectedRows();
             ITreeNavigator[] navs = new ITreeNavigator[paths.Length];
             for (int n = 0; n < paths.Length; n++)
             {
-                Gtk.TreeIter it;
-                store.GetIter(out it, paths[n]);
+                TreeIter it;
+                Store.GetIter(out it, paths[n]);
                 navs[n] = new TreeNodeNavigator(this, it);
             }
             return navs;
@@ -833,14 +770,13 @@ namespace MonoDevelop.Ide.Gui.Components
         public ITreeNavigator GetNodeAtObject(object dataObject, bool createTreeBranch)
         {
             object it;
-            if (!nodeHash.TryGetValue(dataObject, out it))
+            if (!NodeHash.TryGetValue(dataObject, out it))
             {
                 if (createTreeBranch)
                 {
                     TypeNodeBuilder tnb = GetTypeNodeBuilder(dataObject.GetType());
-                    if (tnb == null) return null;
 
-                    object parent = tnb.GetParentObject(dataObject);
+                    object parent = tnb?.GetParentObject(dataObject);
                     if (parent == null || parent == dataObject || dataObject.Equals(parent)) return null;
 
                     ITreeNavigator pnav = GetNodeAtObject(parent, true);
@@ -849,23 +785,25 @@ namespace MonoDevelop.Ide.Gui.Components
                     pnav.MoveToFirstChild();
 
                     // The child should be now in the this. Try again.
-                    if (!nodeHash.TryGetValue(dataObject, out it))
+                    if (!NodeHash.TryGetValue(dataObject, out it))
                         return null;
                 }
                 else
                     return null;
             }
 
-            if (it is Gtk.TreeIter[])
-                return new TreeNodeNavigator(this, ((Gtk.TreeIter[])it)[0]);
-            else
-                return new TreeNodeNavigator(this, (Gtk.TreeIter)it);
+            var iters = it as TreeIter[];
+            if (iters != null)
+            {
+                return new TreeNodeNavigator(this, iters[0]);
+            }
+            return new TreeNodeNavigator(this, (TreeIter)it);
         }
 
         public ITreeNavigator GetRootNode()
         {
-            Gtk.TreeIter iter;
-            if (!store.GetIterFirst(out iter)) return null;
+            TreeIter iter;
+            if (!Store.GetIterFirst(out iter)) return null;
             return new TreeNodeNavigator(this, iter);
         }
 
@@ -882,8 +820,7 @@ namespace MonoDevelop.Ide.Gui.Components
                 list.Add(callback);
             else
             {
-                list = new ArrayList();
-                list.Add(callback);
+                list = new ArrayList { callback };
                 callbacks[dataObject] = list;
             }
         }
@@ -893,9 +830,9 @@ namespace MonoDevelop.Ide.Gui.Components
             return null;
         }
 
-        class MulticastNodeRouter : IMultiCastCommandRouter
+        private class MulticastNodeRouter : IMultiCastCommandRouter
         {
-            ArrayList targets;
+            private readonly ArrayList targets;
 
             public MulticastNodeRouter(ArrayList targets)
             {
@@ -945,32 +882,29 @@ namespace MonoDevelop.Ide.Gui.Components
             }
             if (targets.Count == 1)
                 return targets[0];
-            else if (targets.Count > 1)
+            if (targets.Count > 1)
                 return new MulticastNodeRouter(targets);
-            else
-                return null;
+            return null;
         }
 
-        void ExpandCurrentItem()
+        private void ExpandCurrentItem()
         {
             try
             {
                 LockUpdates();
 
-                IEnumerable<SelectionGroup> nodeGroups = GetSelectedNodesGrouped();
-                if (nodeGroups.Count() == 1)
+                var nodeGroups = GetSelectedNodesGrouped();
+                if (nodeGroups.Count == 1)
                 {
                     SelectionGroup grp = nodeGroups.First();
 
-                    if (grp.Nodes.Count() == 1)
+                    if (grp.Nodes.Count == 1)
                     {
                         ITreeNavigator node = grp.Nodes.First();
                         if (node.Expanded)
                         {
                             grp.SavePositions();
-                            node.Selected = false;
-                            if (node.MoveToFirstChild())
-                                node.Selected = true;
+                            node.Selected = node.MoveToFirstChild();
 
                             // This exit statement is so that it doesn't do 2 actions at a time.
                             // As in, navigate, then expand.
@@ -995,26 +929,24 @@ namespace MonoDevelop.Ide.Gui.Components
             }
         }
 
-        void CollapseCurrentItem()
+        private void CollapseCurrentItem()
         {
             try
             {
                 LockUpdates();
 
-                IEnumerable<SelectionGroup> nodeGroups = GetSelectedNodesGrouped();
-                if (nodeGroups.Count() == 1)
+                var nodeGroups = GetSelectedNodesGrouped();
+                if (nodeGroups.Count == 1)
                 {
                     SelectionGroup grp = nodeGroups.First();
 
-                    if (grp.Nodes.Count() == 1)
+                    if (grp.Nodes.Count == 1)
                     {
                         ITreeNavigator node = grp.Nodes.First();
                         if (!node.HasChildren() || !node.Expanded)
                         {
                             grp.SavePositions();
-                            node.Selected = false;
-                            if (node.MoveToParent())
-                                node.Selected = true;
+                            node.Selected = node.MoveToParent();
 
                             // This exit statement is so that it doesn't do 2 actions at a time.
                             // As in, navigate, then collapse.
@@ -1163,20 +1095,19 @@ namespace MonoDevelop.Ide.Gui.Components
 
         protected virtual void OnCurrentItemActivated()
         {
-            if (CurrentItemActivated != null)
-                CurrentItemActivated(this, EventArgs.Empty);
+            CurrentItemActivated?.Invoke(this, EventArgs.Empty);
         }
 
         public event EventHandler CurrentItemActivated;
 
         #region Zoom
 
-        const double ZOOM_FACTOR = 1.1f;
-        const int ZOOM_MIN_POW = -4;
-        const int ZOOM_MAX_POW = 8;
-        static readonly double ZOOM_MIN = System.Math.Pow(ZOOM_FACTOR, ZOOM_MIN_POW);
-        static readonly double ZOOM_MAX = System.Math.Pow(ZOOM_FACTOR, ZOOM_MAX_POW);
-        double zoom;
+        private const double ZOOM_FACTOR = 1.1f;
+        private const int ZOOM_MIN_POW = -4;
+        private const int ZOOM_MAX_POW = 8;
+        private static readonly double ZoomMin = Math.Pow(ZOOM_FACTOR, ZOOM_MIN_POW);
+        private static readonly double ZoomMax = Math.Pow(ZOOM_FACTOR, ZOOM_MAX_POW);
+        private double zoom;
 
         public double Zoom
         {
@@ -1186,11 +1117,11 @@ namespace MonoDevelop.Ide.Gui.Components
             }
             set
             {
-                value = System.Math.Min(ZOOM_MAX, System.Math.Max(ZOOM_MIN, value));
-                if (value > ZOOM_MAX || value < ZOOM_MIN)
+                value = Math.Min(ZoomMax, Math.Max(ZoomMin, value));
+                if (value > ZoomMax || value < ZoomMin)
                     return;
                 //snap to one, if within 0.001d
-                if ((System.Math.Abs(value - 1d)) < 0.001d)
+                if ((Math.Abs(value - 1d)) < 0.001d)
                 {
                     value = 1d;
                 }
@@ -1202,10 +1133,10 @@ namespace MonoDevelop.Ide.Gui.Components
             }
         }
 
-        void OnZoomChanged(double value)
+        private void OnZoomChanged(double value)
         {
-            pix_render.Zoom = value;
-            text_render.Zoom = value;
+            pixRender.Zoom = value;
+            textRender.Zoom = value;
 
             int expanderSize = (int)(12 * Zoom);
             if (expanderSize < 3) expanderSize = 3;
@@ -1224,15 +1155,15 @@ namespace MonoDevelop.Ide.Gui.Components
         [CommandHandler(ViewCommands.ZoomIn)]
         public void ZoomIn()
         {
-            int oldPow = (int)System.Math.Round(System.Math.Log(zoom) / System.Math.Log(ZOOM_FACTOR));
-            Zoom = System.Math.Pow(ZOOM_FACTOR, oldPow + 1);
+            int oldPow = (int)Math.Round(Math.Log(zoom) / Math.Log(ZOOM_FACTOR));
+            Zoom = Math.Pow(ZOOM_FACTOR, oldPow + 1);
         }
 
         [CommandHandler(ViewCommands.ZoomOut)]
         public void ZoomOut()
         {
-            int oldPow = (int)System.Math.Round(System.Math.Log(zoom) / System.Math.Log(ZOOM_FACTOR));
-            Zoom = System.Math.Pow(ZOOM_FACTOR, oldPow - 1);
+            int oldPow = (int)Math.Round(Math.Log(zoom) / Math.Log(ZOOM_FACTOR));
+            Zoom = Math.Pow(ZOOM_FACTOR, oldPow - 1);
         }
 
         [CommandHandler(ViewCommands.ZoomReset)]
@@ -1244,13 +1175,13 @@ namespace MonoDevelop.Ide.Gui.Components
         [CommandUpdateHandler(ViewCommands.ZoomIn)]
         protected void UpdateZoomIn(CommandInfo cinfo)
         {
-            cinfo.Enabled = zoom < ZOOM_MAX - 0.000001d;
+            cinfo.Enabled = zoom < ZoomMax - 0.000001d;
         }
 
         [CommandUpdateHandler(ViewCommands.ZoomOut)]
         protected void UpdateZoomOut(CommandInfo cinfo)
         {
-            cinfo.Enabled = zoom > ZOOM_MIN + 0.000001d;
+            cinfo.Enabled = zoom > ZoomMin + 0.000001d;
         }
 
         [CommandUpdateHandler(ViewCommands.ZoomReset)]
@@ -1274,9 +1205,9 @@ namespace MonoDevelop.Ide.Gui.Components
             CancelTransfer();
             TransferCurrentItem(DragOperation.Move);
 
-            if (copyObjects != null)
+            if (CopyObjects != null)
             {
-                foreach (object ob in copyObjects)
+                foreach (object ob in CopyObjects)
                 {
                     ITreeBuilder tb = CreateBuilder();
                     if (tb.MoveToObject(ob))
@@ -1307,7 +1238,7 @@ namespace MonoDevelop.Ide.Gui.Components
             info.Enabled = CanTransferCurrentItem(DragOperation.Move);
         }
 
-        void TransferCurrentItem(DragOperation oper)
+        private void TransferCurrentItem(DragOperation oper)
         {
             foreach (SelectionGroup grp in GetSelectedNodesGrouped())
             {
@@ -1322,8 +1253,8 @@ namespace MonoDevelop.Ide.Gui.Components
                         if ((handler.CanDragNode() & oper) != 0)
                         {
                             grp.RestorePositions();
-                            copyObjects = grp.DataItems;
-                            currentTransferOperation = oper;
+                            CopyObjects = grp.DataItems;
+                            CurrentTransferOperation = oper;
                             break;
                         }
                     }
@@ -1336,7 +1267,7 @@ namespace MonoDevelop.Ide.Gui.Components
             }
         }
 
-        bool CanTransferCurrentItem(DragOperation oper)
+        private bool CanTransferCurrentItem(DragOperation oper)
         {
             TreeNodeNavigator node = (TreeNodeNavigator)GetSelectedNode();
             if (node != null)
@@ -1365,7 +1296,7 @@ namespace MonoDevelop.Ide.Gui.Components
         [CommandHandler(EditCommands.Paste)]
         public void PasteToCurrentItem()
         {
-            if (copyObjects == null) return;
+            if (CopyObjects == null) return;
 
             try
             {
@@ -1379,15 +1310,15 @@ namespace MonoDevelop.Ide.Gui.Components
                     {
                         NodeCommandHandler handler = b.CommandHandler;
                         handler.SetCurrentNode(node);
-                        if (handler.CanDropMultipleNodes(copyObjects, currentTransferOperation, DropPosition.Into))
+                        if (handler.CanDropMultipleNodes(CopyObjects, CurrentTransferOperation, DropPosition.Into))
                         {
                             node.MoveToPosition(pos);
-                            handler.OnMultipleNodeDrop(copyObjects, currentTransferOperation, DropPosition.Into);
+                            handler.OnMultipleNodeDrop(CopyObjects, CurrentTransferOperation, DropPosition.Into);
                         }
                         node.MoveToPosition(pos);
                     }
                 }
-                if (currentTransferOperation == DragOperation.Move)
+                if (CurrentTransferOperation == DragOperation.Move)
                     CancelTransfer();
             }
             finally
@@ -1405,7 +1336,7 @@ namespace MonoDevelop.Ide.Gui.Components
                 return;
             }
 
-            if (copyObjects != null)
+            if (CopyObjects != null)
             {
                 TreeNodeNavigator node = (TreeNodeNavigator)GetSelectedNode();
                 if (node != null)
@@ -1416,7 +1347,7 @@ namespace MonoDevelop.Ide.Gui.Components
                     {
                         NodeCommandHandler handler = b.CommandHandler;
                         handler.SetCurrentNode(node);
-                        if (handler.CanDropMultipleNodes(copyObjects, currentTransferOperation, DropPosition.Into))
+                        if (handler.CanDropMultipleNodes(CopyObjects, CurrentTransferOperation, DropPosition.Into))
                         {
                             info.Enabled = true;
                             return;
@@ -1428,13 +1359,13 @@ namespace MonoDevelop.Ide.Gui.Components
             info.Enabled = false;
         }
 
-        void CancelTransfer()
+        private void CancelTransfer()
         {
-            if (copyObjects != null)
+            if (CopyObjects != null)
             {
-                object[] oldCopyObjects = copyObjects;
-                copyObjects = null;
-                if (currentTransferOperation == DragOperation.Move)
+                object[] oldCopyObjects = CopyObjects;
+                CopyObjects = null;
+                if (CurrentTransferOperation == DragOperation.Move)
                 {
                     foreach (object ob in oldCopyObjects)
                     {
@@ -1446,12 +1377,12 @@ namespace MonoDevelop.Ide.Gui.Components
             }
         }
 
-        NodeInfo GetNodeInfo(Gtk.TreeIter it)
+        private NodeInfo GetNodeInfo(TreeIter it)
         {
-            return (NodeInfo)store.GetValue(it, NodeInfoColumn);
+            return (NodeInfo)Store.GetValue(it, NodeInfoColumn);
         }
 
-        void StartLabelEditInternal()
+        private void StartLabelEditInternal()
         {
             if (editingText)
                 return;
@@ -1460,7 +1391,7 @@ namespace MonoDevelop.Ide.Gui.Components
             if (node == null)
                 return;
 
-            Gtk.TreeIter iter = node.CurrentPosition._iter;
+            TreeIter iter = node.CurrentPosition._iter;
             object dataObject = node.DataItem;
             NodeAttributes attributes = NodeAttributes.None;
 
@@ -1488,11 +1419,11 @@ namespace MonoDevelop.Ide.Gui.Components
 
             string nodeName = node.NodeName;
 
-            GetNodeInfo(iter).Label = GLib.Markup.EscapeText(nodeName);
-            store.EmitRowChanged(store.GetPath(iter), iter);
+            GetNodeInfo(iter).Label = Markup.EscapeText(nodeName);
+            Store.EmitRowChanged(Store.GetPath(iter), iter);
 
             // Get and validate the initial text selection
-            int nameLength = nodeName != null ? nodeName.Length : 0,
+            int nameLength = nodeName?.Length ?? 0,
                 selectionStart = 0, selectionLength = nameLength;
             foreach (NodeBuilder b in node.NodeBuilderChain)
             {
@@ -1512,41 +1443,40 @@ namespace MonoDevelop.Ide.Gui.Components
             if (selectionStart + selectionLength > nameLength)
                 selectionLength = nameLength - selectionStart;
             // This will apply the selection as soon as possible
-            GLib.Idle.Add(() =>
+            Idle.Add(() =>
             {
                 var editable = currentLabelEditable;
-                if (editable == null)
-                    return false;
 
-                editable.SelectRegion(selectionStart, selectionStart + selectionLength);
+                editable?.SelectRegion(selectionStart, selectionStart + selectionLength);
                 return false;
             });
             // Ensure we set all our state variables before calling SetCursor
             // as this may directly invoke HandleOnEditCancelled
-            text_render.Editable = true;
+            textRender.Editable = true;
             editingText = true;
-            tree.SetCursor(store.GetPath(iter), complete_column, true);
+            tree.SetCursor(Store.GetPath(iter), CompleteColumn, true);
         }
 
-        Gtk.Editable currentLabelEditable;
-        void HandleEditingStarted(object o, Gtk.EditingStartedArgs e)
+        private Editable currentLabelEditable;
+
+        private void HandleEditingStarted(object o, EditingStartedArgs e)
         {
-            currentLabelEditable = e.Editable as Gtk.Entry;
+            currentLabelEditable = e.Editable as Entry;
         }
 
-        void HandleOnEdit(object o, Gtk.EditedArgs e)
+        private void HandleOnEdit(object o, EditedArgs e)
         {
             try
             {
                 editingText = false;
-                text_render.Editable = false;
+                textRender.Editable = false;
                 currentLabelEditable = null;
 
-                Gtk.TreeIter iter;
-                if (!store.GetIterFromString(out iter, e.Path))
+                TreeIter iter;
+                if (!Store.GetIterFromString(out iter, e.Path))
                     throw new Exception("Error calculating iter for path " + e.Path);
 
-                if (e.NewText != null && e.NewText.Length > 0)
+                if (!string.IsNullOrEmpty(e.NewText))
                 {
                     ITreeNavigator nav = new TreeNodeNavigator(this, iter);
                     NodePosition pos = nav.CurrentPosition;
@@ -1554,7 +1484,7 @@ namespace MonoDevelop.Ide.Gui.Components
                     try
                     {
                         LockUpdates();
-                        NodeBuilder[] chain = (NodeBuilder[])store.GetValue(iter, BuilderChainColumn);
+                        NodeBuilder[] chain = (NodeBuilder[])Store.GetValue(iter, BuilderChainColumn);
                         foreach (NodeBuilder b in chain)
                         {
                             try
@@ -1577,7 +1507,7 @@ namespace MonoDevelop.Ide.Gui.Components
                 }
 
                 // Get the iter again since the this node may have been replaced.
-                if (!store.GetIterFromString(out iter, e.Path))
+                if (!Store.GetIterFromString(out iter, e.Path))
                     return;
 
                 ITreeBuilder builder = CreateBuilder(iter);
@@ -1589,10 +1519,10 @@ namespace MonoDevelop.Ide.Gui.Components
             }
         }
 
-        void HandleOnEditCancelled(object s, EventArgs args)
+        private void HandleOnEditCancelled(object s, EventArgs args)
         {
             editingText = false;
-            text_render.Editable = false;
+            textRender.Editable = false;
             currentLabelEditable = null;
 
             TreeNodeNavigator node = (TreeNodeNavigator)GetSelectedNode();
@@ -1600,7 +1530,7 @@ namespace MonoDevelop.Ide.Gui.Components
                 return;
 
             // Restore the original node label
-            Gtk.TreeIter iter = node.CurrentPosition._iter;
+            TreeIter iter = node.CurrentPosition._iter;
             ITreeBuilder builder = CreateBuilder(iter);
             builder.Update();
         }
@@ -1667,7 +1597,7 @@ namespace MonoDevelop.Ide.Gui.Components
             globalOptions = new TreeOptions();
             foreach (TreePadOption opt in options)
             {
-                bool val = false;
+                bool val;
                 if (state.Options == null || !state.Options.TryGetValue(opt.Id, out val))
                     val = opt.DefaultValue;
                 globalOptions[opt.Id] = val;
@@ -1676,11 +1606,10 @@ namespace MonoDevelop.Ide.Gui.Components
             RefreshTree();
         }
 
-        TypeNodeBuilder GetTypeNodeBuilder(Type type)
+        private TypeNodeBuilder GetTypeNodeBuilder(Type type)
         {
             NodeBuilder[] chain = GetBuilderChain(type);
-            if (chain == null) return null;
-            return (TypeNodeBuilder)chain[0];
+            return (TypeNodeBuilder)chain?[0];
         }
 
         internal NodeBuilder[] GetBuilderChain(Type type)
@@ -1695,11 +1624,12 @@ namespace MonoDevelop.Ide.Gui.Components
                 TypeNodeBuilder bestTypeNodeBuilder = null;
                 Type bestNodeType = null;
 
-                foreach (NodeBuilder nb in builders)
+                foreach (NodeBuilder nb in NodeBuilders)
                 {
-                    if (nb is TypeNodeBuilder)
+                    var builder = nb as TypeNodeBuilder;
+                    if (builder != null)
                     {
-                        TypeNodeBuilder tnb = (TypeNodeBuilder)nb;
+                        TypeNodeBuilder tnb = builder;
                         if (tnb.NodeDataType.IsAssignableFrom(type))
                         {
                             if (bestNodeType == null || bestNodeType.IsAssignableFrom(tnb.NodeDataType))
@@ -1728,118 +1658,113 @@ namespace MonoDevelop.Ide.Gui.Components
                     list.Insert(0, bestTypeNodeBuilder);
                     chain = list.ToArray();
                 }
-                else
-                    chain = null;
 
                 builderChains[type] = chain;
             }
             return chain;
         }
 
-        TypeNodeBuilder GetTypeNodeBuilder(Gtk.TreeIter iter)
+        private TypeNodeBuilder GetTypeNodeBuilder(TreeIter iter)
         {
-            NodeBuilder[] chain = (NodeBuilder[])store.GetValue(iter, ExtensibleTreeView.BuilderChainColumn);
+            NodeBuilder[] chain = (NodeBuilder[])Store.GetValue(iter, BuilderChainColumn);
             if (chain != null && chain.Length > 0)
                 return chain[0] as TypeNodeBuilder;
             return null;
         }
 
-        internal int CompareNodes(Gtk.TreeModel model, Gtk.TreeIter a, Gtk.TreeIter b)
+        internal int CompareNodes(TreeModel model, TreeIter a, TreeIter b)
         {
-            sorting = true;
+            Sorting = true;
             try
             {
-                NodeBuilder[] chain1 = (NodeBuilder[])store.GetValue(a, BuilderChainColumn);
+                NodeBuilder[] chain1 = (NodeBuilder[])Store.GetValue(a, BuilderChainColumn);
                 if (chain1 == null) return -1;
 
                 compareNode1.MoveToIter(a);
                 compareNode2.MoveToIter(b);
 
                 int sort = CompareObjects(chain1, compareNode1, compareNode2);
-                if (sort != TypeNodeBuilder.DefaultSort) return sort;
+                if (sort != NodeBuilder.DefaultSort) return sort;
 
-                NodeBuilder[] chain2 = (NodeBuilder[])store.GetValue(b, BuilderChainColumn);
+                NodeBuilder[] chain2 = (NodeBuilder[])Store.GetValue(b, BuilderChainColumn);
                 if (chain2 == null) return 1;
 
                 if (chain1 != chain2)
                 {
                     sort = CompareObjects(chain2, compareNode2, compareNode1);
-                    if (sort != TypeNodeBuilder.DefaultSort) return sort * -1;
+                    if (sort != NodeBuilder.DefaultSort) return sort * -1;
                 }
 
                 TypeNodeBuilder tb1 = (TypeNodeBuilder)chain1[0];
                 TypeNodeBuilder tb2 = (TypeNodeBuilder)chain2[0];
-                object o1 = store.GetValue(a, DataItemColumn);
-                object o2 = store.GetValue(b, DataItemColumn);
-                return string.Compare(tb1.GetNodeName(compareNode1, o1), tb2.GetNodeName(compareNode2, o2), true);
+                object o1 = Store.GetValue(a, DataItemColumn);
+                object o2 = Store.GetValue(b, DataItemColumn);
+                return String.Compare(tb1.GetNodeName(compareNode1, o1), tb2.GetNodeName(compareNode2, o2), StringComparison.OrdinalIgnoreCase);
             }
             finally
             {
-                sorting = false;
-                compareNode1.MoveToIter(Gtk.TreeIter.Zero);
-                compareNode2.MoveToIter(Gtk.TreeIter.Zero);
+                Sorting = false;
+                compareNode1.MoveToIter(TreeIter.Zero);
+                compareNode2.MoveToIter(TreeIter.Zero);
             }
         }
 
-        int CompareObjects(NodeBuilder[] chain, ITreeNavigator thisNode, ITreeNavigator otherNode)
+        private int CompareObjects(NodeBuilder[] chain, ITreeNavigator thisNode, ITreeNavigator otherNode)
         {
             int result = NodeBuilder.DefaultSort;
-            for (int n = 0; n < chain.Length; n++)
+            foreach (NodeBuilder t in chain)
             {
-                int sort = chain[n].CompareObjects(thisNode, otherNode);
+                int sort = t.CompareObjects(thisNode, otherNode);
                 if (sort != NodeBuilder.DefaultSort)
                     result = sort;
             }
             return result;
         }
 
-        internal bool GetFirstNode(object dataObject, out Gtk.TreeIter iter)
+        internal bool GetFirstNode(object dataObject, out TreeIter iter)
         {
             object it;
-            if (!nodeHash.TryGetValue(dataObject, out it))
+            if (!NodeHash.TryGetValue(dataObject, out it))
             {
-                iter = Gtk.TreeIter.Zero;
+                iter = TreeIter.Zero;
                 return false;
             }
-            else if (it is Gtk.TreeIter)
-                iter = (Gtk.TreeIter)it;
+            if (it is TreeIter)
+                iter = (TreeIter)it;
             else
-                iter = ((Gtk.TreeIter[])it)[0];
+                iter = ((TreeIter[])it)[0];
             return true;
         }
 
-        internal bool GetNextNode(object dataObject, ref Gtk.TreeIter iter)
+        internal bool GetNextNode(object dataObject, ref TreeIter iter)
         {
             object it;
-            if (!nodeHash.TryGetValue(dataObject, out it))
+            if (!NodeHash.TryGetValue(dataObject, out it))
                 return false;
-            else if (it is Gtk.TreeIter)
+            if (it is TreeIter)
                 return false; // There is only one node, GetFirstNode returned it
-            else
+            TreeIter[] its = (TreeIter[])it;
+            TreePath iterPath = Store.GetPath(iter);
+            for (int n = 0; n < its.Length; n++)
             {
-                Gtk.TreeIter[] its = (Gtk.TreeIter[])it;
-                Gtk.TreePath iterPath = store.GetPath(iter);
-                for (int n = 0; n < its.Length; n++)
+                if (Store.GetPath(its[n]).Equals(iterPath))
                 {
-                    if (store.GetPath(its[n]).Equals(iterPath))
+                    if (n < its.Length - 1)
                     {
-                        if (n < its.Length - 1)
-                        {
-                            iter = its[n + 1];
-                            return true;
-                        }
+                        iter = its[n + 1];
+                        return true;
                     }
                 }
-                return false;
             }
+            return false;
         }
 
-        internal void RegisterNode(Gtk.TreeIter it, object dataObject, NodeBuilder[] chain, bool fireAddedEvent)
+        internal void RegisterNode(TreeIter it, object dataObject, NodeBuilder[] chain, bool fireAddedEvent)
         {
             object currentIt;
-            if (!nodeHash.TryGetValue(dataObject, out currentIt))
+            if (!NodeHash.TryGetValue(dataObject, out currentIt))
             {
-                nodeHash[dataObject] = it;
+                NodeHash[dataObject] = it;
                 if (chain == null) chain = GetBuilderChain(dataObject.GetType());
                 if (fireAddedEvent)
                 {
@@ -1858,101 +1783,97 @@ namespace MonoDevelop.Ide.Gui.Components
             }
             else
             {
-                if (currentIt is Gtk.TreeIter[])
+                var iters = currentIt as TreeIter[];
+                if (iters != null)
                 {
-                    Gtk.TreeIter[] arr = (Gtk.TreeIter[])currentIt;
-                    Gtk.TreeIter[] newArr = new Gtk.TreeIter[arr.Length + 1];
+                    TreeIter[] arr = iters;
+                    TreeIter[] newArr = new TreeIter[arr.Length + 1];
                     arr.CopyTo(newArr, 0);
                     newArr[arr.Length] = it;
-                    nodeHash[dataObject] = newArr;
+                    NodeHash[dataObject] = newArr;
                 }
                 else
                 {
-                    nodeHash[dataObject] = new Gtk.TreeIter[] { it, (Gtk.TreeIter)currentIt };
+                    NodeHash[dataObject] = new[] { it, (TreeIter)currentIt };
                 }
             }
         }
 
-        internal void UnregisterNode(object dataObject, Gtk.TreeIter iter, NodeBuilder[] chain, bool fireRemovedEvent)
+        internal void UnregisterNode(object dataObject, TreeIter iter, NodeBuilder[] chain, bool fireRemovedEvent)
         {
             // Remove object from copy list
 
-            if (copyObjects != null)
+            if (CopyObjects != null)
             {
-                int i = Array.IndexOf(copyObjects, dataObject);
+                int i = Array.IndexOf(CopyObjects, dataObject);
                 if (i != -1)
                 {
-                    ArrayList list = new ArrayList(copyObjects);
+                    ArrayList list = new ArrayList(CopyObjects);
                     list.RemoveAt(i);
-                    if (list.Count > 0)
-                        copyObjects = list.ToArray();
-                    else
-                        copyObjects = null;
+                    CopyObjects = list.Count > 0 ? list.ToArray() : null;
                 }
             }
 
             // Remove object from drag list
 
-            if (tree.dragObjects != null)
+            if (tree.DragObjects != null)
             {
-                int i = Array.IndexOf(tree.dragObjects, dataObject);
+                int i = Array.IndexOf(tree.DragObjects, dataObject);
                 if (i != -1)
                 {
-                    ArrayList list = new ArrayList(tree.dragObjects);
+                    ArrayList list = new ArrayList(tree.DragObjects);
                     list.RemoveAt(i);
-                    if (list.Count > 0)
-                        tree.dragObjects = list.ToArray();
-                    else
-                        tree.dragObjects = null;
+                    tree.DragObjects = list.Count > 0 ? list.ToArray() : null;
                 }
             }
 
             object currentIt;
-            nodeHash.TryGetValue(dataObject, out currentIt);
-            if (currentIt is Gtk.TreeIter[])
+            NodeHash.TryGetValue(dataObject, out currentIt);
+            var treeIters = currentIt as TreeIter[];
+            if (treeIters != null)
             {
-                Gtk.TreeIter[] arr = (Gtk.TreeIter[])currentIt;
-                Gtk.TreePath path = null;
-                List<Gtk.TreeIter> iters = new List<Gtk.TreeIter>();
-                if (store.IterIsValid(iter))
-                    path = store.GetPath(iter);
+                TreeIter[] arr = treeIters;
+                TreePath path = null;
+                List<TreeIter> iters = new List<TreeIter>();
+                if (Store.IterIsValid(iter))
+                    path = Store.GetPath(iter);
 
                 // Iters can't be directly compared (TreeIter.Equals is broken), so we have
                 // to compare paths.
-                foreach (Gtk.TreeIter it in arr)
+                foreach (TreeIter it in arr)
                 {
-                    if (store.IterIsValid(it) && (path == null || !path.Equals(store.GetPath(it))))
+                    if (Store.IterIsValid(it) && (path == null || !path.Equals(Store.GetPath(it))))
                         iters.Add(it);
                 }
                 if (iters.Count > 1)
-                    nodeHash[dataObject] = iters.ToArray();
+                    NodeHash[dataObject] = iters.ToArray();
                 else if (iters.Count == 1)
-                    nodeHash[dataObject] = iters[0];
+                    NodeHash[dataObject] = iters[0];
                 else
-                    nodeHash.Remove(dataObject);
+                    NodeHash.Remove(dataObject);
             }
             else
             {
-                nodeHash.Remove(dataObject);
+                NodeHash.Remove(dataObject);
                 if (fireRemovedEvent)
                     NotifyNodeRemoved(dataObject, chain);
             }
         }
 
-        internal void RemoveChildren(Gtk.TreeIter it)
+        internal void RemoveChildren(TreeIter it)
         {
-            Gtk.TreeIter child;
-            while (store.IterChildren(out child, it))
+            TreeIter child;
+            while (Store.IterChildren(out child, it))
             {
                 RemoveChildren(child);
-                object childData = store.GetValue(child, ExtensibleTreeView.DataItemColumn);
+                object childData = Store.GetValue(child, DataItemColumn);
                 if (childData != null)
                     UnregisterNode(childData, child, null, true);
-                store.Remove(ref child);
+                Store.Remove(ref child);
             }
         }
 
-        void NotifyNodeRemoved(object dataObject, NodeBuilder[] chain)
+        private void NotifyNodeRemoved(object dataObject, NodeBuilder[] chain)
         {
             if (chain == null)
                 chain = GetBuilderChain(dataObject.GetType());
@@ -1971,10 +1892,10 @@ namespace MonoDevelop.Ide.Gui.Components
 
         internal bool IsRegistered(object dataObject)
         {
-            return nodeHash.ContainsKey(dataObject);
+            return NodeHash.ContainsKey(dataObject);
         }
 
-        internal void NotifyInserted(Gtk.TreeIter it, object dataObject)
+        internal void NotifyInserted(TreeIter it, object dataObject)
         {
             if (callbacks.Count > 0)
             {
@@ -1993,7 +1914,7 @@ namespace MonoDevelop.Ide.Gui.Components
             }
         }
 
-        internal string GetNamePathFromIter(Gtk.TreeIter iter)
+        internal string GetNamePathFromIter(TreeIter iter)
         {
             workNode.MoveToIter(iter);
             StringBuilder sb = new StringBuilder();
@@ -2006,12 +1927,12 @@ namespace MonoDevelop.Ide.Gui.Components
                 sb.Insert(0, name);
             } while (workNode.MoveToParent());
 
-            workNode.MoveToIter(Gtk.TreeIter.Zero);
+            workNode.MoveToIter(TreeIter.Zero);
 
             return sb.ToString();
         }
 
-        void RefreshNode(Gtk.TreeIter iter)
+        private void RefreshNode(TreeIter iter)
         {
             ITreeBuilder builder = CreateBuilder(iter);
             builder.UpdateAll();
@@ -2024,8 +1945,9 @@ namespace MonoDevelop.Ide.Gui.Components
 
         internal void ResetState(ITreeNavigator nav)
         {
-            if (nav is TreeBuilder)
-                ((TreeBuilder)nav).ResetState();
+            var treeBuilder = nav as TreeBuilder;
+            if (treeBuilder != null)
+                treeBuilder.ResetState();
             else if (nav is TransactedTreeBuilder)
                 ((TransactedTreeBuilder)nav).ResetState();
             else
@@ -2035,9 +1957,9 @@ namespace MonoDevelop.Ide.Gui.Components
             }
         }
 
-        internal bool GetIterFromNamePath(string path, out Gtk.TreeIter iter)
+        internal bool GetIterFromNamePath(string path, out TreeIter iter)
         {
-            if (!store.GetIterFirst(out iter))
+            if (!Store.GetIterFirst(out iter))
                 return false;
 
             TreeNodeNavigator nav = new TreeNodeNavigator(this, iter);
@@ -2071,7 +1993,7 @@ namespace MonoDevelop.Ide.Gui.Components
         [CommandHandler(EditCommands.Rename)]
         public void StartLabelEdit()
         {
-            GLib.Timeout.Add(20, new GLib.TimeoutHandler(wantFocus));
+            Timeout.Add(20, WantFocus);
         }
 
         [CommandUpdateHandler(EditCommands.Rename)]
@@ -2088,11 +2010,10 @@ namespace MonoDevelop.Ide.Gui.Components
             if ((attributes & NodeAttributes.AllowRename) == 0)
             {
                 info.Visible = false;
-                return;
             }
         }
 
-        NodeAttributes GetNodeAttributes(TreeNodeNavigator node)
+        private NodeAttributes GetNodeAttributes(TreeNodeNavigator node)
         {
             object dataObject = node.DataItem;
             NodeAttributes attributes = NodeAttributes.None;
@@ -2117,16 +2038,16 @@ namespace MonoDevelop.Ide.Gui.Components
         }
 
 
-        bool wantFocus()
+        private bool WantFocus()
         {
             tree.GrabFocus();
             StartLabelEditInternal();
             return false;
         }
 
-        private void OnTestExpandRow(object sender, Gtk.TestExpandRowArgs args)
+        private void OnTestExpandRow(object sender, TestExpandRowArgs args)
         {
-            bool filled = (bool)store.GetValue(args.Iter, FilledColumn);
+            bool filled = (bool)Store.GetValue(args.Iter, FilledColumn);
             if (!filled)
             {
                 TreeBuilder nb = new TreeBuilder(this, args.Iter);
@@ -2136,7 +2057,7 @@ namespace MonoDevelop.Ide.Gui.Components
                 args.RetVal = false;
         }
 
-        void ShowPopup(Gdk.EventButton evt)
+        private void ShowPopup(EventButton evt)
         {
             var entryset = BuildEntrySet();
             if (entryset == null)
@@ -2158,13 +2079,13 @@ namespace MonoDevelop.Ide.Gui.Components
             }
         }
 
-        CommandEntrySet BuildEntrySet()
+        private CommandEntrySet BuildEntrySet()
         {
             ITreeNavigator tnav = GetSelectedNode();
             if (tnav == null)
                 return null;
             TypeNodeBuilder nb = GetTypeNodeBuilder(tnav.CurrentPosition._iter);
-            string menuPath = nb != null && nb.ContextMenuAddinPath != null ? nb.ContextMenuAddinPath : contextMenuPath;
+            string menuPath = nb?.ContextMenuAddinPath ?? contextMenuPath;
             if (menuPath == null)
             {
                 if (options.Length > 0)
@@ -2197,8 +2118,7 @@ namespace MonoDevelop.Ide.Gui.Components
         {
             foreach (TreePadOption op in options)
             {
-                CommandInfo ci = new CommandInfo(op.Label);
-                ci.Checked = globalOptions[op.Id];
+                CommandInfo ci = new CommandInfo(op.Label) { Checked = globalOptions[op.Id] };
                 info.Add(ci, op.Id);
             }
         }
@@ -2219,24 +2139,25 @@ namespace MonoDevelop.Ide.Gui.Components
             RefreshRoots();
         }
 
-        void RefreshRoots()
+        private void RefreshRoots()
         {
-            Gtk.TreeIter it;
-            if (!store.GetIterFirst(out it))
+            TreeIter it;
+            if (!Store.GetIterFirst(out it))
                 return;
             do
             {
                 ITreeBuilder tb = CreateBuilder(it);
                 tb.UpdateAll();
-            } while (store.IterNext(ref it));
+            } while (Store.IterNext(ref it));
         }
 
         public void RefreshTree()
         {
-            foreach (TreeNodeNavigator node in GetSelectedNodes())
+            foreach (var treeNavigator in GetSelectedNodes())
             {
-                Gtk.TreeIter it = node.CurrentPosition._iter;
-                if (store.IterIsValid(it))
+                var node = (TreeNodeNavigator)treeNavigator;
+                TreeIter it = node.CurrentPosition._iter;
+                if (Store.IterIsValid(it))
                 {
                     ITreeBuilder tb = CreateBuilder(it);
                     tb.UpdateAll();
@@ -2250,10 +2171,10 @@ namespace MonoDevelop.Ide.Gui.Components
             tree.CollapseAll();
         }
 
-        [GLib.ConnectBefore]
-        void OnKeyPress(object o, Gtk.KeyPressEventArgs args)
+        [ConnectBefore]
+        private void OnKeyPress(object o, KeyPressEventArgs args)
         {
-            if (args.Event.Key == Gdk.Key.Delete || args.Event.Key == Gdk.Key.KP_Delete)
+            if (args.Event.Key == Key.Delete || args.Event.Key == Key.KP_Delete)
             {
                 DeleteCurrentItem();
                 args.RetVal = true;
@@ -2264,62 +2185,61 @@ namespace MonoDevelop.Ide.Gui.Components
             //  The shift-right combo recursively expands all child nodes but the OnTestExpandRow callback
             //  modifies tree and successive calls get passed an invalid iter. Using the path to regenerate the iter
             //  causes a Gtk-Fatal.
-            bool shift = (args.Event.State & Gdk.ModifierType.ShiftMask) != 0;
-            if (args.Event.Key == Gdk.Key.asterisk || args.Event.Key == Gdk.Key.KP_Multiply
-                || (shift && (args.Event.Key == Gdk.Key.Right || args.Event.Key == Gdk.Key.KP_Right
-                    || args.Event.Key == Gdk.Key.plus || args.Event.Key == Gdk.Key.KP_Add)))
+            bool shift = (args.Event.State & ModifierType.ShiftMask) != 0;
+            if (args.Event.Key == Key.asterisk || args.Event.Key == Key.KP_Multiply
+                || (shift && (args.Event.Key == Key.Right || args.Event.Key == Key.KP_Right
+                    || args.Event.Key == Key.plus || args.Event.Key == Key.KP_Add)))
             {
-                Gtk.TreeIter iter;
-                foreach (Gtk.TreePath path in tree.Selection.GetSelectedRows())
+                foreach (TreePath path in tree.Selection.GetSelectedRows())
                 {
-                    store.GetIter(out iter, path);
+                    TreeIter iter;
+                    Store.GetIter(out iter, path);
                     Expand(iter);
                 }
                 args.RetVal = true;
                 return;
             }
 
-            if (args.Event.Key == Gdk.Key.Right || args.Event.Key == Gdk.Key.KP_Right)
+            if (args.Event.Key == Key.Right || args.Event.Key == Key.KP_Right)
             {
                 ExpandCurrentItem();
                 args.RetVal = true;
                 return;
             }
 
-            if (args.Event.Key == Gdk.Key.Left || args.Event.Key == Gdk.Key.KP_Left)
+            if (args.Event.Key == Key.Left || args.Event.Key == Key.KP_Left)
             {
                 CollapseCurrentItem();
                 args.RetVal = true;
                 return;
             }
 
-            if (args.Event.Key == Gdk.Key.Return || args.Event.Key == Gdk.Key.KP_Enter || args.Event.Key == Gdk.Key.ISO_Enter)
+            if (args.Event.Key == Key.Return || args.Event.Key == Key.KP_Enter || args.Event.Key == Key.ISO_Enter)
             {
                 ActivateCurrentItem();
                 args.RetVal = true;
-                return;
             }
         }
 
-        void Expand(Gtk.TreeIter it)
+        private void Expand(TreeIter it)
         {
-            tree.ExpandRow(store.GetPath(it), false);
-            Gtk.TreeIter ci;
-            if (store.IterChildren(out ci, it))
+            tree.ExpandRow(Store.GetPath(it), false);
+            TreeIter ci;
+            if (Store.IterChildren(out ci, it))
             {
                 do
                 {
                     Expand(ci);
-                } while (store.IterNext(ref ci));
+                } while (Store.IterNext(ref ci));
             }
         }
 
-        void OnNodeActivated(object sender, Gtk.RowActivatedArgs args)
+        private void OnNodeActivated(object sender, RowActivatedArgs args)
         {
             ActivateCurrentItem();
         }
 
-        void OnSelectionChanged(object sender, EventArgs args)
+        private void OnSelectionChanged(object sender, EventArgs args)
         {
             TreeNodeNavigator node = (TreeNodeNavigator)GetSelectedNode();
             if (node != null)
@@ -2346,38 +2266,37 @@ namespace MonoDevelop.Ide.Gui.Components
 
         protected virtual void OnSelectionChanged()
         {
-            if (SelectionChanged != null)
-                SelectionChanged(this, EventArgs.Empty);
+            SelectionChanged?.Invoke(this, EventArgs.Empty);
         }
 
-        void Destroy()
+        private void Destroy()
         {
             IdeApp.Preferences.CustomPadFont.Changed -= CustomFontPropertyChanged;
-            if (pix_render != null)
+            if (pixRender != null)
             {
-                pix_render.Destroy();
-                pix_render = null;
+                pixRender.Destroy();
+                pixRender = null;
             }
-            if (complete_column != null)
+            if (CompleteColumn != null)
             {
-                complete_column.Destroy();
-                complete_column = null;
+                CompleteColumn.Destroy();
+                CompleteColumn = null;
             }
-            if (text_render != null)
+            if (textRender != null)
             {
-                text_render.Destroy();
-                text_render = null;
+                textRender.Destroy();
+                textRender = null;
             }
 
-            if (store != null)
+            if (Store != null)
             {
                 Clear();
-                store = null;
+                Store = null;
             }
 
-            if (builders != null)
+            if (NodeBuilders != null)
             {
-                foreach (NodeBuilder nb in builders)
+                foreach (NodeBuilder nb in NodeBuilders)
                 {
                     try
                     {
@@ -2388,7 +2307,7 @@ namespace MonoDevelop.Ide.Gui.Components
                         LoggingService.LogError(ex.ToString());
                     }
                 }
-                builders = null;
+                NodeBuilders = null;
             }
             builderChains.Clear();
         }
@@ -2398,7 +2317,7 @@ namespace MonoDevelop.Ide.Gui.Components
             return widget.Parent;
         }
 
-        internal class PadCheckMenuItem : Gtk.CheckMenuItem
+        internal class PadCheckMenuItem : CheckMenuItem
         {
             internal string Id;
 
@@ -2410,57 +2329,53 @@ namespace MonoDevelop.Ide.Gui.Components
 
         internal class TreeBuilderContext : ITreeBuilderContext
         {
-            ExtensibleTreeView pad;
-            Hashtable icons = new Hashtable();
-            Hashtable composedIcons = new Hashtable();
+            private readonly Hashtable icons = new Hashtable();
+            private readonly Hashtable composedIcons = new Hashtable();
 
             internal TreeBuilderContext(ExtensibleTreeView pad)
             {
-                this.pad = pad;
+                Tree = pad;
             }
 
             public ITreeBuilder GetTreeBuilder()
             {
-                Gtk.TreeIter iter;
-                if (!pad.store.GetIterFirst(out iter))
-                    return pad.CreateBuilder(Gtk.TreeIter.Zero);
-                else
-                    return pad.CreateBuilder(iter);
+                TreeIter iter;
+                if (!Tree.Store.GetIterFirst(out iter))
+                    return Tree.CreateBuilder(TreeIter.Zero);
+                return Tree.CreateBuilder(iter);
             }
 
             public ITreeBuilder GetTreeBuilder(object dataObject)
             {
-                ITreeBuilder tb = pad.CreateBuilder();
+                ITreeBuilder tb = Tree.CreateBuilder();
                 if (tb.MoveToObject(dataObject))
                     return tb;
-                else
-                    return null;
+                return null;
             }
 
             public ITreeBuilder GetTreeBuilder(ITreeNavigator navigator)
             {
-                return pad.CreateBuilder(navigator.CurrentPosition._iter);
+                return Tree.CreateBuilder(navigator.CurrentPosition._iter);
             }
 
-            public Xwt.Drawing.Image GetIcon(string id)
+            public Image GetIcon(string id)
             {
-                Xwt.Drawing.Image icon = icons[id] as Xwt.Drawing.Image;
+                Image icon = icons[id] as Image;
                 if (icon == null)
                 {
-                    icon = ImageService.GetIcon(id).WithSize(Gtk.IconSize.Menu);
+                    icon = ImageService.GetIcon(id).WithSize(IconSize.Menu);
                     icons[id] = icon;
                 }
                 return icon;
             }
 
-            public Xwt.Drawing.Image GetComposedIcon(Xwt.Drawing.Image baseIcon, object compositionKey)
+            public Image GetComposedIcon(Image baseIcon, object compositionKey)
             {
                 Hashtable itable = composedIcons[baseIcon] as Hashtable;
-                if (itable == null) return null;
-                return itable[compositionKey] as Xwt.Drawing.Image;
+                return itable?[compositionKey] as Image;
             }
 
-            public Xwt.Drawing.Image CacheComposedIcon(Xwt.Drawing.Image baseIcon, object compositionKey, Xwt.Drawing.Image composedIcon)
+            public Image CacheComposedIcon(Image baseIcon, object compositionKey, Image composedIcon)
             {
                 Hashtable itable = composedIcons[baseIcon] as Hashtable;
                 if (itable == null)
@@ -2474,69 +2389,66 @@ namespace MonoDevelop.Ide.Gui.Components
 
             public ITreeNavigator GetTreeNavigator(object dataObject)
             {
-                Gtk.TreeIter iter;
-                if (!pad.GetFirstNode(dataObject, out iter)) return null;
-                return new TreeNodeNavigator(pad, iter);
+                TreeIter iter;
+                if (!Tree.GetFirstNode(dataObject, out iter)) return null;
+                return new TreeNodeNavigator(Tree, iter);
             }
 
-            public ExtensibleTreeView Tree
-            {
-                get { return pad; }
-            }
+            public ExtensibleTreeView Tree { get; }
         }
 
-        class ExtensibleTreeViewTree : ContextMenuTreeView
+        private class ExtensibleTreeViewTree : ContextMenuTreeView
         {
-            ExtensibleTreeView tv;
+            private readonly ExtensibleTreeView tv;
 
             public ExtensibleTreeViewTree(ExtensibleTreeView tv)
             {
                 this.tv = tv;
-                EnableModelDragDest(targetTable, Gdk.DragAction.Copy | Gdk.DragAction.Move);
-                Gtk.Drag.SourceSet(this, Gdk.ModifierType.Button1Mask, targetTable, Gdk.DragAction.Copy | Gdk.DragAction.Move);
+                EnableModelDragDest(TargetTable, DragAction.Copy | DragAction.Move);
+                Drag.SourceSet(this, ModifierType.Button1Mask, TargetTable, DragAction.Copy | DragAction.Move);
             }
 
-            static Gtk.TargetEntry[] targetTable = new Gtk.TargetEntry[] {
-                new Gtk.TargetEntry ("text/uri-list", 0, 11 ),
-                new Gtk.TargetEntry ("text/plain", 0, 22),
-                new Gtk.TargetEntry ("application/x-rootwindow-drop", 0, 33)
+            private static readonly TargetEntry[] TargetTable = {
+                new TargetEntry ("text/uri-list", 0, 11 ),
+                new TargetEntry ("text/plain", 0, 22),
+                new TargetEntry ("application/x-rootwindow-drop", 0, 33)
             };
 
-            public object[] dragObjects = null;
-            bool dropping = false;
-            Func<object, string> nodeToUri;
+            public object[] DragObjects;
+            private bool dropping;
+            private Func<object, string> nodeToUri;
 
             public void EnableDragUriSource(Func<object, string> nodeToUri)
             {
                 this.nodeToUri = nodeToUri;
             }
 
-            protected override void OnDragBegin(Gdk.DragContext context)
+            protected override void OnDragBegin(DragContext context)
             {
-                Xwt.Drawing.Image dragIcon;
-                dragObjects = tv.GetDragObjects(out dragIcon);
-                Gtk.Drag.SetIconPixbuf(context, dragIcon != null ? dragIcon.ToPixbuf(Gtk.IconSize.Menu) : null, -10, -10);
+                Image dragIcon;
+                DragObjects = tv.GetDragObjects(out dragIcon);
+                Drag.SetIconPixbuf(context, dragIcon?.ToPixbuf(IconSize.Menu), -10, -10);
 
                 base.OnDragBegin(context);
             }
 
-            protected override void OnDragEnd(Gdk.DragContext context)
+            protected override void OnDragEnd(DragContext context)
             {
-                dragObjects = null;
+                DragObjects = null;
                 base.OnDragEnd(context);
             }
 
-            protected override bool OnDragMotion(Gdk.DragContext context, int x, int y, uint time)
+            protected override bool OnDragMotion(DragContext context, int x, int y, uint time)
             {
                 //OnDragDataReceived callback loses x/y values, so stash them
                 this.x = x;
                 this.y = y;
 
-                if (dragObjects == null)
+                if (DragObjects == null)
                 {
                     //it's a drag from outside, need to retrieve the data. This will cause OnDragDataReceived to be called.
-                    Gdk.Atom atom = Gtk.Drag.DestFindTarget(this, context, null);
-                    Gtk.Drag.GetData(this, context, atom, time);
+                    Atom atom = Drag.DestFindTarget(this, context, null);
+                    Drag.GetData(this, context, atom, time);
                 }
                 else
                 {
@@ -2546,20 +2458,20 @@ namespace MonoDevelop.Ide.Gui.Components
                 return true;
             }
 
-            int x, y;
+            private int x, y;
 
-            protected override void OnDragDataReceived(Gdk.DragContext context, int x, int y, Gtk.SelectionData selection_data, uint info, uint time)
+            protected override void OnDragDataReceived(DragContext context, int x, int y, SelectionData selectionData, uint info, uint time)
             {
                 x = this.x;
                 y = this.y;
 
-                object[] data = dragObjects ?? new object[] { selection_data };
+                object[] data = DragObjects ?? new object[] { selectionData };
                 bool canDrop = tv.CheckAndDrop(x, y, dropping, context, data);
                 if (dropping)
                 {
                     dropping = false;
                     SetDragDestRow(null, 0);
-                    Gtk.Drag.Finish(context, canDrop, true, time);
+                    Drag.Finish(context, canDrop, true, time);
                     return;
                 }
 
@@ -2569,27 +2481,27 @@ namespace MonoDevelop.Ide.Gui.Components
                 //if we can't handle it, flag as not droppable and remove the drop marker
                 if (!canDrop)
                 {
-                    Gdk.Drag.Status(context, (Gdk.DragAction)0, time);
+                    Gdk.Drag.Status(context, 0, time);
                     SetDragDestRow(null, 0);
                 }
             }
 
-            protected override bool OnDragDrop(Gdk.DragContext context, int x, int y, uint time_)
+            protected override bool OnDragDrop(DragContext context, int x, int y, uint time)
             {
                 dropping = true;
-                return base.OnDragDrop(context, x, y, time_);
+                return base.OnDragDrop(context, x, y, time);
             }
 
-            protected override void OnDragDataGet(Gdk.DragContext context, Gtk.SelectionData selection_data, uint info, uint time_)
+            protected override void OnDragDataGet(DragContext context, SelectionData selectionData, uint info, uint time)
             {
-                if (dragObjects == null || nodeToUri == null)
+                if (DragObjects == null || nodeToUri == null)
                     return;
 
-                uint uriListTarget = targetTable[0].Info;
+                uint uriListTarget = TargetTable[0].Info;
                 if (info == uriListTarget)
                 {
                     var sb = new StringBuilder();
-                    foreach (var dobj in dragObjects)
+                    foreach (var dobj in DragObjects)
                     {
                         var val = nodeToUri(dobj);
                         if (val != null)
@@ -2597,29 +2509,26 @@ namespace MonoDevelop.Ide.Gui.Components
                             sb.AppendLine(val);
                         }
                     }
-                    selection_data.Set(selection_data.Target, selection_data.Format, Encoding.UTF8.GetBytes(sb.ToString()));
+                    selectionData.Set(selectionData.Target, selectionData.Format, Encoding.UTF8.GetBytes(sb.ToString()));
                 }
             }
         }
 
-        class CustomCellRendererText : Gtk.CellRendererText
+        private class CustomCellRendererText : CellRendererText
         {
-            double zoom;
-            Pango.Layout layout;
-            Pango.FontDescription scaledFont, customFont;
+            private double zoom;
+            private Layout layout;
+            private FontDescription scaledFont, customFont;
 
-            ExtensibleTreeView parent;
-            Gdk.Rectangle buttonScreenRect;
-            Gdk.Rectangle buttonAllocation;
-            string markup;
-            string secondarymarkup;
+            private readonly ExtensibleTreeView parent;
+            private Rectangle buttonScreenRect;
+            private string markup;
+            private string secondarymarkup;
 
-            const int StatusIconSpacing = 4;
-
-            public bool Pushed { get; set; }
+            private const int StatusIconSpacing = 4;
 
             //using this instead of FontDesc property, FontDesc seems to be broken
-            public Pango.FontDescription CustomFont
+            public FontDescription CustomFont
             {
                 get
                 {
@@ -2640,7 +2549,7 @@ namespace MonoDevelop.Ide.Gui.Components
             {
             }
 
-            [GLib.Property("text-markup")]
+            [Property("text-markup")]
             public string TextMarkup
             {
                 get { return markup; }
@@ -2654,7 +2563,7 @@ namespace MonoDevelop.Ide.Gui.Components
                 }
             }
 
-            [GLib.Property("secondary-text-markup")]
+            [Property("secondary-text-markup")]
             public string SecondaryTextMarkup
             {
                 get { return secondarymarkup; }
@@ -2670,73 +2579,70 @@ namespace MonoDevelop.Ide.Gui.Components
 
             public bool DisabledStyle { get; set; }
 
-            [GLib.Property("status-icon")]
-            public Xwt.Drawing.Image StatusIcon { get; set; }
+            [Property("status-icon")]
+            public Image StatusIcon { get; set; }
 
             public CustomCellRendererText(ExtensibleTreeView parent)
             {
                 this.parent = parent;
             }
 
-            static Xwt.Size defaultIconSize = Gtk.IconSize.Menu.GetSize();
+            private static readonly Size DefaultIconSize = IconSize.Menu.GetSize();
 
-            static Xwt.Size GetZoomedIconSize(Xwt.Drawing.Image icon, double zoom)
+            private static Size GetZoomedIconSize(Image icon, double zoom)
             {
                 if (icon == null || icon == CellRendererImage.NullImage)
-                    return defaultIconSize;
+                    return DefaultIconSize;
 
-                var size = icon.HasFixedSize ? icon.Size : defaultIconSize;
+                var size = icon.HasFixedSize ? icon.Size : DefaultIconSize;
 
                 if (zoom == 1)
                     return size;
 
-                int w = (int)(zoom * (double)size.Width);
-                int h = (int)(zoom * (double)size.Height);
+                int w = (int)(zoom * size.Width);
+                int h = (int)(zoom * size.Height);
                 if (w == 0) w = 1;
                 if (h == 0) h = 1;
-                return new Xwt.Size(w, h);
+                return new Size(w, h);
             }
 
-            static Xwt.Drawing.Image GetResized(Xwt.Drawing.Image icon, double zoom)
+            private static Image GetResized(Image icon, double zoom)
             {
                 var size = GetZoomedIconSize(icon, zoom);
                 return icon.WithSize(size);
             }
 
-            void SetupLayout(Gtk.Widget widget, Gtk.CellRendererState flags = 0)
+            private void SetupLayout(Widget widget, CellRendererState flags = 0)
             {
                 if (scaledFont == null)
                 {
-                    if (scaledFont != null)
-                        scaledFont.Dispose();
+                    scaledFont?.Dispose();
                     scaledFont = (customFont ?? parent.widget.Style.FontDesc).Copy();
-                    scaledFont.Size = (int)(customFont.Size * Zoom);
+                    scaledFont.Size = (int)(customFont?.Size * Zoom ?? 0);
                     if (layout != null)
                         layout.FontDescription = scaledFont;
                 }
 
                 if (layout == null || layout.Context != widget.PangoContext)
                 {
-                    if (layout != null)
-                        layout.Dispose();
-                    layout = new Pango.Layout(widget.PangoContext);
-                    layout.FontDescription = scaledFont;
+                    layout?.Dispose();
+                    layout = new Layout (widget.PangoContext) {FontDescription = scaledFont};
                 }
 
                 string newmarkup = TextMarkup;
                 if (DisabledStyle)
                 {
-                    Gdk.Color fgColor;
-                    if (Platform.IsMac && flags.HasFlag(Gtk.CellRendererState.Selected))
-                        fgColor = widget.Style.Text(IdeTheme.UserInterfaceTheme == Theme.Light ? Gtk.StateType.Selected : Gtk.StateType.Normal);
+                    Color fgColor;
+                    if (Platform.IsMac && flags.HasFlag(CellRendererState.Selected))
+                        fgColor = widget.Style.Text(IdeTheme.UserInterfaceTheme == Theme.Light ? StateType.Selected : StateType.Normal);
                     else
-                        fgColor = widget.Style.Text(Gtk.StateType.Insensitive);
+                        fgColor = widget.Style.Text(StateType.Insensitive);
                     newmarkup = "<span foreground='" + fgColor.GetHex() + "'>" + TextMarkup + "</span>";
                 }
 
                 if (!string.IsNullOrEmpty(SecondaryTextMarkup))
                 {
-                    if (Platform.IsMac && flags.HasFlag(Gtk.CellRendererState.Selected))
+                    if (Platform.IsMac && flags.HasFlag(CellRendererState.Selected))
                         newmarkup += " <span foreground='" + Styles.SecondarySelectionTextColor.ToHexString(false) + "'>" + SecondaryTextMarkup + "</span>";
                     else
                         newmarkup += " <span foreground='" + Styles.SecondaryTextColor.ToHexString(false) + "'>" + SecondaryTextMarkup + "</span>";
@@ -2745,46 +2651,44 @@ namespace MonoDevelop.Ide.Gui.Components
                 layout.SetMarkup(newmarkup);
             }
 
-            protected override void Render(Gdk.Drawable window, Gtk.Widget widget, Gdk.Rectangle background_area, Gdk.Rectangle cell_area, Gdk.Rectangle expose_area, Gtk.CellRendererState flags)
+            protected override void Render(Drawable window, Widget widget, Rectangle backgroundArea, Rectangle cellArea, Rectangle exposeArea, CellRendererState flags)
             {
-                Gtk.StateType st = Gtk.StateType.Normal;
-                if ((flags & Gtk.CellRendererState.Prelit) != 0)
-                    st = Gtk.StateType.Prelight;
-                if ((flags & Gtk.CellRendererState.Focused) != 0)
-                    st = Gtk.StateType.Normal;
-                if ((flags & Gtk.CellRendererState.Insensitive) != 0)
-                    st = Gtk.StateType.Insensitive;
-                if ((flags & Gtk.CellRendererState.Selected) != 0)
-                    st = widget.HasFocus ? Gtk.StateType.Selected : Gtk.StateType.Active;
+                StateType st = StateType.Normal;
+                if ((flags & CellRendererState.Prelit) != 0)
+                    st = StateType.Prelight;
+                if ((flags & CellRendererState.Focused) != 0)
+                    st = StateType.Normal;
+                if ((flags & CellRendererState.Insensitive) != 0)
+                    st = StateType.Insensitive;
+                if ((flags & CellRendererState.Selected) != 0)
+                    st = widget.HasFocus ? StateType.Selected : StateType.Active;
 
                 SetupLayout(widget, flags);
 
                 int w, h;
                 layout.GetPixelSize(out w, out h);
 
-                int tx = cell_area.X + (int)Xpad;
-                int ty = cell_area.Y + (cell_area.Height - h) / 2;
+                int tx = cellArea.X + (int)Xpad;
+                int ty = cellArea.Y + (cellArea.Height - h) / 2;
 
                 bool hasStatusIcon = StatusIcon != CellRendererImage.NullImage && StatusIcon != null;
 
                 if (hasStatusIcon)
                 {
                     var img = GetResized(StatusIcon, zoom);
-                    if (st == Gtk.StateType.Selected)
+                    if (st == StateType.Selected)
                         img = img.WithStyles("sel");
                     var x = tx + w + StatusIconSpacing;
-                    using (var ctx = Gdk.CairoHelper.Create(window))
+                    using (var ctx = CairoHelper.Create(window))
                     {
-                        ctx.DrawImage(widget, img, x, cell_area.Y + (cell_area.Height - img.Height) / 2);
+                        ctx.DrawImage(widget, img, x, cellArea.Y + (cellArea.Height - img.Height) / 2);
                     }
                 }
 
                 window.DrawLayout(widget.Style.TextGC(st), tx, ty, layout);
-
-                hasStatusIcon = false;
             }
 
-            public Gdk.Rectangle GetStatusIconArea(Gtk.Widget widget, Gdk.Rectangle cell_area)
+            public Rectangle GetStatusIconArea(Widget widget, Rectangle cellArea)
             {
                 SetupLayout(widget);
 
@@ -2792,16 +2696,16 @@ namespace MonoDevelop.Ide.Gui.Components
                 layout.GetPixelSize(out w, out h);
 
                 var iconSize = GetZoomedIconSize(StatusIcon, zoom);
-                int tx = cell_area.X + (int)Xpad;
+                int tx = cellArea.X + (int)Xpad;
                 var x = tx + w + StatusIconSpacing;
-                return new Gdk.Rectangle(x, cell_area.Y, (int)iconSize.Width, (int)cell_area.Height);
+                return new Rectangle(x, cellArea.Y, (int)iconSize.Width, cellArea.Height);
             }
 
-            public override void GetSize(Gtk.Widget widget, ref Gdk.Rectangle cell_area, out int x_offset, out int y_offset, out int width, out int height)
+            public override void GetSize(Widget widget, ref Rectangle cellArea, out int xOffset, out int yOffset, out int width, out int height)
             {
                 SetupLayout(widget);
 
-                x_offset = y_offset = 0;
+                xOffset = yOffset = 0;
 
                 layout.GetPixelSize(out width, out height);
                 width += (int)Xpad * 2;
@@ -2813,9 +2717,9 @@ namespace MonoDevelop.Ide.Gui.Components
                 }
             }
 
-            protected override void OnEditingStarted(Gtk.CellEditable editable, string path)
+            protected override void OnEditingStarted(CellEditable editable, string path)
             {
-                var entry = editable as Gtk.Entry;
+                var entry = editable as Entry;
                 if (entry != null && scaledFont != null)
                     entry.ModifyFont(scaledFont);
                 base.OnEditingStarted(editable, path);
@@ -2838,33 +2742,19 @@ namespace MonoDevelop.Ide.Gui.Components
                 }
             }
 
-            public bool PointerInButton(int px, int py)
-            {
-                return buttonScreenRect.Contains(px, py);
-            }
-
-            public Gdk.Point PointerPosition { get; set; }
-
-            public Gdk.Rectangle PopupAllocation
-            {
-                get { return buttonAllocation; }
-            }
-
             protected override void OnDestroyed()
             {
                 base.OnDestroyed();
-                if (scaledFont != null)
-                    scaledFont.Dispose();
-                if (layout != null)
-                    layout.Dispose();
+                scaledFont?.Dispose();
+                layout?.Dispose();
             }
         }
     }
 
-    class NodeCommandTargetChain : ICommandDelegatorRouter
+    internal class NodeCommandTargetChain : ICommandDelegatorRouter
     {
-        NodeCommandHandler target;
-        ITreeNavigator[] nodes;
+        private readonly NodeCommandHandler target;
+        private readonly ITreeNavigator[] nodes;
         internal NodeCommandTargetChain Next;
 
         public NodeCommandTargetChain(NodeCommandHandler target, ITreeNavigator[] nodes)
@@ -2886,47 +2776,46 @@ namespace MonoDevelop.Ide.Gui.Components
         }
     }
 
-    class IterComparer : IEqualityComparer<Gtk.TreeIter>
+    internal class IterComparer : IEqualityComparer<TreeIter>
     {
-        Gtk.TreeStore store;
+        private readonly TreeStore store;
 
-        public IterComparer(Gtk.TreeStore store)
+        public IterComparer(TreeStore store)
         {
             this.store = store;
         }
-        public bool Equals(Gtk.TreeIter x, Gtk.TreeIter y)
+        public bool Equals(TreeIter x, TreeIter y)
         {
             if (!store.IterIsValid(x) || !store.IterIsValid(y))
                 return false;
-            Gtk.TreePath px = store.GetPath(x);
-            Gtk.TreePath py = store.GetPath(y);
+            TreePath px = store.GetPath(x);
+            TreePath py = store.GetPath(y);
             if (px == null || py == null)
                 return false;
             return px.Equals(py);
         }
 
-        public int GetHashCode(Gtk.TreeIter obj)
+        public int GetHashCode(TreeIter obj)
         {
             if (!store.IterIsValid(obj))
                 return 0;
-            Gtk.TreePath p = store.GetPath(obj);
+            TreePath p = store.GetPath(obj);
             if (p == null)
                 return 0;
-            else
-                return p.ToString().GetHashCode();
+            return p.ToString().GetHashCode();
         }
     }
 
-    class ZoomableCellRendererPixbuf : CellRendererImage
+    internal class ZoomableCellRendererPixbuf : CellRendererImage
     {
-        double zoom = 1f;
+        private double zoom = 1f;
 
-        Dictionary<Xwt.Drawing.Image, Xwt.Drawing.Image> resizedCache = new Dictionary<Xwt.Drawing.Image, Xwt.Drawing.Image>();
+        private readonly Dictionary<Image, Image> resizedCache = new Dictionary<Image, Image>();
 
-        Xwt.Drawing.Image overlayBottomLeft;
-        Xwt.Drawing.Image overlayBottomRight;
-        Xwt.Drawing.Image overlayTopLeft;
-        Xwt.Drawing.Image overlayTopRight;
+        private Image overlayBottomLeft;
+        private Image overlayBottomRight;
+        private Image overlayTopLeft;
+        private Image overlayTopRight;
 
         public double Zoom
         {
@@ -2942,7 +2831,7 @@ namespace MonoDevelop.Ide.Gui.Components
             }
         }
 
-        public override Xwt.Drawing.Image Image
+        public override Image Image
         {
             get
             {
@@ -2954,7 +2843,7 @@ namespace MonoDevelop.Ide.Gui.Components
             }
         }
 
-        public override Xwt.Drawing.Image ImageExpanderOpen
+        public override Image ImageExpanderOpen
         {
             get
             {
@@ -2966,7 +2855,7 @@ namespace MonoDevelop.Ide.Gui.Components
             }
         }
 
-        public override Xwt.Drawing.Image ImageExpanderClosed
+        public override Image ImageExpanderClosed
         {
             get
             {
@@ -2978,8 +2867,8 @@ namespace MonoDevelop.Ide.Gui.Components
             }
         }
 
-        [GLib.Property("overlay-image-top-left")]
-        public Xwt.Drawing.Image OverlayTopLeft
+        [Property("overlay-image-top-left")]
+        public Image OverlayTopLeft
         {
             get
             {
@@ -2991,8 +2880,8 @@ namespace MonoDevelop.Ide.Gui.Components
             }
         }
 
-        [GLib.Property("overlay-image-top-right")]
-        public Xwt.Drawing.Image OverlayTopRight
+        [Property("overlay-image-top-right")]
+        public Image OverlayTopRight
         {
             get
             {
@@ -3004,8 +2893,8 @@ namespace MonoDevelop.Ide.Gui.Components
             }
         }
 
-        [GLib.Property("overlay-image-bottom-left")]
-        public Xwt.Drawing.Image OverlayBottomLeft
+        [Property("overlay-image-bottom-left")]
+        public Image OverlayBottomLeft
         {
             get
             {
@@ -3017,8 +2906,8 @@ namespace MonoDevelop.Ide.Gui.Components
             }
         }
 
-        [GLib.Property("overlay-image-bottom-right")]
-        public Xwt.Drawing.Image OverlayBottomRight
+        [Property("overlay-image-bottom-right")]
+        public Image OverlayBottomRight
         {
             get
             {
@@ -3030,24 +2919,24 @@ namespace MonoDevelop.Ide.Gui.Components
             }
         }
 
-        Xwt.Drawing.Image GetResized(Xwt.Drawing.Image value)
+        private Image GetResized(Image value)
         {
             //this can happen during solution deserialization if the project is unrecognized
             //because a line is added into the treeview with no icon
-            if (value == null || value == CellRendererImage.NullImage)
+            if (value == null || value == NullImage)
                 return null;
 
-            var img = value.HasFixedSize ? value : value.WithSize(Gtk.IconSize.Menu);
+            var img = value.HasFixedSize ? value : value.WithSize(IconSize.Menu);
 
             if (zoom == 1)
                 return img;
 
-            Xwt.Drawing.Image resized;
+            Image resized;
             if (resizedCache.TryGetValue(img, out resized))
                 return resized;
 
-            int w = (int)(zoom * (double)img.Width);
-            int h = (int)(zoom * (double)img.Height);
+            int w = (int)(zoom * img.Width);
+            int h = (int)(zoom * img.Height);
             if (w == 0) w = 1;
             if (h == 0) h = 1;
             resized = img.WithSize(w, h);
@@ -3055,9 +2944,9 @@ namespace MonoDevelop.Ide.Gui.Components
             return resized;
         }
 
-        public override void GetSize(Gtk.Widget widget, ref Gdk.Rectangle cell_area, out int x_offset, out int y_offset, out int width, out int height)
+        public override void GetSize(Widget widget, ref Rectangle cellArea, out int xOffset, out int yOffset, out int width, out int height)
         {
-            base.GetSize(widget, ref cell_area, out x_offset, out y_offset, out width, out height);
+            base.GetSize(widget, ref cellArea, out xOffset, out yOffset, out width, out height);
             /*			if (overlayBottomLeft != null || overlayBottomRight != null)
 				height += overlayOverflow;
 			if (overlayTopLeft != null || overlayTopRight != null)
@@ -3066,56 +2955,56 @@ namespace MonoDevelop.Ide.Gui.Components
 				width += overlayOverflow;*/
         }
 
-        const int overlayOverflow = 2;
+        private const int OverlayOverflow = 2;
 
-        protected override void Render(Gdk.Drawable window, Gtk.Widget widget, Gdk.Rectangle background_area, Gdk.Rectangle cell_area, Gdk.Rectangle expose_area, Gtk.CellRendererState flags)
+        protected override void Render(Drawable window, Widget widget, Rectangle backgroundArea, Rectangle cellArea, Rectangle exposeArea, CellRendererState flags)
         {
-            base.Render(window, widget, background_area, cell_area, expose_area, flags);
+            base.Render(window, widget, backgroundArea, cellArea, exposeArea, flags);
 
             if (overlayBottomLeft != null || overlayBottomRight != null || overlayTopLeft != null || overlayTopRight != null)
             {
                 int x, y;
-                Xwt.Drawing.Image image;
-                GetImageInfo(cell_area, out image, out x, out y);
+                Image image;
+                GetImageInfo(cellArea, out image, out x, out y);
 
                 if (image == null)
                     return;
 
-                bool selected = (flags & Gtk.CellRendererState.Selected) != 0;
+                bool selected = (flags & CellRendererState.Selected) != 0;
 
-                using (var ctx = Gdk.CairoHelper.Create(window))
+                using (var ctx = CairoHelper.Create(window))
                 {
                     if (overlayBottomLeft != null && overlayBottomLeft != NullImage)
                     {
                         var img = selected ? overlayBottomLeft.WithStyles("sel") : overlayBottomLeft;
-                        ctx.DrawImage(widget, img, x - overlayOverflow, y + image.Height - img.Height + overlayOverflow);
+                        ctx.DrawImage(widget, img, x - OverlayOverflow, y + image.Height - img.Height + OverlayOverflow);
                     }
                     if (overlayBottomRight != null && overlayBottomRight != NullImage)
                     {
                         var img = selected ? overlayBottomRight.WithStyles("sel") : overlayBottomRight;
-                        ctx.DrawImage(widget, img, x + image.Width - img.Width + overlayOverflow, y + image.Height - img.Height + overlayOverflow);
+                        ctx.DrawImage(widget, img, x + image.Width - img.Width + OverlayOverflow, y + image.Height - img.Height + OverlayOverflow);
                     }
                     if (overlayTopLeft != null && overlayTopLeft != NullImage)
                     {
                         var img = selected ? overlayTopLeft.WithStyles("sel") : overlayTopLeft;
-                        ctx.DrawImage(widget, img, x - overlayOverflow, y - overlayOverflow);
+                        ctx.DrawImage(widget, img, x - OverlayOverflow, y - OverlayOverflow);
                     }
                     if (overlayTopRight != null && overlayTopRight != NullImage)
                     {
                         var img = selected ? overlayTopRight.WithStyles("sel") : overlayTopRight;
-                        ctx.DrawImage(widget, img, x + image.Width - img.Width + overlayOverflow, y - overlayOverflow);
+                        ctx.DrawImage(widget, img, x + image.Width - img.Width + OverlayOverflow, y - OverlayOverflow);
                     }
                 }
             }
         }
     }
 
-    class NodeHashtable : Dictionary<object, object>
+    internal class NodeHashtable : Dictionary<object, object>
     {
         // This dictionary can be configured to use object reference equality
         // instead of regular object equality for a specific set of types
 
-        NodeComparer nodeComparer;
+        private readonly NodeComparer nodeComparer;
 
         public NodeHashtable() : base(new NodeComparer())
         {
@@ -3128,50 +3017,48 @@ namespace MonoDevelop.Ide.Gui.Components
         /// </summary>
         public void RegisterByRefType(Type type)
         {
-            nodeComparer.byRefTypes.Add(type);
+            nodeComparer.ByRefTypes.Add(type);
         }
 
-        class NodeComparer : IEqualityComparer<object>
+        private class NodeComparer : IEqualityComparer<object>
         {
-            public HashSet<Type> byRefTypes = new HashSet<Type>();
-            public Dictionary<Type, bool> typeData = new Dictionary<Type, bool>();
+            public readonly HashSet<Type> ByRefTypes = new HashSet<Type>();
+            public readonly Dictionary<Type, bool> TypeData = new Dictionary<Type, bool>();
 
             bool IEqualityComparer<object>.Equals(object x, object y)
             {
                 if (CompareByRef(x.GetType()))
                     return x == y;
-                else
-                    return x.Equals(y);
+                return x.Equals(y);
             }
 
             int IEqualityComparer<object>.GetHashCode(object obj)
             {
                 if (CompareByRef(obj.GetType()))
-                    return System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(obj);
-                else
-                    return obj.GetHashCode();
+                    return RuntimeHelpers.GetHashCode(obj);
+                return obj.GetHashCode();
             }
 
-            bool CompareByRef(Type type)
+            private bool CompareByRef(Type type)
             {
-                if (byRefTypes.Count == 0)
+                if (ByRefTypes.Count == 0)
                     return false;
 
                 bool compareRef;
-                if (!typeData.TryGetValue(type, out compareRef))
+                if (!TypeData.TryGetValue(type, out compareRef))
                 {
                     compareRef = false;
                     var t = type;
                     while (t != null)
                     {
-                        if (byRefTypes.Contains(t))
+                        if (ByRefTypes.Contains(t))
                         {
                             compareRef = true;
                             break;
                         }
                         t = t.BaseType;
                     }
-                    typeData[type] = compareRef;
+                    TypeData[type] = compareRef;
                 }
                 return compareRef;
             }

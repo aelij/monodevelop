@@ -41,24 +41,105 @@ using MonoDevelop.Components.MainToolbar;
 
 namespace MonoDevelop.Ide.Desktop
 {
-    public abstract class PlatformService
+    public interface IPlatformService
     {
-        Hashtable iconHash = new Hashtable();
-        static readonly bool UsePlatformFileIcons = false;
+        string DefaultMonospaceFont { get; }
+        string DefaultSansFont { get; }
+        string Name { get; }
+
+        /// <summary>
+        /// True if both OpenTerminal and StartConsoleProcess are implemented.
+        /// </summary>
+        bool CanOpenTerminal { get; }
+
+        RecentFiles RecentFiles { get; }
+
+        void Initialize();
+        void SetGlobalProgressBar(double progress);
+        void ShowGlobalProgressBarError();
+        void ShowGlobalProgressBarIndeterminate();
+        void OpenFile(string filename);
+        void OpenFolder(FilePath folderPath, FilePath[] selectFiles);
+        void ShowUrl(string url);
+
+        /// <summary>
+        /// Loads the XWT toolkit backend for the native toolkit (Cocoa on Mac, WPF on Windows)
+        /// </summary>
+        /// <returns>The native toolkit.</returns>
+        Xwt.Toolkit LoadNativeToolkit();
+
+        string GetMimeTypeForUri(string uri);
+        string GetMimeTypeDescription(string mimeType);
+        bool GetMimeTypeIsText(string mimeType);
+        bool GetMimeTypeIsSubtype(string subMimeType, string baseMimeType);
+        IEnumerable<string> GetMimeTypeInheritanceChain(string mimeType);
+        Xwt.Drawing.Image GetIconForFile(string filename);
+        Xwt.Drawing.Image GetIconForType(string mimeType);
+
+        bool SetGlobalMenu(Components.Commands.CommandManager commandManager,
+            string commandMenuAddinPath, string appMenuAddinPath);
+
+        object GetFileAttributes(string fileName);
+        void SetFileAttributes(string fileName, object attributes);
+
+        ProcessAsyncOperation StartConsoleProcess(
+            string command, string arguments, string workingDirectory,
+            IDictionary<string, string> environmentVariables,
+            string title, bool pauseWhenFinished);
+
+        void OpenTerminal(FilePath directory, IDictionary<string, string> environmentVariables, string title);
+        string GetUpdaterUrl();
+        IEnumerable<string> GetUpdaterEnviromentFlags();
+
+        /// <summary>
+        /// Starts the installer.
+        /// </summary>
+        /// <param name='installerDataFile'>
+        /// File containing the list of updates to install
+        /// </param>
+        /// <param name='updatedInstallerPath'>
+        /// Optional path to an updated installer executable
+        /// </param>
+        /// <remarks>
+        /// This method should start the installer in an independent process.
+        /// </remarks>
+        void StartUpdatesInstaller(FilePath installerDataFile, FilePath updatedInstallerPath);
+
+        IEnumerable<DesktopApplication> GetApplications(string filename);
+        Xwt.Rectangle GetUsableMonitorGeometry(int screenNumber, int monitorNumber);
+
+        /// <summary>
+        /// Grab the desktop focus for the window.
+        /// </summary>
+        void GrabDesktopFocus(Gtk.Window window);
+
+        void RemoveWindowShadow(Gtk.Window window);
+        void SetMainWindowDecorations(Gtk.Window window);
+        IMainToolbarView CreateMainToolbar(Gtk.Window window);
+        void AttachMainToolbar(Gtk.VBox parent, IMainToolbarView toolbar);
+        bool GetIsFullscreen(Window window);
+        bool IsModalDialogRunning();
+        void SetIsFullscreen(Window window, bool isFullscreen);
+        void AddChildWindow(Gtk.Window parent, Gtk.Window child);
+        void RemoveChildWindow(Gtk.Window parent, Gtk.Window child);
+        void PlaceWindow(Gtk.Window window, int x, int y, int width, int height);
+
+        /// <summary>
+        /// Restarts MonoDevelop
+        /// </summary>
+        /// <param name="reopenWorkspace"> true to reopen current workspace. </param>
+        void RestartIde(bool reopenWorkspace);
+    }
+
+    public abstract class PlatformService : IPlatformService
+    {
+        private static bool UsePlatformFileIcons = false;
+        private readonly Hashtable iconHash = new Hashtable();
 
         public abstract string DefaultMonospaceFont { get; }
-        public virtual string DefaultSansFont { get { return null; } }
+        public virtual string DefaultSansFont => null;
 
         public abstract string Name { get; }
-
-        [Obsolete]
-        public virtual string DefaultControlLeftRightBehavior
-        {
-            get
-            {
-                return "MonoDevelop";
-            }
-        }
 
         public virtual void Initialize()
         {
@@ -133,11 +214,14 @@ namespace MonoDevelop.Ide.Desktop
             Xwt.Drawing.Image pic = null;
 
             string icon = GetIconIdForFile(filename);
-            if (icon != null)
+            if (icon != null) {
                 pic = ImageService.GetIcon(icon, false);
+            }
 
             if (pic == null && UsePlatformFileIcons)
+            {
                 pic = Xwt.Desktop.GetFileIcon(filename);
+            }
 
             if (pic == null)
             {
@@ -188,7 +272,7 @@ namespace MonoDevelop.Ide.Desktop
             return bf;
         }
 
-        Xwt.Drawing.Image GetDefaultIcon()
+        private Xwt.Drawing.Image GetDefaultIcon()
         {
             string id = "__default";
             Xwt.Drawing.Image bf = (Xwt.Drawing.Image)iconHash[id];
@@ -206,12 +290,12 @@ namespace MonoDevelop.Ide.Desktop
             return bf;
         }
 
-        string GetIconIdForFile(string fileName)
+        private string GetIconIdForFile(string fileName)
         {
             return OnGetIconIdForFile(fileName);
         }
 
-        string GetIconIdForType(string type)
+        private string GetIconIdForType(string type)
         {
             if (type == "text/plain")
                 return "md-text-file-icon";
@@ -255,17 +339,11 @@ namespace MonoDevelop.Ide.Desktop
             return null;
         }
 
-        protected virtual string DefaultFileIconId
-        {
-            get { return null; }
-        }
+        protected virtual string DefaultFileIconId => null;
 
-        protected virtual Xwt.Drawing.Image DefaultFileIcon
-        {
-            get { return null; }
-        }
+        protected virtual Xwt.Drawing.Image DefaultFileIcon => null;
 
-        public virtual bool SetGlobalMenu(MonoDevelop.Components.Commands.CommandManager commandManager,
+        public virtual bool SetGlobalMenu(Components.Commands.CommandManager commandManager,
             string commandMenuAddinPath, string appMenuAddinPath)
         {
             return false;
@@ -276,9 +354,7 @@ namespace MonoDevelop.Ide.Desktop
         public virtual object GetFileAttributes(string fileName)
         {
             UnixFileSystemInfo info = UnixFileSystemInfo.GetFileSystemEntry(fileName);
-            if (info == null)
-                return null;
-            return info.FileAccessPermissions;
+            return info?.FileAccessPermissions;
         }
 
         public virtual void SetFileAttributes(string fileName, object attributes)
@@ -301,10 +377,7 @@ namespace MonoDevelop.Ide.Desktop
         /// <summary>
         /// True if both OpenTerminal and StartConsoleProcess are implemented.
         /// </summary>
-        public virtual bool CanOpenTerminal
-        {
-            get { return false; }
-        }
+        public virtual bool CanOpenTerminal => false;
 
         public virtual void OpenTerminal(FilePath directory, IDictionary<string, string> environmentVariables, string title)
         {
@@ -316,14 +389,8 @@ namespace MonoDevelop.Ide.Desktop
             return new FdoRecentFiles();
         }
 
-        RecentFiles recentFiles;
-        public RecentFiles RecentFiles
-        {
-            get
-            {
-                return recentFiles ?? (recentFiles = CreateRecentFilesProvider());
-            }
-        }
+        private RecentFiles recentFiles;
+        public RecentFiles RecentFiles => recentFiles ?? (recentFiles = CreateRecentFilesProvider());
 
         public virtual string GetUpdaterUrl()
         {
@@ -334,7 +401,6 @@ namespace MonoDevelop.Ide.Desktop
         {
             return new string[0];
         }
-
 
         /// <summary>
         /// Starts the installer.
@@ -374,7 +440,7 @@ namespace MonoDevelop.Ide.Desktop
         /// <summary>
         /// Grab the desktop focus for the window.
         /// </summary>
-        internal virtual void GrabDesktopFocus(Gtk.Window window)
+        public virtual void GrabDesktopFocus(Gtk.Window window)
         {
             if (Platform.IsWindows && window.IsRealized)
             {
@@ -388,20 +454,22 @@ namespace MonoDevelop.Ide.Desktop
             }
         }
 
-        internal virtual void RemoveWindowShadow(Gtk.Window window)
+        public virtual void RemoveWindowShadow(Gtk.Window window)
         {
         }
 
-        internal virtual void SetMainWindowDecorations(Gtk.Window window)
+        public virtual void SetMainWindowDecorations(Gtk.Window window)
         {
         }
 
-        internal virtual IMainToolbarView CreateMainToolbar(Gtk.Window window)
+        public virtual IMainToolbarView CreateMainToolbar(Gtk.Window window)
         {
-            return new MainToolbar();
+            // TODO-AELIJ: toolbar
+            return null;
+            //return new MainToolbar();
         }
 
-        internal virtual void AttachMainToolbar(Gtk.VBox parent, IMainToolbarView toolbar)
+        public virtual void AttachMainToolbar(Gtk.VBox parent, IMainToolbarView toolbar)
         {
             var toolbarBox = new Gtk.HBox();
             parent.PackStart(toolbarBox, false, false, 0);
@@ -434,15 +502,15 @@ namespace MonoDevelop.Ide.Desktop
             }
         }
 
-        internal virtual void AddChildWindow(Gtk.Window parent, Gtk.Window child)
+        public virtual void AddChildWindow(Gtk.Window parent, Gtk.Window child)
         {
         }
 
-        internal virtual void RemoveChildWindow(Gtk.Window parent, Gtk.Window child)
+        public virtual void RemoveChildWindow(Gtk.Window parent, Gtk.Window child)
         {
         }
 
-        internal virtual void PlaceWindow(Gtk.Window window, int x, int y, int width, int height)
+        public virtual void PlaceWindow(Gtk.Window window, int x, int y, int width, int height)
         {
             window.Move(x, y);
             window.Resize(width, height);
@@ -452,7 +520,7 @@ namespace MonoDevelop.Ide.Desktop
         /// Restarts MonoDevelop
         /// </summary>
         /// <param name="reopenWorkspace"> true to reopen current workspace. </param>
-        internal virtual void RestartIde(bool reopenWorkspace)
+        public virtual void RestartIde(bool reopenWorkspace)
         {
             var reopen = reopenWorkspace;
 
