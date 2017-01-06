@@ -37,7 +37,6 @@ using MonoDevelop.Ide.Gui;
 using MonoDevelop.Components.MainToolbar;
 using MonoDevelop.Ide;
 using MonoDevelop.Ide.Gui.Components;
-using MonoDevelop.Ide.Tasks;
 using MonoDevelop.Components.Mac;
 using System.Threading;
 
@@ -178,11 +177,6 @@ namespace MonoDevelop.MacIntegration.MainToolbar
 			var stringSize = resultString.GetSize ();
 			Frame = new CGRect (Frame.X, Frame.Y, iconImage.Size.Width + stringSize.Width, Frame.Height);
 			NeedsDisplay = true;
-		}
-
-		public override void MouseDown (NSEvent theEvent)
-		{
-			IdeApp.Workbench.GetPad<MonoDevelop.Ide.Gui.Pads.ErrorListPad> ().BringToFront ();
 		}
 	}
 
@@ -424,7 +418,6 @@ namespace MonoDevelop.MacIntegration.MainToolbar
 		NSTrackingArea textFieldArea;
 		ProgressView progressView;
 
-		TaskEventHandler updateHandler;
 		public StatusBar ()
 		{
 			Cell = new ColoredButtonCell ();
@@ -458,31 +451,6 @@ namespace MonoDevelop.MacIntegration.MainToolbar
 
 			ctxHandler = new StatusBarContextHandler (this);
 
-			updateHandler = delegate {
-				int ec = 0, wc = 0;
-
-				foreach (var t in TaskService.Errors) {
-					if (t.Severity == TaskSeverity.Error)
-						ec++;
-					else if (t.Severity == TaskSeverity.Warning)
-						wc++;
-				}
-
-				Runtime.RunInMainThread (delegate {
-					buildResults.Hidden = (ec == 0 && wc == 0);
-					buildResults.ResultCount = ec > 0 ? ec : wc;
-
-					buildImageId = ec > 0 ? "md-status-error-count" : "md-status-warning-count";
-					buildResults.IconImage = ImageService.GetIcon (buildImageId, Gtk.IconSize.Menu).ToNSImage ();
-
-					RepositionStatusIcons ();
-				});
-			};
-
-			updateHandler (null, null);
-
-			TaskService.Errors.TasksAdded += updateHandler;
-			TaskService.Errors.TasksRemoved += updateHandler;
 			BrandingService.ApplicationNameChanged += ApplicationNameChanged;
 
 			AddSubview (cancelButton);
@@ -526,8 +494,6 @@ namespace MonoDevelop.MacIntegration.MainToolbar
 
 		protected override void Dispose (bool disposing)
 		{
-			TaskService.Errors.TasksAdded -= updateHandler;
-			TaskService.Errors.TasksRemoved -= updateHandler;
 			Ide.Gui.Styles.Changed -= LoadStyles;
 			BrandingService.ApplicationNameChanged -= ApplicationNameChanged;
 			base.Dispose (disposing);
@@ -630,8 +596,6 @@ namespace MonoDevelop.MacIntegration.MainToolbar
 
 			return right - 12;
 		}
-
-		IconId buildImageId;
 
 		void PositionBuildResults (nfloat right)
 		{

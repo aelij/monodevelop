@@ -100,7 +100,7 @@ namespace MonoDevelop.MacIntegration
 							Enabled = false,
 						};
 
-						if (encodingSelector != null || IdeApp.Workspace.IsOpen) {
+						if (encodingSelector != null) {
 							viewerSelector.Activated += delegate {
 								var idx = viewerSelector.IndexOfSelectedItem;
 								bool workbenchViewerSelected = idx == 0 && currentViewers [0] == null;
@@ -120,19 +120,6 @@ namespace MonoDevelop.MacIntegration
 							{ viewSelLabel, true },
 							{ new MDAlignment (viewerSelector, true) { MinWidth = 200 }  }
 						};
-						
-						if (IdeApp.Workspace.IsOpen) {
-							closeSolutionButton = new NSButton {
-								Title = "Close current workspace",
-								Hidden = true,
-								State = NSCellStateValue.On,
-							};
-							
-							closeSolutionButton.SetButtonType (NSButtonType.Switch);
-							closeSolutionButton.SizeToFit ();
-							
-							viewSelBox.Add (closeSolutionButton, true);
-						}
 						
 						box.Add (viewSelBox);
 					}
@@ -209,19 +196,6 @@ namespace MonoDevelop.MacIntegration
 			int i = 0;
 			bool hasWorkbenchViewer = false;
 
-			if (IdeApp.Services.ProjectService.IsWorkspaceItemFile (filename) || IdeApp.Services.ProjectService.IsSolutionItemFile (filename)) {
-				button.Menu.AddItem (new NSMenuItem { Title = "Solution Workbench" });
-				currentViewers.Add (null);
-				
-				if (closeSolutionButton != null)
-					closeSolutionButton.State = NSCellStateValue.On;
-				
-				if (!CanBeOpenedInAssemblyBrowser (filename))
-					selected = 0;
-				hasWorkbenchViewer = true;
-				i++;
-			}
-			
 			foreach (var vw in DisplayBindingService.GetFileViewers (filename, null)) {
 				if (!vw.IsExternal) {
 					button.Menu.AddItem (new NSMenuItem { Title = vw.Title });

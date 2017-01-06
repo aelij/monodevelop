@@ -31,9 +31,7 @@ using MonoDevelop.Core;
 using System.Text;
 using Foundation;
 using ObjCRuntime;
-using System.Collections.Generic;
 using MonoDevelop.Components;
-using MonoDevelop.Ide.Navigation;
 
 namespace MonoDevelop.MacIntegration.MacMenu
 {
@@ -41,7 +39,7 @@ namespace MonoDevelop.MacIntegration.MacMenu
 	class MDMenuItem : NSMenuItem, IUpdatableMenuItem
 	{
 		public const string ActionSelName = "run:";
-		public static Selector ActionSel = new Selector (ActionSelName);
+		public static Selector ActionSel = new Selector(ActionSelName);
 
 		CommandEntry ce;
 		CommandManager manager;
@@ -50,7 +48,7 @@ namespace MonoDevelop.MacIntegration.MacMenu
 		object initialCommandTarget;
 		CommandSource commandSource;
 
-		public MDMenuItem (CommandManager manager, CommandEntry ce, ActionCommand command, CommandSource commandSource, object initialCommandTarget)
+		public MDMenuItem(CommandManager manager, CommandEntry ce, ActionCommand command, CommandSource commandSource, object initialCommandTarget)
 		{
 			this.ce = ce;
 			this.manager = manager;
@@ -65,16 +63,19 @@ namespace MonoDevelop.MacIntegration.MacMenu
 
 		public CommandEntry CommandEntry { get { return ce; } }
 
-		[Export (ActionSelName)]
-		public void Run (NSMenuItem sender)
+		[Export(ActionSelName)]
+		public void Run(NSMenuItem sender)
 		{
 			var a = sender as MDExpandedArrayItem;
 			//if the command opens a modal subloop, give cocoa a chance to unhighlight the menu item
-			GLib.Timeout.Add (1, () => {
-				if (a != null) {
-					manager.DispatchCommand (ce.CommandId, a.Info.DataItem, initialCommandTarget, commandSource);
-				} else {
-					manager.DispatchCommand (ce.CommandId, null, initialCommandTarget, commandSource);
+			GLib.Timeout.Add(1, () =>
+			{
+				if (a != null)
+				{
+					manager.DispatchCommand(ce.CommandId, a.Info.DataItem, initialCommandTarget, commandSource);
+				}
+				else {
+					manager.DispatchCommand(ce.CommandId, null, initialCommandTarget, commandSource);
 				}
 				return false;
 			});
@@ -82,78 +83,87 @@ namespace MonoDevelop.MacIntegration.MacMenu
 
 		//NOTE: This is used to disable the whole menu when there's a modal dialog.
 		// We can justify this because safari 3.2.1 does it ("do you want to close all tabs?").
-		public static bool IsGloballyDisabled {
-			get {
-				return MonoDevelop.Ide.DesktopService.IsModalDialogRunning ();
+		public static bool IsGloballyDisabled
+		{
+			get
+			{
+				return MonoDevelop.Ide.DesktopService.IsModalDialogRunning();
 			}
 		}
 
-		public void Update (MDMenu parent, ref NSMenuItem lastSeparator, ref int index)
+		public void Update(MDMenu parent, ref NSMenuItem lastSeparator, ref int index)
 		{
-			var info = manager.GetCommandInfo (ce.CommandId, new CommandTargetRoute (initialCommandTarget));
+			var info = manager.GetCommandInfo(ce.CommandId, new CommandTargetRoute(initialCommandTarget));
 
-			if (!isArrayItem) {
-				SetItemValues (this, info, ce.DisabledVisible, ce.OverrideLabel);
+			if (!isArrayItem)
+			{
+				SetItemValues(this, info, ce.DisabledVisible, ce.OverrideLabel);
 				if (!Hidden)
-					MDMenu.ShowLastSeparator (ref lastSeparator);
+					MDMenu.ShowLastSeparator(ref lastSeparator);
 				return;
 			}
 
 			Hidden = true;
 
-			if (index < parent.Count - 1) {
-				for (int i = index + 1; i < parent.Count; i++) {
-					var nextItem = parent.ItemAt (i);
+			if (index < parent.Count - 1)
+			{
+				for (int i = index + 1; i < parent.Count; i++)
+				{
+					var nextItem = parent.ItemAt(i);
 					if (nextItem == null || nextItem.Target != this)
 						break;
-					parent.RemoveItemAt (i);
+					parent.RemoveItemAt(i);
 					i--;
 				}
 			}
 
 			index++;
-			PopulateArrayItems (info.ArrayInfo, parent, ref lastSeparator, ref index);
+			PopulateArrayItems(info.ArrayInfo, parent, ref lastSeparator, ref index);
 		}
 
-		void PopulateArrayItems (CommandArrayInfo infos, NSMenu parent, ref NSMenuItem lastSeparator, ref int index)
+		void PopulateArrayItems(CommandArrayInfo infos, NSMenu parent, ref NSMenuItem lastSeparator, ref int index)
 		{
 			if (infos == null)
 				return;
 
-			foreach (CommandInfo ci in infos) {
-				if (ci.IsArraySeparator) {
+			foreach (CommandInfo ci in infos)
+			{
+				if (ci.IsArraySeparator)
+				{
 					var n = NSMenuItem.SeparatorItem;
 					n.Hidden = true;
 					n.Target = this;
 					lastSeparator = n;
 					if (parent.Count > index)
-						parent.InsertItem (n, index);
+						parent.InsertItem(n, index);
 					else
-						parent.AddItem (n);
+						parent.AddItem(n);
 					index++;
 					continue;
 				}
 
-				var item = new MDExpandedArrayItem {
+				var item = new MDExpandedArrayItem
+				{
 					Info = ci,
 					Target = this,
 					Action = ActionSel,
 				};
 
-				if (ci is CommandInfoSet) {
-					item.Submenu = new NSMenu ();
+				if (ci is CommandInfoSet)
+				{
+					item.Submenu = new NSMenu();
 					int i = 0;
 					NSMenuItem sep = null;
-					PopulateArrayItems (((CommandInfoSet)ci).CommandInfos, item.Submenu, ref sep, ref i);
+					PopulateArrayItems(((CommandInfoSet)ci).CommandInfos, item.Submenu, ref sep, ref i);
 				}
-				SetItemValues (item, ci, true);
+				SetItemValues(item, ci, true);
 
 				if (!item.Hidden)
-					MDMenu.ShowLastSeparator (ref lastSeparator);
+					MDMenu.ShowLastSeparator(ref lastSeparator);
 				if (parent.Count > index)
-					parent.InsertItem (item, index);
+					parent.InsertItem(item, index);
 				else
-					parent.AddItem (item);
+					parent.AddItem(item);
 				index++;
 			}
 			index--;
@@ -164,9 +174,9 @@ namespace MonoDevelop.MacIntegration.MacMenu
 			public CommandInfo Info;
 		}
 
-		void SetItemValues (NSMenuItem item, CommandInfo info, bool disabledVisible, string overrideLabel = null)
+		void SetItemValues(NSMenuItem item, CommandInfo info, bool disabledVisible, string overrideLabel = null)
 		{
-			item.SetTitleWithMnemonic (GetCleanCommandText (info, overrideLabel));
+			item.SetTitleWithMnemonic(GetCleanCommandText(info, overrideLabel));
 
 			bool enabled = info.Enabled && (!IsGloballyDisabled || commandSource == CommandSource.ContextMenu);
 			bool visible = info.Visible && (disabledVisible || info.Enabled);
@@ -176,332 +186,358 @@ namespace MonoDevelop.MacIntegration.MacMenu
 
 			string fileName = null;
 			var doc = info.DataItem as Ide.Gui.Document;
-			if (doc != null) {
+			if (doc != null)
+			{
 				if (doc.IsFile)
 					fileName = doc.FileName;
 				else {
 					// Designer documents have no file bound to them, but the document name
 					// could be a valid path
 					var docName = doc.Name;
-					if (!string.IsNullOrEmpty (docName) && System.IO.Path.IsPathRooted (docName) && System.IO.File.Exists (docName))
+					if (!string.IsNullOrEmpty(docName) && System.IO.Path.IsPathRooted(docName) && System.IO.File.Exists(docName))
 						fileName = docName;
 				}
-			} else if (info.DataItem is NavigationHistoryItem) {
-					var navDoc = ((NavigationHistoryItem)info.DataItem).NavigationPoint as DocumentNavigationPoint;
-					if (navDoc != null)
-						fileName = navDoc.FileName;
-			} else {
+			}
+			else {
 				var str = info.DataItem as string;
-				if (str != null && System.IO.Path.IsPathRooted (str) && System.IO.File.Exists (str))
+				if (str != null && System.IO.Path.IsPathRooted(str) && System.IO.File.Exists(str))
 					fileName = str;
 			}
 
-			if (!String.IsNullOrWhiteSpace (fileName)) {
+			if (!String.IsNullOrWhiteSpace(fileName))
+			{
 				item.ToolTip = fileName;
 				Xwt.Drawing.Image icon = null;
 				if (!info.Icon.IsNull)
-					icon = Ide.ImageService.GetIcon (info.Icon, Gtk.IconSize.Menu);
+					icon = Ide.ImageService.GetIcon(info.Icon, Gtk.IconSize.Menu);
 				if (icon == null)
-					icon = Ide.DesktopService.GetIconForFile (fileName, Gtk.IconSize.Menu);
-				if (icon != null) {
-					var scale = GtkWorkarounds.GetScaleFactor (Ide.IdeApp.Workbench.RootWindow);
+					icon = Ide.DesktopService.GetIconForFile(fileName, Gtk.IconSize.Menu);
+				if (icon != null)
+				{
+					var scale = GtkWorkarounds.GetScaleFactor(Ide.IdeApp.Workbench.RootWindow);
 
-					if (NSUserDefaults.StandardUserDefaults.StringForKey ("AppleInterfaceStyle") == "Dark")
-						icon = icon.WithStyles ("dark");
+					if (NSUserDefaults.StandardUserDefaults.StringForKey("AppleInterfaceStyle") == "Dark")
+						icon = icon.WithStyles("dark");
 					else
-						icon = icon.WithStyles ("-dark");
-					item.Image = icon.ToBitmap (scale).ToNSImage ();
+						icon = icon.WithStyles("-dark");
+					item.Image = icon.ToBitmap(scale).ToNSImage();
 					item.Image.Template = true;
 				}
 			}
 
-			SetAccel (item, info.AccelKey);
+			SetAccel(item, info.AccelKey);
 
-			if (info.Checked) {
+			if (info.Checked)
+			{
 				item.State = NSCellStateValue.On;
-			} else if (info.CheckedInconsistent) {
+			}
+			else if (info.CheckedInconsistent)
+			{
 				item.State = NSCellStateValue.Mixed;
-			} else {
+			}
+			else {
 				item.State = NSCellStateValue.Off;
 			}
 		}
 
-		static void SetAccel (NSMenuItem item, string accelKey)
+		static void SetAccel(NSMenuItem item, string accelKey)
 		{
 			uint modeKey;
 			Gdk.ModifierType modeMod;
 			uint key;
 			Gdk.ModifierType mod;
 
-			if (!KeyBindingManager.BindingToKeys (accelKey, out modeKey, out modeMod, out key, out mod)) {
+			if (!KeyBindingManager.BindingToKeys(accelKey, out modeKey, out modeMod, out key, out mod))
+			{
 				item.KeyEquivalent = "";
-				item.KeyEquivalentModifierMask = (NSEventModifierMask) 0;
+				item.KeyEquivalentModifierMask = (NSEventModifierMask)0;
 				return;
 			}
 
-			if (modeKey != 0) {
-				LoggingService.LogWarning ("Mac menu cannot display accelerators with mode keys ({0})", accelKey);
+			if (modeKey != 0)
+			{
+				LoggingService.LogWarning("Mac menu cannot display accelerators with mode keys ({0})", accelKey);
 				item.KeyEquivalent = "";
-				item.KeyEquivalentModifierMask = (NSEventModifierMask) 0;
+				item.KeyEquivalentModifierMask = (NSEventModifierMask)0;
 				return;
 			}
 
-			var keyEq = GetKeyEquivalent ((Gdk.Key) key);
+			var keyEq = GetKeyEquivalent((Gdk.Key)key);
 			item.KeyEquivalent = keyEq;
-			if (keyEq.Length == 0) {
+			if (keyEq.Length == 0)
+			{
 				item.KeyEquivalentModifierMask = 0;
 			}
 
 			NSEventModifierMask outMod = 0;
-			if ((mod & Gdk.ModifierType.Mod1Mask) != 0) {
+			if ((mod & Gdk.ModifierType.Mod1Mask) != 0)
+			{
 				outMod |= NSEventModifierMask.AlternateKeyMask;
 				mod ^= Gdk.ModifierType.Mod1Mask;
 			}
-			if ((mod & Gdk.ModifierType.ShiftMask) != 0) {
+			if ((mod & Gdk.ModifierType.ShiftMask) != 0)
+			{
 				outMod |= NSEventModifierMask.ShiftKeyMask;
 				mod ^= Gdk.ModifierType.ShiftMask;
 			}
-			if ((mod & Gdk.ModifierType.ControlMask) != 0) {
+			if ((mod & Gdk.ModifierType.ControlMask) != 0)
+			{
 				outMod |= NSEventModifierMask.ControlKeyMask;
 				mod ^= Gdk.ModifierType.ControlMask;
 			}
-			if ((mod & Gdk.ModifierType.MetaMask) != 0) {
+			if ((mod & Gdk.ModifierType.MetaMask) != 0)
+			{
 				outMod |= NSEventModifierMask.CommandKeyMask;
 				mod ^= Gdk.ModifierType.MetaMask;
 			}
 
-			if (mod != 0) {
-				LoggingService.LogWarning ("Mac menu cannot display accelerators with modifiers {0}", mod);
+			if (mod != 0)
+			{
+				LoggingService.LogWarning("Mac menu cannot display accelerators with modifiers {0}", mod);
 			}
 			item.KeyEquivalentModifierMask = outMod;
 		}
 
-		static string GetKeyEquivalent (Gdk.Key key)
+		static string GetKeyEquivalent(Gdk.Key key)
 		{
 			// Gdk.Keyval.ToUnicode returns NULL for TAB, fix it
 			if (key == Gdk.Key.Tab)
 				return "\t";
-			
-			char c = (char) Gdk.Keyval.ToUnicode ((uint) key);
+
+			char c = (char)Gdk.Keyval.ToUnicode((uint)key);
 			if (c != 0)
-				return c.ToString ();
+				return c.ToString();
 
-			var fk = GetFunctionKey (key);
+			var fk = GetFunctionKey(key);
 			if (fk != 0)
-				return ((char) fk).ToString ();
+				return ((char)fk).ToString();
 
-			LoggingService.LogError ("Mac menu cannot display key '{0}'", key);
+			LoggingService.LogError("Mac menu cannot display key '{0}'", key);
 			return "";
 		}
 
-		static string GetCleanCommandText (CommandInfo ci, string overrideLabel = null)
+		static string GetCleanCommandText(CommandInfo ci, string overrideLabel = null)
 		{
 			string txt = overrideLabel ?? ci.Text;
 			if (txt == null)
 				return "";
 
 			//FIXME: markup stripping could be done better
-			var sb = new StringBuilder ();
-			for (int i = 0; i < txt.Length; i++) {
+			var sb = new StringBuilder();
+			for (int i = 0; i < txt.Length; i++)
+			{
 				char ch = txt[i];
-				if (ch == '_') {
-					if (i + 1 < txt.Length && txt[i + 1] == '_') {
-						sb.Append ('_');
+				if (ch == '_')
+				{
+					if (i + 1 < txt.Length && txt[i + 1] == '_')
+					{
+						sb.Append('_');
 						i++;
-					} else {
-						sb.Append ('&');
 					}
-				} else if (!ci.UseMarkup) {
-					sb.Append (ch);
-				} else if (ch == '<') {
-					while (++i < txt.Length && txt[i] != '>');
-				} else if (ch == '&') {
+					else {
+						sb.Append('&');
+					}
+				}
+				else if (!ci.UseMarkup)
+				{
+					sb.Append(ch);
+				}
+				else if (ch == '<')
+				{
+					while (++i < txt.Length && txt[i] != '>') ;
+				}
+				else if (ch == '&')
+				{
 					int j = i;
-					while (++i < txt.Length && txt[i] != ';');
+					while (++i < txt.Length && txt[i] != ';') ;
 					int len = i - j - 1;
-					if (len > 0) {
-						string entityName = txt.Substring (j + 1, i - j - 1);
-						switch (entityName) {
+					if (len > 0)
+					{
+						string entityName = txt.Substring(j + 1, i - j - 1);
+						switch (entityName)
+						{
 							case "quot":
-							sb.Append ('"');
-							break;
+								sb.Append('"');
+								break;
 							case "amp":
-							sb.Append ('&');
-							break;
+								sb.Append('&');
+								break;
 							case "apos":
-							sb.Append ('\'');
-							break;
+								sb.Append('\'');
+								break;
 							case "lt":
-							sb.Append ('<');
-							break;
+								sb.Append('<');
+								break;
 							case "gt":
-							sb.Append ('>');
-							break;
+								sb.Append('>');
+								break;
 							default:
-							LoggingService.LogWarning ("Could not de-markup entity '{0}'", entityName);
-							break;
+								LoggingService.LogWarning("Could not de-markup entity '{0}'", entityName);
+								break;
 						}
 					}
-				} else {
-					sb.Append (ch);
+				}
+				else {
+					sb.Append(ch);
 				}
 			}
 
-			return sb.ToString ();
+			return sb.ToString();
 		}
 
-		static FunctionKey GetFunctionKey (Gdk.Key key)
+		static FunctionKey GetFunctionKey(Gdk.Key key)
 		{
-			switch (key) {
-			case Gdk.Key.Return:
-				return (FunctionKey) (uint) '\n';
-			case Gdk.Key.BackSpace:
-				return (FunctionKey) 0x08;
+			switch (key)
+			{
+				case Gdk.Key.Return:
+					return (FunctionKey)(uint)'\n';
+				case Gdk.Key.BackSpace:
+					return (FunctionKey)0x08;
 				// NSBackspaceCharacter
-			case Gdk.Key.KP_Delete:
-			case Gdk.Key.Delete:
-				return (FunctionKey) 0x7F;
+				case Gdk.Key.KP_Delete:
+				case Gdk.Key.Delete:
+					return (FunctionKey)0x7F;
 				// NSDeleteCharacter
-			case Gdk.Key.KP_Up:
-			case Gdk.Key.Up:
-				return FunctionKey.UpArrow;
-			case Gdk.Key.KP_Down:
-			case Gdk.Key.Down:
-				return FunctionKey.DownArrow;
-			case Gdk.Key.KP_Left:
-			case Gdk.Key.Left:
-				return FunctionKey.LeftArrow;
-			case Gdk.Key.KP_Right:
-			case Gdk.Key.Right:
-				return FunctionKey.RightArrow;
-			case Gdk.Key.F1:
-				return FunctionKey.F1;
-			case Gdk.Key.F2:
-				return FunctionKey.F2;
-			case Gdk.Key.F3:
-				return FunctionKey.F3;
-			case Gdk.Key.F4:
-				return FunctionKey.F4;
-			case Gdk.Key.F5:
-				return FunctionKey.F5;
-			case Gdk.Key.F6:
-				return FunctionKey.F6;
-			case Gdk.Key.F7:
-				return FunctionKey.F7;
-			case Gdk.Key.F8:
-				return FunctionKey.F8;
-			case Gdk.Key.F9:
-				return FunctionKey.F9;
-			case Gdk.Key.F10:
-				return FunctionKey.F10;
-			case Gdk.Key.F11:
-				return FunctionKey.F11;
-			case Gdk.Key.F12:
-				return FunctionKey.F12;
-			case Gdk.Key.F13:
-				return FunctionKey.F13;
-			case Gdk.Key.F14:
-				return FunctionKey.F14;
-			case Gdk.Key.F15:
-				return FunctionKey.F15;
-			case Gdk.Key.F16:
-				return FunctionKey.F16;
-			case Gdk.Key.F17:
-				return FunctionKey.F17;
-			case Gdk.Key.F18:
-				return FunctionKey.F18;
-			case Gdk.Key.F19:
-				return FunctionKey.F19;
-			case Gdk.Key.F20:
-				return FunctionKey.F20;
-			case Gdk.Key.F21:
-				return FunctionKey.F21;
-			case Gdk.Key.F22:
-				return FunctionKey.F22;
-			case Gdk.Key.F23:
-				return FunctionKey.F23;
-			case Gdk.Key.F24:
-				return FunctionKey.F24;
-			case Gdk.Key.F25:
-				return FunctionKey.F25;
-			case Gdk.Key.F26:
-				return FunctionKey.F26;
-			case Gdk.Key.F27:
-				return FunctionKey.F27;
-			case Gdk.Key.F28:
-				return FunctionKey.F28;
-			case Gdk.Key.F29:
-				return FunctionKey.F29;
-			case Gdk.Key.F30:
-				return FunctionKey.F30;
-			case Gdk.Key.F31:
-				return FunctionKey.F31;
-			case Gdk.Key.F32:
-				return FunctionKey.F32;
-			case Gdk.Key.F33:
-				return FunctionKey.F33;
-			case Gdk.Key.F34:
-				return FunctionKey.F34;
-			case Gdk.Key.F35:
-				return FunctionKey.F35;
-			case Gdk.Key.KP_Insert:
-			case Gdk.Key.Insert:
-				return FunctionKey.Insert;
-			case Gdk.Key.KP_Home:
-			case Gdk.Key.Home:
-				return FunctionKey.Home;
-			case Gdk.Key.Begin:
-				return FunctionKey.Begin;
-			case Gdk.Key.KP_End:
-			case Gdk.Key.End:
-				return FunctionKey.End;
-			case Gdk.Key.KP_Page_Up:
-			case Gdk.Key.Page_Up:
-				return FunctionKey.PageUp;
-			case Gdk.Key.KP_Page_Down:
-			case Gdk.Key.Page_Down:
-				return FunctionKey.PageDown;
-			case Gdk.Key.Key_3270_PrintScreen:
-				return FunctionKey.PrintScreen;
-			case Gdk.Key.Scroll_Lock:
-				return FunctionKey.ScrollLock;
-			case Gdk.Key.Pause:
-				return FunctionKey.Pause;
-			case Gdk.Key.Sys_Req:
-				return FunctionKey.SysReq;
-			case Gdk.Key.Break:
-				return FunctionKey.Break;
-			case Gdk.Key.Key_3270_Reset:
-				return FunctionKey.Reset;
-			case Gdk.Key.Menu:
-				return FunctionKey.Menu;
-			case Gdk.Key.Print:
-				return FunctionKey.Print;
-			case Gdk.Key.Help:
-				return FunctionKey.Help;
-			case Gdk.Key.Find:
-				return FunctionKey.Find;
-			case Gdk.Key.Undo:
-				return FunctionKey.Undo;
-			case Gdk.Key.Redo:
-				return FunctionKey.Redo;
-			case Gdk.Key.Execute:
-				return FunctionKey.Execute;
-				/*
-				return FunctionKey.Stop;
-				return FunctionKey.User;
-				return FunctionKey.System;
-				return FunctionKey.ClearLine;
-				return FunctionKey.ClearDisplay;
-				return FunctionKey.InsertLine;
-				return FunctionKey.DeleteLine;
-				return FunctionKey.InsertChar;
-				return FunctionKey.DeleteChar;
-				return FunctionKey.Next;
-				return FunctionKey.Prev;
-				return FunctionKey.Select;
-				return FunctionKey.ModeSwitch;
-				*/
+				case Gdk.Key.KP_Up:
+				case Gdk.Key.Up:
+					return FunctionKey.UpArrow;
+				case Gdk.Key.KP_Down:
+				case Gdk.Key.Down:
+					return FunctionKey.DownArrow;
+				case Gdk.Key.KP_Left:
+				case Gdk.Key.Left:
+					return FunctionKey.LeftArrow;
+				case Gdk.Key.KP_Right:
+				case Gdk.Key.Right:
+					return FunctionKey.RightArrow;
+				case Gdk.Key.F1:
+					return FunctionKey.F1;
+				case Gdk.Key.F2:
+					return FunctionKey.F2;
+				case Gdk.Key.F3:
+					return FunctionKey.F3;
+				case Gdk.Key.F4:
+					return FunctionKey.F4;
+				case Gdk.Key.F5:
+					return FunctionKey.F5;
+				case Gdk.Key.F6:
+					return FunctionKey.F6;
+				case Gdk.Key.F7:
+					return FunctionKey.F7;
+				case Gdk.Key.F8:
+					return FunctionKey.F8;
+				case Gdk.Key.F9:
+					return FunctionKey.F9;
+				case Gdk.Key.F10:
+					return FunctionKey.F10;
+				case Gdk.Key.F11:
+					return FunctionKey.F11;
+				case Gdk.Key.F12:
+					return FunctionKey.F12;
+				case Gdk.Key.F13:
+					return FunctionKey.F13;
+				case Gdk.Key.F14:
+					return FunctionKey.F14;
+				case Gdk.Key.F15:
+					return FunctionKey.F15;
+				case Gdk.Key.F16:
+					return FunctionKey.F16;
+				case Gdk.Key.F17:
+					return FunctionKey.F17;
+				case Gdk.Key.F18:
+					return FunctionKey.F18;
+				case Gdk.Key.F19:
+					return FunctionKey.F19;
+				case Gdk.Key.F20:
+					return FunctionKey.F20;
+				case Gdk.Key.F21:
+					return FunctionKey.F21;
+				case Gdk.Key.F22:
+					return FunctionKey.F22;
+				case Gdk.Key.F23:
+					return FunctionKey.F23;
+				case Gdk.Key.F24:
+					return FunctionKey.F24;
+				case Gdk.Key.F25:
+					return FunctionKey.F25;
+				case Gdk.Key.F26:
+					return FunctionKey.F26;
+				case Gdk.Key.F27:
+					return FunctionKey.F27;
+				case Gdk.Key.F28:
+					return FunctionKey.F28;
+				case Gdk.Key.F29:
+					return FunctionKey.F29;
+				case Gdk.Key.F30:
+					return FunctionKey.F30;
+				case Gdk.Key.F31:
+					return FunctionKey.F31;
+				case Gdk.Key.F32:
+					return FunctionKey.F32;
+				case Gdk.Key.F33:
+					return FunctionKey.F33;
+				case Gdk.Key.F34:
+					return FunctionKey.F34;
+				case Gdk.Key.F35:
+					return FunctionKey.F35;
+				case Gdk.Key.KP_Insert:
+				case Gdk.Key.Insert:
+					return FunctionKey.Insert;
+				case Gdk.Key.KP_Home:
+				case Gdk.Key.Home:
+					return FunctionKey.Home;
+				case Gdk.Key.Begin:
+					return FunctionKey.Begin;
+				case Gdk.Key.KP_End:
+				case Gdk.Key.End:
+					return FunctionKey.End;
+				case Gdk.Key.KP_Page_Up:
+				case Gdk.Key.Page_Up:
+					return FunctionKey.PageUp;
+				case Gdk.Key.KP_Page_Down:
+				case Gdk.Key.Page_Down:
+					return FunctionKey.PageDown;
+				case Gdk.Key.Key_3270_PrintScreen:
+					return FunctionKey.PrintScreen;
+				case Gdk.Key.Scroll_Lock:
+					return FunctionKey.ScrollLock;
+				case Gdk.Key.Pause:
+					return FunctionKey.Pause;
+				case Gdk.Key.Sys_Req:
+					return FunctionKey.SysReq;
+				case Gdk.Key.Break:
+					return FunctionKey.Break;
+				case Gdk.Key.Key_3270_Reset:
+					return FunctionKey.Reset;
+				case Gdk.Key.Menu:
+					return FunctionKey.Menu;
+				case Gdk.Key.Print:
+					return FunctionKey.Print;
+				case Gdk.Key.Help:
+					return FunctionKey.Help;
+				case Gdk.Key.Find:
+					return FunctionKey.Find;
+				case Gdk.Key.Undo:
+					return FunctionKey.Undo;
+				case Gdk.Key.Redo:
+					return FunctionKey.Redo;
+				case Gdk.Key.Execute:
+					return FunctionKey.Execute;
+					/*
+					return FunctionKey.Stop;
+					return FunctionKey.User;
+					return FunctionKey.System;
+					return FunctionKey.ClearLine;
+					return FunctionKey.ClearDisplay;
+					return FunctionKey.InsertLine;
+					return FunctionKey.DeleteLine;
+					return FunctionKey.InsertChar;
+					return FunctionKey.DeleteChar;
+					return FunctionKey.Next;
+					return FunctionKey.Prev;
+					return FunctionKey.Select;
+					return FunctionKey.ModeSwitch;
+					*/
 			}
 
 			return 0;

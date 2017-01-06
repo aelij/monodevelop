@@ -23,7 +23,8 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-using System;
+
+/*using System;
 using Microsoft.CodeAnalysis;
 using MonoDevelop.Core;
 using MonoDevelop.Ide.Editor;
@@ -100,4 +101,4 @@ namespace TestMonoEditor
         public override event EventHandler<TextChangeEventArgs> TextChanged;
         #endregion
     }
-}
+}*/

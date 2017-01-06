@@ -278,8 +278,7 @@ namespace MonoDevelop.MacIntegration
 			commandManager.GetCommand (EditCommands.DefaultPolicies).Text = GettextCatalog.GetString ("Policies...");
 			commandManager.GetCommand (HelpCommands.About).Text = GetAboutCommandText ();
 			commandManager.GetCommand (MacIntegrationCommands.HideWindow).Text = GetHideWindowCommandText ();
-			commandManager.GetCommand (ToolCommands.AddinManager).Text = GettextCatalog.GetString ("Add-ins...");
-
+		
 			initedApp = true;
 
 			IdeApp.Workbench.RootWindow.DeleteEvent += HandleDeleteEvent;
@@ -839,7 +838,9 @@ namespace MonoDevelop.MacIntegration
 
 	    public override IMainToolbarView CreateMainToolbar (Gtk.Window window)
 		{
-			return new MonoDevelop.MacIntegration.MainToolbar.MainToolbar (window);
+			//TODO-AELIJ: toolbar
+			return null;
+			//return new MonoDevelop.MacIntegration.MainToolbar.MainToolbar (window);
 		}
 
 	    public override void AttachMainToolbar (Gtk.VBox parent, IMainToolbarView toolbar)
@@ -947,7 +948,7 @@ namespace MonoDevelop.MacIntegration
 				return;
 			}
 
-			var reopen = reopenWorkspace && IdeApp.Workspace != null && IdeApp.Workspace.Items.Count > 0;
+			var reopen = reopenWorkspace;
 
 			var proc = new Process ();
 

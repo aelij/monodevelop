@@ -40,6 +40,7 @@ using Gdk;
 using GLib;
 using Gtk;
 using MonoDevelop.Core;
+using MonoDevelop.Ide;
 using Key = Gdk.Key;
 using Timeout = GLib.Timeout;
 using WindowType = Gtk.WindowType;

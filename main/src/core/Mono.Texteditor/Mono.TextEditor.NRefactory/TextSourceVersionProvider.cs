@@ -94,7 +94,7 @@ namespace Mono.TextEditor.NRefactory
 					throw new ArgumentException("Versions do not belong to the same document.");
 				// We will allow overflows, but assume that the maximum distance between checkpoints is 2^31-1.
 				// This is guaranteed on x86 because so many checkpoints don't fit into memory.
-				return Math.Sign(unchecked( this.id - o.id ));
+				return System.Math.Sign(unchecked( this.id - o.id ));
 			}
 			
 			public IEnumerable<TextChangeEventArgs> GetChangesTo(ITextSourceVersion other)

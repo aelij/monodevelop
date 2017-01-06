@@ -51,6 +51,7 @@ using MonoDevelop.Components.Extensions;
 using MonoDevelop.Core;
 using MonoDevelop.Core.Instrumentation;
 using MonoDevelop.Core.ProgressMonitoring;
+using MonoDevelop.Ide.Desktop;
 using MonoDevelop.Ide.Gui;
 using Xwt;
 using Action = System.Action;
@@ -74,9 +75,12 @@ namespace MonoDevelop.Ide
 
         public bool EnablePerfLog { get; set; }
 
-        public IdeStartup(MonoDevelopOptions options = null, ComponentServices componentServices = null)
+		readonly Func<PlatformService> platformService;
+
+		public IdeStartup(MonoDevelopOptions options = null, ComponentServices componentServices = null, Func<PlatformService> platformService = null)
         {
-            ComponentServices = componentServices ?? new MefComponentServices();
+			this.platformService = platformService;
+			ComponentServices = componentServices ?? new MefComponentServices();
             Options = options ?? MonoDevelopOptions.Default;
         }
 
@@ -106,9 +110,8 @@ namespace MonoDevelop.Ide
                     // ReSharper disable once PossibleNullReferenceException
                     exename = exename.ToLower();
                 Runtime.SetProcessName(exename);
-                var app = new IdeStartup();
 
-                ret = app.RunInternal(createUi);
+                ret = RunInternal(createUi);
             }
             catch (Exception ex)
             {
@@ -202,7 +205,7 @@ namespace MonoDevelop.Ide
 
             //make sure that the platform service is initialised so that the Mac platform can subscribe to open-document events
             Counters.Initialization.Trace("Initializing Platform Service");
-            DesktopService.Initialize();
+			DesktopService.Initialize(platformService());
 
             monitor.Step();
 
